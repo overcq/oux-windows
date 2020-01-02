@@ -30,13 +30,21 @@ LRESULT CALLBACK E_wnd_I_dnd_wnd_proc( HWND hwnd
             break;
         }
       case WM_MOUSEMOVE:
-        {   MoveWindow( E_wnd_Q_dnd_window_S.h, LOWORD(lParam), HIWORD(lParam), 50, 50, TRUE );
+        {   WINDOWPLACEMENT wp;
+            GetWindowPlacement( E_wnd_Q_dnd_window_S.h, &wp );
+            MoveWindow( E_wnd_Q_dnd_window_S.h
+            , ( wp.showCmd == SW_SHOWNORMAL ? wp.rcNormalPosition.left : wp.ptMaxPosition.x ) + LOWORD(lParam) - 25
+            , ( wp.showCmd == SW_SHOWNORMAL ? wp.rcNormalPosition.top : wp.ptMaxPosition.x ) + HIWORD(lParam) - 25
+            , 50, 50
+            , TRUE
+            );
             break;
         }
       case WM_LBUTTONUP:
         {   MoveWindow( E_wnd_Q_dnd_window_S.h, -1, -1, 1, 1, TRUE );
             ShowWindow( E_wnd_Q_dnd_window_S.h, SW_HIDE );
             ReleaseCapture();
+            E_mem_Q_tab_W( E_wnd_Q_dnd_window_S.object );
             break;
         }
       case WM_DESTROY:
@@ -106,7 +114,7 @@ LRESULT CALLBACK E_wnd_I_wnd_proc( HWND hwnd
             W( window->object_mask );
             Mt_( window->object_mask, window->width * window->height );
             if( !window->object_mask )
-                V();-
+                V();
             E_wnd_Q_object_I_lay(window);
             break;
         }
@@ -119,7 +127,14 @@ LRESULT CALLBACK E_wnd_I_wnd_proc( HWND hwnd
             E_wnd_Q_dnd_window_S.pixel_height = (F)GetDeviceCaps( dc, VERTSIZE ) / GetDeviceCaps( dc, VERTRES );
             ReleaseDC( E_wnd_Q_dnd_window_S.h, dc );
             ShowWindow( E_wnd_Q_dnd_window_S.h, SW_SHOWNORMAL );
-            MoveWindow( E_wnd_Q_dnd_window_S.h, LOWORD(lParam), HIWORD(lParam), 50, 50, TRUE );
+            WINDOWPLACEMENT wp;
+            GetWindowPlacement( E_wnd_Q_dnd_window_S.h, &wp );
+            MoveWindow( E_wnd_Q_dnd_window_S.h
+            , ( wp.showCmd == SW_SHOWNORMAL ? wp.rcNormalPosition.left : wp.ptMaxPosition.x ) + LOWORD(lParam) - 25
+            , ( wp.showCmd == SW_SHOWNORMAL ? wp.rcNormalPosition.top : wp.ptMaxPosition.x ) + HIWORD(lParam) - 25
+            , 50, 50
+            , TRUE
+            );
             SetCapture( E_wnd_Q_dnd_window_S.h );
             break;
         }

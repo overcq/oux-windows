@@ -9,9 +9,9 @@ Libs=
 PrivateResource=Oux_private.rc
 ResourceIncludes=
 MakeIncludes=
-Compiler=-D_WIN32_IE=0x300_@@_
+Compiler=_@@_
 CppCompiler=
-Linker=-lkernel32 -luser32 -lcomctl32_@@_
+Linker=_@@_
 IsCpp=0
 Icon=
 ExeOutput=

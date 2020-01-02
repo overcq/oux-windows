@@ -593,8 +593,11 @@ E_wnd_Q_object_I_draw_Z_draw_proc( draw_object_proc draw_object_proc
         for_each( object_id, window->object, E_mem_Q_tab )
         {   struct E_wnd_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
             if( object->draw == draw_object_proc )
-            {   InvalidateRect( window->h, 0, TRUE );
-                break;
+            {   RECT rectangle =
+                { object->x, object->y
+                , object->x + object->width, object->y + object->height
+                };
+                InvalidateRect( window->h, &rectangle, TRUE );
             }
         }
     }

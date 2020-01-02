@@ -200,7 +200,8 @@ E_mem_Q_blk_Q_table_M_from_free_or_map_0( N allocated_2_table_i
                         E_mem_Q_blk_I_copy( p_, p, src_page - (Pc)p );
                     p_ -= l_rel;
                     Pc src_page_ = src_page, dst_page_end = dst_page;
-                    MoveMemory( dst_page, src_page, src_page_end - src_page );
+                    E_mem_Q_blk_I_copy( dst_page, src_page, src_page_end - src_page );
+                    VirtualFree( src_page, src_page_end - src_page, MEM_RELEASE );
                     E_mem_Q_blk_I_copy( dst_page_end, src_page_end, (Pc)p + l - src_page_end );
                 }else
                     E_mem_Q_blk_I_copy( p_1 + l_rel, p, l );
