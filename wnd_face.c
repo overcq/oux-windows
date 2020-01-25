@@ -2,9 +2,13 @@
 struct E_mem_Q_tab_Z *E_wnd_Q_window_S;
 struct E_wnd_Q_window_Z E_wnd_Q_dnd_window_S;
 struct E_wnd_Q_theme_Z E_wnd_Q_theme;
+struct E_wnd_Z_drag_object_src *E_wnd_S_drag_object_src;
+N E_wnd_S_drag_object_src_n;
 I E_wnd_S_cursor_window = ~0;
 I E_wnd_S_cursor_object;
 I E_wnd_S_current_object;
+B U_R( E_wnd_S_mode, drag ) = no;
+B U_R( E_wnd_S_state, draw_object_drag_move ) = no;
 I
 E_wnd_Q_window_M( HINSTANCE hInstance
 , N16 width
@@ -18,13 +22,13 @@ E_wnd_Q_window_M( HINSTANCE hInstance
     {   E_mem_Q_tab_I_rem( E_wnd_Q_window_S, window_id );
         return ~0;
     }
-    Mt_( window->object_mask, 0 );
+    Mt_( window->object_mask, width * height );
     if( !window->object_mask )
     {   E_mem_Q_tab_W( window->object );
         E_mem_Q_tab_I_rem( E_wnd_Q_window_S, window_id );
         return ~0;
     }
-    window->h = CreateWindowEx( WS_EX_CLIENTEDGE, "WindowClass", "Caption"
+    window->h = CreateWindowEx( WS_EX_OVERLAPPEDWINDOW, "WindowClass", "Caption"
     , WS_VISIBLE | WS_OVERLAPPEDWINDOW
     , CW_USEDEFAULT, CW_USEDEFAULT
     , width + 1, height + 1
@@ -51,8 +55,8 @@ void
 E_wnd_Q_window_W( I window_id
 ){  struct E_wnd_Q_window_Z *window = E_mem_Q_tab_R( E_wnd_Q_window_S, window_id );
     DestroyWindow( window->h );
-    E_mem_Q_tab_W( window->object );
     W( window->object_mask );
+    E_mem_Q_tab_W( window->object );
     E_mem_Q_tab_I_rem( E_wnd_Q_window_S, window_id );
 }
 

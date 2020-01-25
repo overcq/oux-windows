@@ -601,18 +601,18 @@ E_wnd_Q_object_I_draw_Z_draw_proc( draw_object_proc draw_object_proc
             }
         }
     }
-//        if( U_R( display->mode, drag ))
-//        {   struct E_wnd_Q_screen_Z *screen = E_mem_Q_tab_R( display->screen, display->drag_S_dnd_window_screen_id );
-//            struct E_wnd_Q_window_Z *window = &screen->dnd_window;
-//            for_each( object_id, window->object, E_mem_Q_tab )
-//            {   struct E_wnd_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
-//                if( object->draw == draw_object_proc )
-//                {   U_F( window->req, draw );
-//                    break;
-//                }
-//            }
-//            if( U_R( window->req, draw ))
-//                U_F( display->req, draw );
-//        }
+    if( U_R( E_wnd_S_mode, drag ))
+    {   for_each( object_id, E_wnd_Q_dnd_window_S.object, E_mem_Q_tab )
+        {   struct E_wnd_Q_object_Z *object = E_mem_Q_tab_R( E_wnd_Q_dnd_window_S.object, object_id );
+            if( object->draw == draw_object_proc )
+            {   RECT rectangle =
+                { object->x, object->y
+                , object->x + object->width, object->y + object->height
+                };
+                InvalidateRect( E_wnd_Q_dnd_window_S.h, &rectangle, TRUE );
+                break;
+            }
+        }
+    }
 }
 

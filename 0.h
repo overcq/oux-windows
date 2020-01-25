@@ -82,6 +82,10 @@ struct E_wnd_Q_window_Z
   N16 width, height;
   HDC dc;
 };
+struct E_wnd_Z_drag_object_src
+{ I window_id;
+  I object_id;
+};
 #include "wnd_face.h"
 struct E_wnd_Q_object_Z;
 typedef

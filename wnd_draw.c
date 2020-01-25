@@ -39,8 +39,8 @@ E_wnd_Q_window_I_draw_Z_points(
 , POINT *points
 ){  for_n( i, n )
     {   SetPixel( window->dc, points[i].x, points[i].y, E_wnd_S_draw_color );
-//        if( !U_R( screen->state, draw_object_drag_move ))
-//            window->object_mask[ points[i].x + points[i].y * window->width ] = display->current_object;
+        if( !U_R( E_wnd_S_state, draw_object_drag_move ))
+            window->object_mask[ points[i].x + window->width * points[i].y ] = E_wnd_S_current_object;
         //else
 
             //screen->dnd_window_shape_pixmap[ ( points[i].x + points[i].y * window->width ) / 8 ] |= 1 << (( points[i].x + points[i].y * window->width ) % 8 );
@@ -284,7 +284,7 @@ E_wnd_Q_window_I_draw_aa_Z_pixel(
 , N get_pixel
 ){  N background_red, background_green, background_blue;
     N n = 0;
-//    if( !U_R( screen->state, draw_object_drag_move ))
+    if( !U_R( E_wnd_S_state, draw_object_drag_move ))
     {   N p[8];
         p[0] = ( get_pixel & Z_aa_pixel_S_e ) && x + 1 < window->width ? GetPixel( window->dc, x + 1, y ) : color;
         p[1] = ( get_pixel & Z_aa_pixel_S_se ) && x + 1 < window->width && y + 1 < window->height ? GetPixel( window->dc, x + 1, y + 1 ) : color;

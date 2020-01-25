@@ -11,14 +11,15 @@ LRESULT CALLBACK E_wnd_I_dnd_wnd_proc( HWND hwnd
             E_wnd_Q_dnd_window_S.height = rectangle.bottom;
         }
       case WM_PAINT:
-        {   PAINTSTRUCT ps;
+        {   U_F( E_wnd_S_state, draw_object_drag_move );
+            PAINTSTRUCT ps;
             E_wnd_Q_dnd_window_S.dc = BeginPaint( E_wnd_Q_dnd_window_S.h, &ps );
             for_each( object_id, E_wnd_Q_dnd_window_S.object, E_mem_Q_tab ) //NDFN zakładana kolejność od na spodzie do na wierzchu. nie wiadomo, czy “_q” jest konieczne.
-            {   E_wnd_S_current_object = object_id;
-                struct E_wnd_Q_object_Z *object = E_mem_Q_tab_R( E_wnd_Q_dnd_window_S.object, object_id );
+            {   struct E_wnd_Q_object_Z *object = E_mem_Q_tab_R( E_wnd_Q_dnd_window_S.object, object_id );
                 object->draw( &E_wnd_Q_dnd_window_S, object ); //NDFN nieprzerysowywanie wszystkich obiektów dla każdej klatki animacji.
             }
             EndPaint( E_wnd_Q_dnd_window_S.h, &ps );
+            U_L( E_wnd_S_state, draw_object_drag_move );
             break;
         }
       case WM_SIZE:
@@ -32,10 +33,13 @@ LRESULT CALLBACK E_wnd_I_dnd_wnd_proc( HWND hwnd
       case WM_MOUSEMOVE:
         {   WINDOWPLACEMENT wp;
             GetWindowPlacement( E_wnd_Q_dnd_window_S.h, &wp );
+            RECT rect;
+            GetWindowRect( E_wnd_Q_dnd_window_S.h, &rect );
             MoveWindow( E_wnd_Q_dnd_window_S.h
-            , ( wp.showCmd == SW_SHOWNORMAL ? wp.rcNormalPosition.left : wp.ptMaxPosition.x ) + LOWORD(lParam) - 25
-            , ( wp.showCmd == SW_SHOWNORMAL ? wp.rcNormalPosition.top : wp.ptMaxPosition.x ) + HIWORD(lParam) - 25
-            , 50, 50
+            , wp.rcNormalPosition.left + (S16)LOWORD(lParam) + 1
+            , wp.rcNormalPosition.top + (S16)HIWORD(lParam) + 1
+            , rect.right - rect.left
+            , rect.bottom - rect.top
             , TRUE
             );
             break;
@@ -44,7 +48,9 @@ LRESULT CALLBACK E_wnd_I_dnd_wnd_proc( HWND hwnd
         {   MoveWindow( E_wnd_Q_dnd_window_S.h, -1, -1, 1, 1, TRUE );
             ShowWindow( E_wnd_Q_dnd_window_S.h, SW_HIDE );
             ReleaseCapture();
+            W( E_wnd_S_drag_object_src );
             E_mem_Q_tab_W( E_wnd_Q_dnd_window_S.object );
+            U_L( E_wnd_S_mode, drag );
             break;
         }
       case WM_DESTROY:
@@ -83,6 +89,8 @@ LRESULT CALLBACK E_wnd_I_wnd_proc( HWND hwnd
                 if( window->h == hwnd )
                     break;
             }
+            for_n( i, window->width * window->height )
+                window->object_mask[i] = ~0;
             PAINTSTRUCT ps;
             window->dc = BeginPaint( window->h, &ps );
             for_each( object_id, window->object, E_mem_Q_tab ) //NDFN zakładana kolejność od na spodzie do na wierzchu. nie wiadomo, czy “_q” jest konieczne.
@@ -119,9 +127,53 @@ LRESULT CALLBACK E_wnd_I_wnd_proc( HWND hwnd
             break;
         }
       case WM_LBUTTONDOWN:
-        {   E_wnd_Q_dnd_window_S.object = E_mem_Q_tab_M( sizeof( struct E_wnd_Q_object_Z ), 0 );
+        {   struct E_wnd_Q_window_Z *window;
+            for_each( window_id, E_wnd_Q_window_S, E_mem_Q_tab )
+            {   window = E_mem_Q_tab_R( E_wnd_Q_window_S, window_id );
+                if( window->h == hwnd )
+                    break;
+            }
+            if( !~window->object_mask[ LOWORD(lParam) + window->width * HIWORD(lParam) ] )
+                break;
+            I parent_object_id = window->object_mask[ LOWORD(lParam) + window->width * HIWORD(lParam) ];
+            struct E_wnd_Q_object_Z *parent_object = E_mem_Q_tab_R( window->object, parent_object_id );
+            E_wnd_Q_dnd_window_S.object = E_mem_Q_tab_M( sizeof( struct E_wnd_Q_object_Z ), 0 );
             if( !E_wnd_Q_dnd_window_S.object )
                 break;
+            I dnd_window_object_id = E_wnd_Q_object_M( &E_wnd_Q_dnd_window_S, 0, 0, 0, parent_object->width, parent_object->height, 0, parent_object->draw, 0 );
+            struct E_wnd_Q_object_Z *dnd_window_object = E_mem_Q_tab_R( E_wnd_Q_dnd_window_S.object, dnd_window_object_id );
+            dnd_window_object->data = parent_object->data;
+            Mt_( E_wnd_S_drag_object_src, 1 );
+            if( !E_wnd_S_drag_object_src )
+            {   E_mem_Q_tab_W( E_wnd_Q_dnd_window_S.object );
+                break;
+            }
+            E_wnd_S_drag_object_src[0].window_id = window_id;
+            E_wnd_S_drag_object_src[0].object_id = parent_object_id;
+            E_wnd_S_drag_object_src_n = 1;
+            N child_expanded_n = 0;
+            while( child_expanded_n != E_wnd_S_drag_object_src_n )
+            {   struct E_wnd_Q_object_Z *object = E_mem_Q_tab_R( window->object, E_wnd_S_drag_object_src[ child_expanded_n ].object_id );
+                child_expanded_n++;
+                if( !object->child_n )
+                    continue;
+                if( !E_mem_Q_blk_I_append( &E_wnd_S_drag_object_src, object->child_n ))
+                {   W( E_wnd_S_drag_object_src );
+                    goto Drag_start_error;
+                }
+                I parent_id = E_wnd_Q_dnd_window_S.object->index_n - 1;
+                for_n( i, object->child_n )
+                {   struct E_wnd_Q_object_Z *object_src = E_mem_Q_tab_R( window->object, object->child[i] );
+                    U_F( object_src->mode, drag_src );
+                    E_wnd_S_drag_object_src[ E_wnd_S_drag_object_src_n + i ].window_id = window_id;
+                    E_wnd_S_drag_object_src[ E_wnd_S_drag_object_src_n + i ].object_id = object->child[i];
+                    I dnd_window_object_id = E_wnd_Q_object_M( &E_wnd_Q_dnd_window_S, 0, object_src->x - parent_object->x, object_src->y - parent_object->y, object_src->width, object_src->height, 0, object_src->draw, 0 );
+                    struct E_wnd_Q_object_Z *dnd_window_object = E_mem_Q_tab_R( E_wnd_Q_dnd_window_S.object, dnd_window_object_id );
+                    parent_object->data = object_src->data;
+                    E_wnd_Q_object_I_add( &E_wnd_Q_dnd_window_S, parent_id, dnd_window_object_id );
+                }
+                E_wnd_S_drag_object_src_n += object->child_n;
+            }
             HDC dc = GetDC( E_wnd_Q_dnd_window_S.h );
             E_wnd_Q_dnd_window_S.pixel_width = (F)GetDeviceCaps( dc, HORZSIZE ) / GetDeviceCaps( dc, HORZRES );
             E_wnd_Q_dnd_window_S.pixel_height = (F)GetDeviceCaps( dc, VERTSIZE ) / GetDeviceCaps( dc, VERTRES );
@@ -130,12 +182,14 @@ LRESULT CALLBACK E_wnd_I_wnd_proc( HWND hwnd
             WINDOWPLACEMENT wp;
             GetWindowPlacement( E_wnd_Q_dnd_window_S.h, &wp );
             MoveWindow( E_wnd_Q_dnd_window_S.h
-            , ( wp.showCmd == SW_SHOWNORMAL ? wp.rcNormalPosition.left : wp.ptMaxPosition.x ) + LOWORD(lParam) - 25
-            , ( wp.showCmd == SW_SHOWNORMAL ? wp.rcNormalPosition.top : wp.ptMaxPosition.x ) + HIWORD(lParam) - 25
-            , 50, 50
+            , wp.rcNormalPosition.left + LOWORD(lParam) + 1
+            , wp.rcNormalPosition.top + HIWORD(lParam) + 1
+            , parent_object->width, parent_object->height
             , TRUE
             );
             SetCapture( E_wnd_Q_dnd_window_S.h );
+            U_F( E_wnd_S_mode, drag );
+Drag_start_error:
             break;
         }
       case WM_DESTROY:
@@ -146,27 +200,5 @@ LRESULT CALLBACK E_wnd_I_wnd_proc( HWND hwnd
             return DefWindowProc(hwnd, Message, wParam, lParam);
     }
     return 0;
-}
-D( wnd_window, cursor )
-{   struct E_wnd_Q_window_Z *window = E_mem_Q_tab_R( E_wnd_Q_window_S, E_wnd_S_cursor_window );
-    struct E_wnd_Q_object_Z *object = E_mem_Q_tab_R( window->object, E_wnd_S_cursor_object );
-    struct E_wnd_Q_object_Z_data_Z_entry *object_data = object->data;
-    U_L( object_data->state, visible );
-    Y_M( wnd_window, cursor, 360 );
-    I_D
-    {   N lost_count;
-        Y_B( wnd_window, cursor );
-        if( lost_count % 2 )
-            continue;
-        B U_L( wnd_object, draw );
-        if( !~E_wnd_S_cursor_window )
-            continue;
-        struct E_wnd_Q_window_Z *window = E_mem_Q_tab_R( E_wnd_Q_window_S, E_wnd_S_cursor_window );
-        struct E_wnd_Q_object_Z *object = E_mem_Q_tab_R( window->object, E_wnd_S_cursor_object );
-        struct E_wnd_Q_object_Z_data_Z_entry *object_data = object->data;
-        U_R( object_data->state, visible ) = !U_R( object_data->state, visible );
-        E_wnd_Q_object_I_draw(object);
-    }
-    Y_W( wnd_window, cursor );
 }
 
