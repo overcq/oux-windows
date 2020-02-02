@@ -526,8 +526,7 @@ E_mem_Q_blk_M_replace_tab( P p
 , N u ///!= 0
 , N n
 ){  if(!p)
-    {   V();
-    }
+        V( "E_mem_Q_blk_M_replace_tab" );
     _single_thread_begin;
     for_n( allocated_i, E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_table_allocated_id ].n )
         if( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p == p )
@@ -546,7 +545,7 @@ E_mem_Q_blk_M_replace_tab( P p
             return p_;
         }
     _single_thread_end;
-    V();
+    V( "E_mem_Q_blk_M_replace_tab" );
 }
 P
 E_mem_Q_blk_M_replace( P p
@@ -558,8 +557,7 @@ P
 E_mem_Q_blk_M_split( P p
 , N i
 ){  if( !p )
-    {   V();
-    }
+        V( "E_mem_Q_blk_M_split" );
     _single_thread_begin;
     struct E_mem_Q_blk_Z_allocated allocated_p;
     N allocated_i = E_mem_Q_blk_Q_sys_table_R_new_id( E_base_S->E_mem_Q_blk_S_table_allocated_id, (Pc)&allocated_p.p - (Pc)&allocated_p, (Pc)&allocated_p.n - (Pc)&allocated_p, 0, 0 );
@@ -580,7 +578,7 @@ E_mem_Q_blk_M_split( P p
             return p_;
         }
     _single_thread_end;
-    V();
+    V( "E_mem_Q_blk_M_split" );
 }
 N
 E_mem_Q_blk_W( P p
@@ -604,7 +602,7 @@ E_mem_Q_blk_W( P p
             return 0;
         }
     _single_thread_end;
-    V();
+    V( "E_mem_Q_blk_W" );
 }
 //------------------------------------------------------------------------------
 P
@@ -1081,8 +1079,7 @@ E_mem_Q_blk_I_add( P p
     E_mem_Q_blk_I_assert_on_return( __LINE__ );
     _single_thread_end;
     if( !~(N)p_ )
-    {   V();
-    }
+        V( "E_mem_Q_blk_I_add" );
     return p_;
 }
 ///resize useing boundaries without memory move if possible.
@@ -1096,8 +1093,7 @@ E_mem_Q_blk_I_prepend_append( P p
     E_mem_Q_blk_I_assert_on_return( __LINE__ );
     _single_thread_end;
     if( !~(N)p_ )
-    {   V();
-    }
+        V( "E_mem_Q_blk_I_prepend_append" );
     return p_;
 }
 ///resize useing high boundary without memory move if possible.
@@ -1110,8 +1106,7 @@ E_mem_Q_blk_I_append( P p
     E_mem_Q_blk_I_assert_on_return( __LINE__ );
     _single_thread_end;
     if( !~(N)p_ )
-    {   V();
-    }
+        V( "E_mem_Q_blk_I_append" );
     return p_;
 }
 ///resize useing low boundary without memory move if possible.
@@ -1124,8 +1119,7 @@ E_mem_Q_blk_I_prepend( P p
     E_mem_Q_blk_I_assert_on_return( __LINE__ );
     _single_thread_end;
     if( !~(N)p_ )
-    {   V();
-    }
+        V( "E_mem_Q_blk_I_prepend" );
     return p_;
 }
 ///insert without memory move if possible.
@@ -1140,8 +1134,7 @@ E_mem_Q_blk_I_insert( P p
     E_mem_Q_blk_I_assert_on_return( __LINE__ );
     _single_thread_end;
     if( !~(N)p_ )
-    {   V();
-    }
+        V( "E_mem_Q_blk_I_insert" );
     return p_;
 }
 ///remove without memory move.
@@ -1155,8 +1148,7 @@ E_mem_Q_blk_I_rem( P p
     E_mem_Q_blk_I_assert_on_return( __LINE__ );
     _single_thread_end;
     if( !~(N)p )
-    {   V();
-    }
+        V( "E_mem_Q_blk_I_rem" );
     return p_;
 }
 

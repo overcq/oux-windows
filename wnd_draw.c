@@ -28,8 +28,7 @@ E_wnd_Z_color_M_gray(
 void
 E_wnd_Q_window_I_draw_P_color(
   N32 color
-){  if( E_wnd_S_draw_color != color )
-        E_wnd_S_draw_color = color;
+){  E_wnd_S_draw_color = color;
 }
 //------------------------------------------------------------------------------
 void
@@ -38,22 +37,15 @@ E_wnd_Q_window_I_draw_Z_points(
 , N32 n
 , POINT *points
 ){  for_n( i, n )
-    {   SetPixel( window->dc, points[i].x, points[i].y, E_wnd_S_draw_color );
+    {   SetPixel( window->drawable_dc, points[i].x, points[i].y, E_wnd_S_draw_color );
         if( !U_R( E_wnd_S_state, draw_object_drag_move ))
             window->object_mask[ points[i].x + window->width * points[i].y ] = E_wnd_S_current_object;
-        //else
-
-            //screen->dnd_window_shape_pixmap[ ( points[i].x + points[i].y * window->width ) / 8 ] |= 1 << (( points[i].x + points[i].y * window->width ) % 8 );
+        else
+        {   OffsetRgn( E_wnd_S_drag_region_pixel, points[i].x, points[i].y );
+            CombineRgn( E_wnd_S_drag_region, E_wnd_S_drag_region, E_wnd_S_drag_region_pixel, RGN_OR );
+            OffsetRgn( E_wnd_S_drag_region_pixel, -points[i].x, -points[i].y );
+        }
     }
-//    if( U_R( screen->state, draw_object_drag_move ))
-//        xcb_poly_point( display->x_display
-//        , XCB_COORD_MODE_ORIGIN
-//        , screen->dnd_window_shape_pixmap
-//        , screen->bitmask_1_gc
-//        , n
-//        , points
-//        );
-
 }
 N
 E_wnd_Q_window_I_draw_Z_segments_Z_low(
@@ -286,14 +278,14 @@ E_wnd_Q_window_I_draw_aa_Z_pixel(
     N n = 0;
     if( !U_R( E_wnd_S_state, draw_object_drag_move ))
     {   N p[8];
-        p[0] = ( get_pixel & Z_aa_pixel_S_e ) && x + 1 < window->width ? GetPixel( window->dc, x + 1, y ) : color;
-        p[1] = ( get_pixel & Z_aa_pixel_S_se ) && x + 1 < window->width && y + 1 < window->height ? GetPixel( window->dc, x + 1, y + 1 ) : color;
-        p[2] = ( get_pixel & Z_aa_pixel_S_s ) && y + 1 < window->height ? GetPixel( window->dc, x, y + 1 ) : color;
-        p[3] = ( get_pixel & Z_aa_pixel_S_sw ) && x > 0 && y + 1 < window->height ? GetPixel( window->dc, x - 1, y + 1 ) : color;
-        p[4] = ( get_pixel & Z_aa_pixel_S_w ) && x > 0 ? GetPixel( window->dc, x - 1, y ) : color;
-        p[5] = ( get_pixel & Z_aa_pixel_S_nw ) && x > 0 && y > 0 ? GetPixel( window->dc, x - 1, y - 1 ) : color;
-        p[6] = ( get_pixel & Z_aa_pixel_S_n ) && y > 0 ? GetPixel( window->dc, x, y - 1 ) : color;
-        p[7] = ( get_pixel & Z_aa_pixel_S_ne ) && x + 1 < window->width && y > 0 ? GetPixel( window->dc, x + 1, y - 1 ) : color;
+        p[0] = ( get_pixel & Z_aa_pixel_S_e ) && x + 1 < window->width ? GetPixel( window->drawable_dc, x + 1, y ) : color;
+        p[1] = ( get_pixel & Z_aa_pixel_S_se ) && x + 1 < window->width && y + 1 < window->height ? GetPixel( window->drawable_dc, x + 1, y + 1 ) : color;
+        p[2] = ( get_pixel & Z_aa_pixel_S_s ) && y + 1 < window->height ? GetPixel( window->drawable_dc, x, y + 1 ) : color;
+        p[3] = ( get_pixel & Z_aa_pixel_S_sw ) && x > 0 && y + 1 < window->height ? GetPixel( window->drawable_dc, x - 1, y + 1 ) : color;
+        p[4] = ( get_pixel & Z_aa_pixel_S_w ) && x > 0 ? GetPixel( window->drawable_dc, x - 1, y ) : color;
+        p[5] = ( get_pixel & Z_aa_pixel_S_nw ) && x > 0 && y > 0 ? GetPixel( window->drawable_dc, x - 1, y - 1 ) : color;
+        p[6] = ( get_pixel & Z_aa_pixel_S_n ) && y > 0 ? GetPixel( window->drawable_dc, x, y - 1 ) : color;
+        p[7] = ( get_pixel & Z_aa_pixel_S_ne ) && x + 1 < window->width && y > 0 ? GetPixel( window->drawable_dc, x + 1, y - 1 ) : color;
         background_red = background_green = background_blue = 0;
         for_n( i, 8 )
             if( p[i] != color )
@@ -1155,7 +1147,9 @@ E_wnd_Q_object_I_draw_aa_Z_pixel(
 ){  E_wnd_Q_window_I_draw_aa_Z_pixel( window
     , object->x + x
     , object->y + y
-    , !U_R( object->mode, drag_src ) ? color : E_wnd_Q_theme.current_brace, brightness, get_pixel
+    , !U_R( object->mode, drag_src ) ? color : E_wnd_Q_theme.current_brace
+    , brightness
+    , get_pixel
     );
 }
 void
@@ -1170,6 +1164,11 @@ E_wnd_Q_object_I_draw_aa_Z_lines(
     {   points[i].x += object->x;
         points[i].y += object->y;
     }
-    E_wnd_Q_window_I_draw_aa_Z_lines( window, n, points, thickness, !U_R( object->mode, drag_src ) ? color : E_wnd_Q_theme.current_brace );
+    E_wnd_Q_window_I_draw_aa_Z_lines( window
+    , n
+    , points
+    , thickness
+    , !U_R( object->mode, drag_src ) ? color : E_wnd_Q_theme.current_brace
+    );
 }
 

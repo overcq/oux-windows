@@ -80,7 +80,11 @@ struct E_wnd_Q_window_Z
   I *object_mask;
   F pixel_width, pixel_height;
   N16 width, height;
-  HDC dc;
+  HBRUSH background_brush;
+  HBITMAP default_drawable;
+  HBITMAP drawable;
+  HDC drawable_dc;
+  unsigned U_R( state, created )    :1;
 };
 struct E_wnd_Z_drag_object_src
 { I window_id;

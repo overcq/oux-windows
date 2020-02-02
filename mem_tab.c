@@ -78,8 +78,7 @@ E_mem_Q_tab_I_add( struct E_mem_Q_tab_Z *tab
     if( id == tab->index_n )
     {   if( !E_mem_Q_blk_I_append( &tab->index, 1 ))
         {   if( !E_mem_Q_blk_I_rem( &tab->data, n_prepended ? 0 : tab->data_n, 1 ))
-            {   V();
-            }
+                V( "E_mem_Q_blk_I_rem" );
             return ~0;
         }
         tab->index_n++;
@@ -92,8 +91,7 @@ E_mem_Q_tab_I_add( struct E_mem_Q_tab_Z *tab
             if(iterator)
             {   I *p = E_mem_Q_blk_I_append( &iterator->index, 1 );
                 if( !p )
-                {   V();
-                }
+                    V( "E_mem_Q_blk_I_append" );
                 *p = id;
                 iterator->n++;
             }
@@ -124,7 +122,7 @@ E_mem_Q_tab_I_add_i( struct E_mem_Q_tab_Z *tab
     if( id >= tab->index_n )
     {   if( !E_mem_Q_blk_I_append( &tab->index, id + 1 - tab->index_n ))
         {   if( !E_mem_Q_blk_I_rem( &tab->data, n_prepended ? 0 : tab->data_n, id + 1 - tab->index_n ))
-            {   V();
+            {   V( "E_mem_Q_blk_I_rem" );
             }
             return ~0;
         }
@@ -140,8 +138,7 @@ E_mem_Q_tab_I_add_i( struct E_mem_Q_tab_Z *tab
             if(iterator)
             {   I *p = E_mem_Q_blk_I_append( &iterator->index, 1 );
                 if( !p )
-                {   V();
-                }
+                    V( "E_mem_Q_blk_I_append" );
                 *p = id;
                 iterator->n++;
             }

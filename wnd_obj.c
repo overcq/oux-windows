@@ -1,5 +1,6 @@
 #include "0.h"
-S16 E_wnd_Q_object_S_layout_dx = 4, E_wnd_Q_object_S_layout_dy = 4;
+S16 E_wnd_Q_object_S_layout_dx = 4;
+S16 E_wnd_Q_object_S_layout_dy = 4;
 B U_R( E_wnd_S_mode, draw_simple ) = no;
 //==============================================================================
 I
@@ -238,14 +239,14 @@ E_wnd_Q_object_Z_entry_I_draw(
     {   U u = ~0;
         s = E_text_Z_s_Z_utf8_R_u( s, &u );
         if( !~u )
-            V();
+            V( "E_text_Z_s_Z_utf8_R_u" );
     }
     Pc s_ = s;
     while( *s )
     {   U u = ~0;
         s = E_text_Z_s_Z_utf8_R_u( s, &u );
         if( !~u )
-            V();
+            V( "E_text_Z_s_Z_utf8_R_u" );
         for_n( i, font->bitmap_n )
             if( font->bitmap[i].u == u )
             {   x += ( x != 0 ? 1 : 0 ) + font->bitmap[i].width;
@@ -268,14 +269,14 @@ E_wnd_Q_object_Z_entry_I_draw(
         {   U u = ~0;
             s = E_text_Z_s_Z_utf8_R_u( s, &u );
             if( !~u )
-                V();
+                V( "E_text_Z_s_Z_utf8_R_u" );
         }
         N l = object_data->cursor_pos - object_data->text_start;
         while( l && *s )
         {   U u = ~0;
             s = E_text_Z_s_Z_utf8_R_u( s, &u );
             if( !~u )
-                V();
+                V( "E_text_Z_s_Z_utf8_R_u" );
             for_n( i, font->bitmap_n )
                 if( font->bitmap[i].u == u )
                 {   x += ( x != 0 ? 1 : 0 ) + font->bitmap[i].width;

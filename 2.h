@@ -130,7 +130,57 @@ enum { false, true };
 ///czekanie na pełny okres ‹cyklera›.
 #define Y_B(module,timer)                   WaitForSingleObject( _Y_var(module,timer), INFINITE )
 //==============================================================================
-#define V()         FatalAppExit( 0, "Failure exit." )
+#define V(s) \
+    {   MessageBox( 0, (s), "Failure exit", MB_OK ); \
+        ExitProcess(1); \
+    }
+//==============================================================================
+#define Gs(s,l) \
+    {   N l_ = (l) + 2; \
+        Pc s_ = M( l_ ); \
+        E_text_Z_s_P_copy_l( s_, (s), (l) ); \
+        s_[ l_ - 2 ] = '\r'; \
+        s_[ l_ - 1 ] = '\n'; \
+        HANDLE file = CreateFile( "log.txt", GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 ); \
+        if( file == INVALID_HANDLE_VALUE ) \
+            V( "CreateFile" ); \
+        if( SetFilePointer( file, 0, 0, FILE_END ) == INVALID_SET_FILE_POINTER ) \
+            V( "SetFilePointer" ); \
+        N written; \
+        if( !WriteFile( file, s_, l_, &written, 0 ) \
+        || l_ != written \
+        ) \
+            V( "WriteFile" ); \
+        CloseHandle(file); \
+    }
+#define Gs_(s) Gs( (s), E_text_Z_s0_R_l(s) )
+#define Gd(v) \
+    {   N l = E_text_Z_n_N_s_G( (v), sizeof(v), 10 ); \
+        Pc s = M(l); \
+        E_text_Z_n_N_s( s + l, (v), sizeof(v), 10 ); \
+        Gs(s,l); \
+    }
+#define Gh(v) \
+    {   N l = E_text_Z_n_N_s_G( (v), sizeof(v), 16 ) + 2; \
+        Pc s = M(l); \
+        E_text_Z_n_N_s( s + l, (v), sizeof(v), 16 ); \
+        s[1] = 'x'; \
+        s[0] = '0'; \
+        Gs(s,l); \
+    }
+#define Ge \
+    {   N error = GetLastError(); \
+        Pc s; \
+        FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM \
+        , 0 \
+        , error \
+        , 0 \
+        , &s, 0 \
+        , 0 \
+        ); \
+        MessageBox( 0, s, "error", MB_OK ); \
+        LocalFree(s); \
+    }
 //==============================================================================
 #define _forced_statement                   __asm__ volatile ( "" )
     #ifndef _unreachable

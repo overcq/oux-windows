@@ -11,7 +11,7 @@ E_mem_M_blk( void
     , MEM_COMMIT
     , PAGE_READWRITE
     )))
-    {   V();
+    {   V( "VirtualAlloc" );
     }
     E_base_S->E_mem_S_page_size = page_size;
     E_base_S->E_mem_Q_blk_S_table_allocated_id = 2;
@@ -39,7 +39,7 @@ void
 E_mem_M_file( void
 ){  E_base_S->E_mem_Q_file_S = E_mem_Q_tab_M( sizeof( struct E_mem_Q_file_Z ), 0 );
     if( !E_base_S->E_mem_Q_file_S )
-        V();
+        V( "E_mem_Q_tab_M" );
     E_base_S->E_mem_Q_file_S_buffer_l = E_base_S->E_mem_S_page_size; //CONF wartość optymalna, ale może być wymagana większa.
     E_base_S->E_mem_Q_file_S_buffer = VirtualAlloc( 0
     , E_base_S->E_mem_Q_file_S_buffer_l
@@ -51,14 +51,14 @@ void
 E_wnd_M_font( void
 ){  E_wnd_Q_font_S = E_mem_Q_tab_M( sizeof( struct E_mem_Q_tab_Z ), 1 );
     if( !E_wnd_Q_font_S )
-        V();
+        V( "E_mem_Q_tab_M" );
     struct E_wnd_Q_font_Z *font = E_mem_Q_tab_R( E_wnd_Q_font_S, 0 );
     font->name = "default";
     font->height = 8;
     font->bitmap_n = 177;
     Mt_( font->bitmap, font->bitmap_n );
     if( !font->bitmap )
-        V();
+        V( "Mt_( font->bitmap" );
     for_n( i, font->bitmap_n )
     {   N8 *bitmap;
         switch(i)
@@ -2533,7 +2533,7 @@ E_wnd_M_font( void
         }
         Mt_( font->bitmap[i].bitmap, font->bitmap[i].width * font->height / 4 + ( font->bitmap[i].width * font->height % 4 ? 1 : 0 ));
         if( !font->bitmap[i].bitmap )
-            V();
+            V( "Mt_( font->bitmap[i].bitmap" );
         N8 c;
         N k = 0;
         for_n( j, font->bitmap[i].width * font->height )
@@ -2590,17 +2590,17 @@ E_wnd_M( HINSTANCE hInstance
     E_wnd_M_font();
     E_wnd_Q_dnd_window_S.object = E_mem_Q_tab_M( sizeof( struct E_wnd_Q_object_Z ), 0 );
     if( !E_wnd_Q_dnd_window_S.object )
-        V();
+        V( "E_mem_Q_tab_M" );
     WNDCLASSEX wc;
     _0_( &wc );
     wc.cbSize = sizeof(WNDCLASSEX);
     wc.lpfnWndProc = E_wnd_I_dnd_wnd_proc;
     wc.hInstance = hInstance;
     wc.hCursor = LoadCursor( NULL, IDC_ARROW );
-    wc.hbrBackground = CreateSolidBrush( E_wnd_Q_theme.window_bg );
     wc.lpszClassName = "DndWindowClass";
     if( !RegisterClassEx( &wc ))
-        V();
+        V( "RegisterClassEx" );
+    U_L( E_wnd_Q_dnd_window_S.state, created );
     E_wnd_Q_dnd_window_S.h = CreateWindowEx( WS_EX_TOPMOST, "DndWindowClass", "DndCaption"
     , WS_POPUP
     , -1, -1
@@ -2610,21 +2610,20 @@ E_wnd_M( HINSTANCE hInstance
     , NULL
     );
     if( !E_wnd_Q_dnd_window_S.h )
-        V();
+        V( "CreateWindowEx" );
     _0_( &wc );
     wc.cbSize = sizeof(WNDCLASSEX);
     wc.lpfnWndProc = E_wnd_I_wnd_proc;
     wc.hInstance = hInstance;
     wc.hCursor = LoadCursor( NULL, IDC_ARROW );
-    wc.hbrBackground = CreateSolidBrush( E_wnd_Q_theme.window_bg );
     wc.lpszClassName = "WindowClass";
     wc.hIcon = LoadIcon( NULL, IDI_APPLICATION ); /* Load a standard icon */
     wc.hIconSm = LoadIcon( NULL, IDI_APPLICATION ); /* use the name "A" to use the project icon */
     if( !RegisterClassEx( &wc ))
-        V();
+        V( "RegisterClassEx" );
     E_wnd_Q_window_S = E_mem_Q_tab_M( sizeof( struct E_wnd_Q_window_Z ), 0 );
     if( !E_wnd_Q_window_S )
-        V();
+        V( "E_mem_Q_tab_M" );
 }
 void
 E_base_M( void
