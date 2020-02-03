@@ -489,7 +489,7 @@ E_mem_Q_blk_R_new_0( void
         if( ++p == p_end )
             break;
     }
-    return 0;
+    V( "out of empty block address space" );
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 __attribute__ ((__malloc__))

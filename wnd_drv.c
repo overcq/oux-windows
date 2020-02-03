@@ -83,6 +83,11 @@ Drag_error:
             {   struct E_wnd_Q_window_Z *window = E_mem_Q_tab_R( E_wnd_Q_window_S, E_wnd_S_drag_object_src[i].window_id );
                 struct E_wnd_Q_object_Z *object = E_mem_Q_tab_R( window->object, E_wnd_S_drag_object_src[i].object_id );
                 U_L( object->mode, drag_src );
+                RECT rectangle =
+                { object->x, object->y
+                , object->x + object->width, object->y + object->height
+                };
+                InvalidateRect( window->h, &rectangle, TRUE );
             }
             W( E_wnd_S_drag_object_src );
             E_mem_Q_tab_W( E_wnd_Q_dnd_window_S.object );

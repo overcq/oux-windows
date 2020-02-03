@@ -571,23 +571,6 @@ Cont:               do
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void
-E_wnd_Q_object_I_draw( struct E_wnd_Q_object_Z *object_
-){  for_each( window_id, E_wnd_Q_window_S, E_mem_Q_tab )
-    {   struct E_wnd_Q_window_Z *window = E_mem_Q_tab_R( E_wnd_Q_window_S, window_id );
-        for_each( object_id, window->object, E_mem_Q_tab )
-        {   struct E_wnd_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
-            if( object == object_ )
-            {   RECT rectangle =
-                { object->x, object->y
-                , object->x + object->width, object->y + object->height
-                };
-                InvalidateRect( window->h, &rectangle, TRUE );
-                return;
-            }
-        }
-    }
-}
-void
 E_wnd_Q_object_I_draw_Z_draw_proc( draw_object_proc draw_object_proc
 ){  for_each( window_id, E_wnd_Q_window_S, E_mem_Q_tab )
     {   struct E_wnd_Q_window_Z *window = E_mem_Q_tab_R( E_wnd_Q_window_S, window_id );

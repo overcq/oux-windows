@@ -13,37 +13,37 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         if( !~window_id )
             V( "E_wnd_Q_window_M" );
         struct E_wnd_Q_window_Z *window = E_mem_Q_tab_R( E_wnd_Q_window_S, window_id );
-//        I object_id = E_wnd_Q_object_Z_frame_M(window);
-//        for_n( i, 2 )
-//        {   I id = E_wnd_Q_object_Z_frame_M(window);
-//            E_wnd_Q_object_I_add( window, object_id, id );
-//            for_n( i, 5 )
-//            {   I id_2 = E_wnd_Q_object_Z_frame_M(window);
-//                E_wnd_Q_object_I_add( window, id, id_2 );
-//                for_n( i, 2 )
-//                {   I id_3 = E_wnd_Q_object_Z_frame_M(window);
-//                    E_wnd_Q_object_I_add( window, id_2, id_3 );
+        I object_id = E_wnd_Q_object_Z_frame_M(window);
+        for_n( i, 1 )
+        {   I id = E_wnd_Q_object_Z_frame_M(window);
+            E_wnd_Q_object_I_add( window, object_id, id );
+            for_n( i, 5 )
+            {   I id_2 = E_wnd_Q_object_Z_frame_M(window);
+                E_wnd_Q_object_I_add( window, id, id_2 );
+                for_n( i, 2 )
+                {   I id_3 = E_wnd_Q_object_Z_frame_M(window);
+                    E_wnd_Q_object_I_add( window, id_2, id_3 );
 //                    for_n( i, 3 )
 //                    {   I id_4 = E_wnd_Q_object_Z_button_M(window);
 //                        E_wnd_Q_object_I_add( window, id_3, id_4 );
 //                        I id_5 = E_wnd_Q_object_Z_font_M( window, 0, "abc" );
 //                        E_wnd_Q_object_I_add( window, id_4, id_5 );
 //                    }
-//                }
-//                for_n_( i, 2 )
-//                {   I id_3 = E_wnd_Q_object_Z_button_M(window);
-//                    E_wnd_Q_object_I_add( window, id_2, id_3 );
-//                    I id_4 = E_wnd_Q_object_Z_font_M( window, 0, "abcd" );
-//                    E_wnd_Q_object_I_add( window, id_3, id_4 );
-//                }
-//            }
+                }
+                for_n_( i, 2 )
+                {   I id_3 = E_wnd_Q_object_Z_button_M(window);
+                    E_wnd_Q_object_I_add( window, id_2, id_3 );
+                    I id_4 = E_wnd_Q_object_Z_font_M( window, 0, "abcd" );
+                    E_wnd_Q_object_I_add( window, id_3, id_4 );
+                }
+            }
 //            for_n_( i, 5 )
 //            {   I id_2 = E_wnd_Q_object_Z_frame_M(window);
 //                E_wnd_Q_object_I_add( window, id, id_2 );
 //                I id_3 = E_wnd_Q_object_Z_entry_M( window, 0, "abcdefghijkl" );
 //                E_wnd_Q_object_I_add( window, id_2, id_3 );
 //            }
-//        }
+        }
         E_wnd_Q_object_M( window
         , 0
         , 5, 5
@@ -60,7 +60,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         , E_main_Q_timer_I_draw
         , 0
         );
-        I id = E_wnd_Q_object_M( window
+        E_wnd_Q_object_M( window
         , 0
         , 151, 191
         , 21, 21
@@ -68,7 +68,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
         , E_main_Q_timer_I_draw
         , 0
         );
-        struct E_wnd_Q_object_Z *object = E_mem_Q_tab_R( window->object, id );
         E_wnd_Q_object_I_lay(window);
     }
     D_M( main, timer_draw );
