@@ -3,8 +3,10 @@ N D_id( main, timer_draw );
 N E_main_Q_timer_S_hour;
 N E_main_Q_timer_S_minute;
 N E_main_Q_timer_S_second;
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
-{   E_base_M();
+int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance
+, LPSTR lpCmdLine
+, int nCmdShow
+){  E_base_M();
     E_wnd_M(hInstance);
     for_n( i, 2 )
     {   N window_id = E_wnd_Q_window_M( hInstance
@@ -37,12 +39,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
                     E_wnd_Q_object_I_add( window, id_3, id_4 );
                 }
             }
-//            for_n_( i, 5 )
-//            {   I id_2 = E_wnd_Q_object_Z_frame_M(window);
-//                E_wnd_Q_object_I_add( window, id, id_2 );
-//                I id_3 = E_wnd_Q_object_Z_entry_M( window, 0, "abcdefghijkl" );
-//                E_wnd_Q_object_I_add( window, id_2, id_3 );
-//            }
+            for_n_( i, 5 )
+            {   I id_2 = E_wnd_Q_object_Z_frame_M(window);
+                E_wnd_Q_object_I_add( window, id, id_2 );
+                I id_3 = E_wnd_Q_object_Z_entry_M( window, 0, "abcdefghijkl" );
+                E_wnd_Q_object_I_add( window, id_2, id_3 );
+            }
         }
         E_wnd_Q_object_M( window
         , 0

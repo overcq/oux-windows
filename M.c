@@ -1,5 +1,6 @@
 #include "0.h"
 struct E_base_Z *E_base_S;
+HANDLE log_file;
 void
 E_mem_M_blk( void
 ){  SYSTEM_INFO si;
@@ -2627,7 +2628,12 @@ E_wnd_M( HINSTANCE hInstance
 }
 void
 E_base_M( void
-){  E_mem_M_blk();
+){  log_file = CreateFile( "log.txt", GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 );
+    if( log_file == INVALID_HANDLE_VALUE )
+        V( "CreateFile" );
+    if( SetFilePointer( log_file, 0, 0, FILE_END ) == INVALID_SET_FILE_POINTER )
+        V( "SetFilePointer" );
+    E_mem_M_blk();
     E_mem_M_file();
 }
 

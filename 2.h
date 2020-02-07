@@ -141,17 +141,11 @@ enum { false, true };
         E_text_Z_s_P_copy_l( s_, (s), (l) ); \
         s_[ l_ - 2 ] = '\r'; \
         s_[ l_ - 1 ] = '\n'; \
-        HANDLE file = CreateFile( "log.txt", GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0 ); \
-        if( file == INVALID_HANDLE_VALUE ) \
-            V( "CreateFile" ); \
-        if( SetFilePointer( file, 0, 0, FILE_END ) == INVALID_SET_FILE_POINTER ) \
-            V( "SetFilePointer" ); \
         N written; \
-        if( !WriteFile( file, s_, l_, &written, 0 ) \
+        if( !WriteFile( log_file, s_, l_, &written, 0 ) \
         || l_ != written \
         ) \
             V( "WriteFile" ); \
-        CloseHandle(file); \
     }
 #define Gs_(s) Gs( (s), E_text_Z_s0_R_l(s) )
 #define Gd(v) \

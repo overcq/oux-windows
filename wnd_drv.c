@@ -135,15 +135,14 @@ LRESULT CALLBACK E_wnd_I_wnd_proc( HWND hwnd
       case WM_SIZE:
         {   if( wParam == SIZE_MINIMIZED )
                 break;
-            struct E_wnd_Q_window_Z *window;
+            struct E_wnd_Q_window_Z *window = E_wnd_S_creating_window;
             if( U_R( window->state, created ))
             {   for_each( window_id, E_wnd_Q_window_S, E_mem_Q_tab )
                 {   window = E_mem_Q_tab_R( E_wnd_Q_window_S, window_id );
                     if( window->h == hwnd )
                         break;
                 }
-            }else
-                window = E_wnd_S_creating_window;
+            }
             B size_changed;
             if( !U_R( window->state, created )
             || window->width != LOWORD(lParam)
