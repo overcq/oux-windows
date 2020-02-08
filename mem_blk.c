@@ -199,15 +199,10 @@ E_mem_Q_blk_Q_table_M_from_free_or_map_0( N allocated_2_table_i
                     if( src_page != p )
                         E_mem_Q_blk_I_copy( p_, p, src_page - (Pc)p );
                     p_ -= l_rel;
-                    Pc src_page_ = src_page, dst_page_end = dst_page;
                     E_mem_Q_blk_I_copy( dst_page, src_page, src_page_end - src_page );
-                    VirtualFree( src_page, src_page_end - src_page, MEM_DECOMMIT );
-//                    struct E_mem_Q_blk_Z_free free_p_;
-//                    if( !~E_mem_Q_blk_Q_sys_table_mf_P_put( E_mem_Q_blk_S_allocated_S_free_id, (Pc)&free_p_.p - (Pc)&free_p_, (Pc)&free_p_.l - (Pc)&free_p_, src_page, src_page_end - src_page ))
-//                    {   VirtualFree( p_1, 0, MEM_RELEASE );
-//                        return 0;
-//                    }
-                    E_mem_Q_blk_I_copy( dst_page_end, src_page_end, (Pc)p + l - src_page_end );
+                    if( !VirtualFree( src_page, src_page_end - src_page, MEM_DECOMMIT ))
+                        V( "VirtualFree" );
+                    E_mem_Q_blk_I_copy( dst_page + ( src_page_end - src_page ), src_page_end, (Pc)p + l - src_page_end );
                 }else
                     E_mem_Q_blk_I_copy( p_1 + l_rel, p, l );
                 if( allocated_2_table_i == E_base_S->E_mem_Q_blk_S_table_allocated_id )

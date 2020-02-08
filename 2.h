@@ -135,32 +135,37 @@ enum { false, true };
         ExitProcess(1); \
     }
 //==============================================================================
-#define Gs(s,l) \
-    {   N l_ = (l) + 2; \
-        Pc s_ = M( l_ ); \
-        E_text_Z_s_P_copy_l( s_, (s), (l) ); \
-        s_[ l_ - 2 ] = '\r'; \
-        s_[ l_ - 1 ] = '\n'; \
-        N written; \
-        if( !WriteFile( log_file, s_, l_, &written, 0 ) \
-        || l_ != written \
+#define Gs(s,l) if( !E_base_S_log_file ){}else \
+    {   N written; \
+        if( !WriteFile( E_base_S_log_file, (s), (l), &written, 0 ) \
+        || (l) != written \
+        ) \
+            V( "WriteFile" ); \
+        if( !WriteFile( E_base_S_log_file, "\r\n", 2, &written, 0 ) \
+        || 2 != written \
         ) \
             V( "WriteFile" ); \
     }
 #define Gs_(s) Gs( (s), E_text_Z_s0_R_l(s) )
-#define Gd(v) \
+#define Gd(v) if( !E_base_S_log_file ){}else \
     {   N l = E_text_Z_n_N_s_G( (v), sizeof(v), 10 ); \
-        Pc s = M(l); \
+        HLOCAL s_ = LocalAlloc( LMEM_FIXED, l ); \
+        Pc s = LocalLock( s_ ); \
         E_text_Z_n_N_s( s + l, (v), sizeof(v), 10 ); \
-        Gs(s,l); \
+        Gs( s, l ); \
+        LocalUnlock( s_ ); \
+        LocalFree( s_ ); \
     }
-#define Gh(v) \
+#define Gh(v) if( !E_base_S_log_file ){}else \
     {   N l = E_text_Z_n_N_s_G( (v), sizeof(v), 16 ) + 2; \
-        Pc s = M(l); \
+        HLOCAL s_ = LocalAlloc( LMEM_FIXED, l ); \
+        Pc s = LocalLock( s_ ); \
         E_text_Z_n_N_s( s + l, (v), sizeof(v), 16 ); \
         s[1] = 'x'; \
         s[0] = '0'; \
-        Gs(s,l); \
+        Gs( s, l ); \
+        LocalUnlock( s_ ); \
+        LocalFree( s_ ); \
     }
 #define Ge \
     {   N error = GetLastError(); \

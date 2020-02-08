@@ -180,6 +180,11 @@ LRESULT CALLBACK E_wnd_I_wnd_proc( HWND hwnd
                 if( !window->default_drawable )
                     V( "SelectObject" );
                 E_wnd_Q_object_I_lay(window);
+                RECT rectangle =
+                { 0, 0
+                , window->width, window->height
+                };
+                InvalidateRect( window->h, &rectangle, TRUE );
             }
             if( !U_R( window->state, created ))
             {   window->background_brush = CreateSolidBrush( E_wnd_Q_theme.window_bg );
