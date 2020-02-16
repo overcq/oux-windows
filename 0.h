@@ -1,5 +1,4 @@
 #include <windows.h>
-#include <commctrl.h>
 #include <math.h>
 #include "1.h"
 #include "2.h"

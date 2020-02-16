@@ -16,7 +16,7 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance
             V( "E_wnd_Q_window_M" );
         struct E_wnd_Q_window_Z *window = E_mem_Q_tab_R( E_wnd_Q_window_S, window_id );
         I object_id = E_wnd_Q_object_Z_frame_M(window);
-        for_n( i, 2 )
+        for_n( i, 3 )
         {   I id = E_wnd_Q_object_Z_frame_M(window);
             E_wnd_Q_object_I_add( window, object_id, id );
             for_n( i, 5 )

@@ -37,15 +37,16 @@ E_wnd_Q_window_I_draw_Z_points(
 , N32 n
 , POINT *points
 ){  for_n( i, n )
-    {   SetPixel( window->drawable_dc, points[i].x, points[i].y, E_wnd_S_draw_color );
-        if( !U_R( E_wnd_S_state, draw_object_drag_move ))
-            window->object_mask[ points[i].x + window->width * points[i].y ] = E_wnd_S_current_object;
-        else
-        {   OffsetRgn( E_wnd_S_drag_region_pixel, points[i].x, points[i].y );
-            CombineRgn( E_wnd_S_drag_region, E_wnd_S_drag_region, E_wnd_S_drag_region_pixel, RGN_OR );
-            OffsetRgn( E_wnd_S_drag_region_pixel, -points[i].x, -points[i].y );
+        if( points[i].x < window->width && points[i].y < window->height )
+        {   SetPixel( window->drawable_dc, points[i].x, points[i].y, E_wnd_S_draw_color );
+            if( !U_R( E_wnd_S_state, draw_object_drag_move ))
+                window->object_mask[ points[i].x + window->width * points[i].y ] = E_wnd_S_current_object;
+            else
+            {   OffsetRgn( E_wnd_S_drag_region_pixel, points[i].x, points[i].y );
+                CombineRgn( E_wnd_S_drag_region, E_wnd_S_drag_region, E_wnd_S_drag_region_pixel, RGN_OR );
+                OffsetRgn( E_wnd_S_drag_region_pixel, -points[i].x, -points[i].y );
+            }
         }
-    }
 }
 N
 E_wnd_Q_window_I_draw_Z_segments_Z_low(
