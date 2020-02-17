@@ -60,6 +60,16 @@ LRESULT CALLBACK E_wnd_I_dnd_wnd_proc( HWND hwnd
                 U_F( E_wnd_Q_dnd_window_S.state, created );
             break;
         }
+      case WM_SHOWWINDOW:
+            if( wParam )
+                break;
+            DeleteObject( E_wnd_S_drag_region_window );
+            DeleteObject( E_wnd_S_drag_region );
+            DeleteObject( E_wnd_S_drag_region_pixel );
+            DeleteDC( E_wnd_Q_dnd_window_S.drawable_dc );
+            DeleteObject( E_wnd_Q_dnd_window_S.drawable );
+            U_L( E_wnd_Q_dnd_window_S.state, created );
+            break;
       case WM_MOUSEMOVE:
         {   WINDOWPLACEMENT wp;
             GetWindowPlacement( E_wnd_Q_dnd_window_S.h, &wp );
@@ -173,7 +183,6 @@ LRESULT CALLBACK E_wnd_I_wnd_proc( HWND hwnd
                     DeleteObject( window->drawable );
                 }
                 window->drawable = CreateCompatibleBitmap( dc, window->width, window->height );
-                ReleaseDC( window->h, dc );
                 if( !window->drawable )
                     V( "CreateCompatibleBitmap" );
                 window->default_drawable = SelectObject( window->drawable_dc, window->drawable );
@@ -186,6 +195,7 @@ LRESULT CALLBACK E_wnd_I_wnd_proc( HWND hwnd
                 };
                 InvalidateRect( window->h, &rectangle, TRUE );
             }
+            ReleaseDC( window->h, dc );
             if( !U_R( window->state, created ))
             {   window->background_brush = CreateSolidBrush( E_wnd_Q_theme.window_bg );
                 if( !window->background_brush )
@@ -258,15 +268,7 @@ LRESULT CALLBACK E_wnd_I_wnd_proc( HWND hwnd
                 }
                 E_wnd_S_drag_object_src_n += object->child_n;
             }
-            HDC dc = GetDC( E_wnd_Q_dnd_window_S.h );
-            if( !dc )
-            {   W( E_wnd_S_drag_object_src );
-                goto Drag_start_error;
-            }
-            E_wnd_Q_dnd_window_S.pixel_width = (F)GetDeviceCaps( dc, HORZSIZE ) / GetDeviceCaps( dc, HORZRES );
-            E_wnd_Q_dnd_window_S.pixel_height = (F)GetDeviceCaps( dc, VERTSIZE ) / GetDeviceCaps( dc, VERTRES );
-            ReleaseDC( E_wnd_Q_dnd_window_S.h, dc );
-            ShowWindow( E_wnd_Q_dnd_window_S.h, SW_SHOWNORMAL );
+            ShowWindow( E_wnd_Q_dnd_window_S.h, SW_SHOWNOACTIVATE );
             WINDOWPLACEMENT wp;
             GetWindowPlacement( window->h, &wp );
             MoveWindow( E_wnd_Q_dnd_window_S.h

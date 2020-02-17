@@ -1,4 +1,3 @@
-*.exe
 *.dll
 *.lo
 *.o
@@ -11,3 +10,4 @@
 *.Manifest
 *.layout
 log.txt
+makeheaders.exe

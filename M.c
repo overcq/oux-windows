@@ -2612,6 +2612,12 @@ E_wnd_M( HINSTANCE hInstance
     );
     if( !E_wnd_Q_dnd_window_S.h )
         V( "CreateWindowEx" );
+    HDC dc = GetDC( E_wnd_Q_dnd_window_S.h );
+    if( !dc )
+        V( "GetDC" );
+    E_wnd_Q_dnd_window_S.pixel_width = (F)GetDeviceCaps( dc, HORZSIZE ) / GetDeviceCaps( dc, HORZRES );
+    E_wnd_Q_dnd_window_S.pixel_height = (F)GetDeviceCaps( dc, VERTSIZE ) / GetDeviceCaps( dc, VERTRES );
+    ReleaseDC( E_wnd_Q_dnd_window_S.h, dc );
     _0_( &wc );
     wc.cbSize = sizeof(WNDCLASSEX);
     wc.lpfnWndProc = E_wnd_I_wnd_proc;
