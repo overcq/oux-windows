@@ -102,8 +102,8 @@ void
 (*click_object_proc)(
   struct E_wnd_Q_window_Z *
 , struct E_wnd_Q_object_Z *
-, N8
-, N8
+, N8 //button
+, N8 //sequence
 );
 struct E_wnd_Q_object_Z
 { draw_object_proc draw; ///ale obiekt zawiera punkty, które narysuje ta funkcja w czasie wywołania.

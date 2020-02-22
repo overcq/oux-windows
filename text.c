@@ -831,4 +831,42 @@ E_text_Z_getter_Z_c_R_rev_u( N (*getter)(void)
     *u = v;
     return i;
 }
-
+LPWSTR
+E_text_Z_s_Z_ansi_R_u( Pc s
+){  N l = MultiByteToWideChar( CP_ACP, 0
+    , s, -1
+    , 0, 0
+    );
+    LPWSTR Mt_( s_u, l );
+    if( !s_u )
+        return 0;
+    if( MultiByteToWideChar( CP_ACP, 0
+    , s, -1
+    , s_u, l
+    ) != l )
+        V( "MultiByteToWideChar" );
+    return s_u;
+}
+Pc
+E_text_Z_s_Z_ansi_R_utf8( Pc s
+){  LPWSTR s_u = E_text_Z_s_Z_ansi_R_u(s);
+    if( !s_u )
+        return 0;
+    N l = 0;
+    s = M(l);
+    LPWSTR s_u_ = s_u;
+    while( *s_u_ )
+    {   C s_[6];
+        N l_ = E_text_Z_s_Z_u_R_utf8( *s_u_, &s_[0] );
+        if( !E_mem_Q_blk_I_append( &s, l_ ))
+            V( "E_mem_Q_blk_I_append" );
+        E_text_Z_s_P_copy_( s + l, s_, &s_[ l_ ] );
+        l += l_;
+        s_u_++;
+    }
+    if( !E_mem_Q_blk_I_append( &s, 1 ))
+        V( "E_mem_Q_blk_I_append" );
+    s[l] = '\0';
+    W( s_u );
+    return s;
+}

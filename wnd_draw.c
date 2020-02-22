@@ -240,13 +240,27 @@ E_wnd_Q_window_I_fill_Z_points(
 ){  //TODO
 
 }
-void
+N
 E_wnd_Q_window_I_fill_Z_rectangles(
   struct E_wnd_Q_window_Z *window
 , N32 n
 , RECT *rectangles
-){  //TODO
-
+){  for_n( i, n )
+    {   RECT *Mt_( segments, rectangles[i].bottom );
+        for_n( j, rectangles[i].bottom )
+            segments[j] = (RECT)
+            { rectangles[i].left
+            , rectangles[i].top + j
+            , rectangles[i].left + rectangles[i].right - 1
+            , rectangles[i].top + j
+            };
+        if( !~E_wnd_Q_window_I_draw_Z_segments( window, rectangles[i].bottom, segments ))
+        {   W(segments);
+            return ~0;
+        }
+        W(segments);
+    }
+    return 0;
 }
 //void
 //E_wnd_Q_window_I_fill_Z_arcs(

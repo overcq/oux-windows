@@ -215,6 +215,8 @@ LRESULT CALLBACK E_wnd_I_wnd_proc( HWND hwnd
                 break;
             I parent_object_id = window->object_mask[ LOWORD(lParam) + window->width * HIWORD(lParam) ];
             struct E_wnd_Q_object_Z *parent_object = E_mem_Q_tab_R( window->object, parent_object_id );
+            if( !U_R( parent_object->mode, draggable ))
+                break;
             U_F( parent_object->mode, drag_src );
             RECT rectangle =
             { parent_object->x, parent_object->y
@@ -280,6 +282,27 @@ LRESULT CALLBACK E_wnd_I_wnd_proc( HWND hwnd
             SetCapture( E_wnd_Q_dnd_window_S.h );
             U_F( E_wnd_S_mode, drag );
 Drag_start_error:
+            break;
+        }
+      case WM_LBUTTONUP:
+        {   struct E_wnd_Q_window_Z *window;
+            for_each( window_id, E_wnd_Q_window_S, E_mem_Q_tab )
+            {   window = E_mem_Q_tab_R( E_wnd_Q_window_S, window_id );
+                if( window->h == hwnd )
+                    break;
+            }
+            if( !~window->object_mask[ LOWORD(lParam) + window->width * HIWORD(lParam) ] )
+                break;
+            I object_id = window->object_mask[ LOWORD(lParam) + window->width * HIWORD(lParam) ];
+            struct E_wnd_Q_object_Z *object;
+            do
+            {   object = E_mem_Q_tab_R( window->object, object_id );
+                if( object->click )
+                {   object->click( window, object, 1, 2 );
+                    break;
+                }
+                object_id = E_wnd_Q_object_R_parent( window, object_id );
+            }while( ~object_id );
             break;
         }
       case WM_DESTROY:

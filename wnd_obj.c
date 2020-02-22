@@ -34,7 +34,7 @@ E_wnd_Q_object_M(
     object->width = width;
     object->height = height;
     U_L( object->mode, lay_height );
-    U_F( object->mode, draggable );
+    U_L( object->mode, draggable );
     U_L( object->mode, drag_src );
     return object_id;
 }
@@ -44,7 +44,8 @@ E_wnd_Q_object_W(
 , I object_id
 ){  struct E_wnd_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
     if( object->data )
-    {   object->clear_data( object->data );
+    {   if( object->clear_data )
+            object->clear_data( object->data );
         W( object->data );
     }
     W( object->child );
@@ -143,7 +144,7 @@ E_wnd_Q_object_Z_button_M(
     , 10
     , 0
     , &E_wnd_Q_object_Z_button_I_draw
-    , &E_wnd_Q_object_Z_button_I_click
+    , 0
     );
 }
 void
@@ -151,7 +152,7 @@ E_wnd_Q_object_Z_button_I_draw(
   struct E_wnd_Q_window_Z *window
 , struct E_wnd_Q_object_Z *object
 ){  E_wnd_Q_object_I_draw_P_color( object, E_wnd_Q_theme.line );
-    E_wnd_Q_object_I_draw_Z_rectangles( window, object
+    E_wnd_Q_object_I_fill_Z_rectangles( window, object
     , 1
     , ( RECT [] )
       { { 0, 0
@@ -169,15 +170,6 @@ E_wnd_Q_object_Z_button_I_draw(
       , { 1, object->height - 1 }
       }
     );
-}
-void
-E_wnd_Q_object_Z_button_I_click(
-  struct E_wnd_Q_window_Z *window
-, struct E_wnd_Q_object_Z *object
-, N8 button
-, N8 seq
-){  if( button == 1 && seq == 2 )
-        ;
 }
 //------------------------------------------------------------------------------
 void
