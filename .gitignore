@@ -3,6 +3,7 @@
 *.o
 *.rc
 *.res
+*.c
 *.h
 *.layout
 Makefile.win
