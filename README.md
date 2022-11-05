@@ -1,5 +1,6 @@
-# oux —Windows
+# oux-windows
 
-OUX/C+ programming language (C based) project for Windows.
+OUX/C+ programming language (C based) project for Windows
 
-makeheaders.exe is built from https://fossil-scm.org/fossil/file/src/makeheaders.c
+# Dependence
+* [PCRE2](https://github.com/PCRE2Project/pcre2)
