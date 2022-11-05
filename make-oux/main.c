@@ -2622,11 +2622,16 @@ E_main_I_clean_programs( char *file_mask
     {   printf( "Not found directory for mask \"%s\".", file_mask );
         return 1;
     }
+    unsigned long l_file_mask = strlen( file_mask );
     do
     {   if( found_file.cFileName[0] != '.' )
         {   if( found_file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )
-            {   unsigned long l_file_mask = strlen( file_mask );
-                char *file = HeapAlloc( E_main_S_process_heap, 0, l_file_mask - 1 + 23 + 1 );
+            {   char *file = HeapAlloc( E_main_S_process_heap, 0, l_file_mask - 1 + 23 + 1 );
+                if( !file );
+                {   puts( "Unable to allocate \"file\"." );
+                    FindClose( h_find_file );
+                    return 1;
+                }
                 strncpy( file, file_mask, l_file_mask - 1 );
                 strcpy( file + l_file_mask - 1, "E_cplus_S_not_to_libs.h" );
                 printf( "Removing file \"%s\"...\n", file );
@@ -2648,8 +2653,7 @@ E_main_I_clean_programs( char *file_mask
                 if( l_file > 3
                 && !strcmp( found_file.cFileName + l_file - 3, ".cx" )
                 )
-                {   unsigned long l_file_mask = strlen( file_mask );
-                    unsigned long l_file = strlen( found_file.cFileName );
+                {   unsigned long l_file = strlen( found_file.cFileName );
                     char *file = HeapAlloc( E_main_S_process_heap, 0, l_file_mask - 1 + l_file + 1 );
                     if( !file )
                     {   puts( "Unable to allocate \"file\"." );
@@ -2661,26 +2665,25 @@ E_main_I_clean_programs( char *file_mask
                     file[ l_file_mask - 1 + l_file - 1 ] = '\0';
                     printf( "Removing file \"%s\"...\n", file );
                     DeleteFile(file);
-                    HeapFree( E_main_S_process_heap, 0, file );
-                    char *file_h = HeapAlloc( E_main_S_process_heap, 0, 12 + l_file - 1 + 1 );
-                    if( !file_h )
-                    {   puts( "Unable to allocate \"file_h\"." );
+                    char *file_ = HeapReAlloc( E_main_S_process_heap, 0, file, l_file_mask - 1 + 12 + l_file - 2 + 1 + 1 );
+                    if( !file_ )
+                    {   puts( "Unable to reallocate \"file\"." );
                         FindClose( h_find_file );
                         return 1;
                     }
-                    strcpy( file_h, "E_cplus_S_0_" );
-                    strncpy( file_h + 12, found_file.cFileName, l_file - 2 );
-                    strcpy( file_h + 12 + l_file - 2, "h" );
-                    printf( "Removing file \"%s\"...\n", file_h );
-                    DeleteFile( file_h );
-                    file_h[10] = '1';
-                    printf( "Removing file \"%s\"...\n", file_h );
-                    DeleteFile( file_h );
-                    file_h[10] = '2';
-                    printf( "Removing file \"%s\"...\n", file_h );
-                    DeleteFile( file_h );
-                    HeapFree( E_main_S_process_heap, 0, file_h );
-                    puts( "1" );
+                    file = file_;
+                    strcpy( file + l_file_mask - 1 , "E_cplus_S_0_" );
+                    strncpy( file + l_file_mask - 1 + 12, found_file.cFileName, l_file - 2 );
+                    strcpy( file + l_file_mask - 1 + 12 + l_file - 2, "h" );
+                    printf( "Removing file \"%s\"...\n", file );
+                    DeleteFile(file);
+                    file[ l_file_mask - 1 + 10 ] = '1';
+                    printf( "Removing file \"%s\"...\n", file );
+                    DeleteFile(file);
+                    file[ l_file_mask - 1 + 10 ] = '2';
+                    printf( "Removing file \"%s\"...\n", file );
+                    DeleteFile(file);
+                    HeapFree( E_main_S_process_heap, 0, file );
                 }
             }
         }
@@ -2718,7 +2721,7 @@ E_main_I_clean( void
                 do
                 {   if( !( found_file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ))
                     {   unsigned long l_file = strlen( found_file.cFileName );
-                        char *file = HeapAlloc( E_main_S_process_heap, 0, 7 + l_dir + 1 + l_file - 1 + 1 );
+                        char *file = HeapAlloc( E_main_S_process_heap, 0, 10 + l_dir + 1 + l_file - 1 + 1 );
                         if( !file )
                         {   puts( "Unable to allocate \"file\"." );
                             FindClose( h_find_file );
@@ -2732,30 +2735,27 @@ E_main_I_clean( void
                         file[ 10 + l_dir + 1 + l_file - 1 ] = '\0';
                         printf( "Removing file \"%s\"...\n", file );
                         DeleteFile(file);
-                        HeapFree( E_main_S_process_heap, 0, file );
-                        file = HeapAlloc( E_main_S_process_heap, 0, 10 + l_dir + 1 + 12 + l_dir + 2 + l_file - 2 + 1 + 1 );
-                        if( !file )
-                        {   puts( "Unable to allocate \"file\"." );
+                        char *file_ = HeapReAlloc( E_main_S_process_heap, 0, file, 10 + l_dir + 1 + 12 + l_dir + 2 + l_file - 2 + 1 + 1 );
+                        if( !file_ )
+                        {   puts( "Unable to reallocate \"file\"." );
                             FindClose( h_find_file );
                             FindClose( h_find_dir );
                             return 1;
                         }
-                        strcpy( file, "..\\module\\" );
-                        strcpy( file + 10, found_dir.cFileName );
-                        file[ 10 + l_dir ] = '\\';
+                        file = file_;
                         strcpy( file + 10 + l_dir + 1, "E_cplus_S_0_" );
                         strcpy( file + 10 + l_dir + 1 + 12, found_dir.cFileName );
                         strcpy( file + 10 + l_dir + 1 + 12 + l_dir, "__" );
                         strncpy( file + 10 + l_dir + 1 + 12 + l_dir + 2, found_file.cFileName, l_file - 2 );
                         strcpy( file + 10 + l_dir + 1 + 12 + l_dir + 2 + l_file - 2, "h" );
                         printf( "Removing file \"%s\"...\n", file );
-                        DeleteFile( file );
+                        DeleteFile(file);
                         file[ 10 + l_dir + 1 + 10 ] = '1';
                         printf( "Removing file \"%s\"...\n", file );
-                        DeleteFile( file );
+                        DeleteFile(file);
                         file[ 10 + l_dir + 1 + 10 ] = '2';
                         printf( "Removing file \"%s\"...\n", file );
-                        DeleteFile( file );
+                        DeleteFile(file);
                         HeapFree( E_main_S_process_heap, 0, file );
                     }
                 }while( FindNextFile( h_find_file, &found_file ));
@@ -2773,23 +2773,32 @@ E_main_I_clean( void
             && found_dir.cFileName[0] != '.'
             )
             {   unsigned long l_dir = strlen( found_dir.cFileName );
-                char *file = HeapAlloc( E_main_S_process_heap, 0, 11 + 23 + 1 );
+                char *file = HeapAlloc( E_main_S_process_heap, 0, 11 + l_dir + 1 + 23 + 1 );
+                if( !file )
+                {   puts( "Unable to allocate \"file\"." );
+                    FindClose( h_find_dir );
+                    return 1;
+                }
                 strcpy( file, "..\\program\\" );
                 strcpy( file + 11, found_dir.cFileName );
                 strcpy( file + 11 + l_dir, "\\E_cplus_S_not_to_libs.h" );
                 printf( "Removing file \"%s\"...\n", file );
                 DeleteFile(file);
-                HeapFree( E_main_S_process_heap, 0, file );
-                char *file_mask = HeapAlloc( E_main_S_process_heap, 0, 11 + l_dir + 2 + 1 );
-                strcpy( file_mask, "..\\program\\" );
-                strcpy( file_mask + 11, found_dir.cFileName );
-                strcpy( file_mask + 11 + l_dir, "\\*" );
-                if( E_main_I_clean_programs( file_mask ))
-                {   HeapFree( E_main_S_process_heap, 0, file_mask );
+                char *file_ = HeapReAlloc( E_main_S_process_heap, 0, file, 11 + l_dir + 1 + 1 + 1 );
+                if( !file_ )
+                {   puts( "Unable to reallocate \"file\"." );
+                    HeapFree( E_main_S_process_heap, 0, file );
                     FindClose( h_find_dir );
                     return 1;
                 }
-                HeapFree( E_main_S_process_heap, 0, file_mask );
+                file = file_;
+                strcpy( file + 11 + l_dir + 1, "*" );
+                if( E_main_I_clean_programs(file))
+                {   HeapFree( E_main_S_process_heap, 0, file );
+                    FindClose( h_find_dir );
+                    return 1;
+                }
+                HeapFree( E_main_S_process_heap, 0, file );
             }
         }while( FindNextFile( h_find_dir, &found_dir ));
         FindClose( h_find_dir );
