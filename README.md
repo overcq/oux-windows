@@ -1,6 +1,8 @@
 # oux-windows
 
-OUX/C+ programming language (C based) project for Windows
+OUX/C+ programming language project for Windows
 
 # Dependence
+* Orwell Dev-C++ with 32‐bit “clang” (for Windows XP)
+## “make-oux”
 * [PCRE2](https://github.com/PCRE2Project/pcre2)
