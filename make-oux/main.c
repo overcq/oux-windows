@@ -41,7 +41,7 @@ E_main_Q_c_I_isalnum( char c
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 unsigned long
-E_main_I_strlen( char *s
+E_main_Q_s_R_strlen( char *s
 ){  unsigned long ret = 0;
     while( *s )
     {   ret++;
@@ -50,7 +50,7 @@ E_main_I_strlen( char *s
     return ret;
 }
 int
-E_main_I_strcmp( char *s
+E_main_Q_s0_s0_I_strcmp( char *s
 , char *t
 ){  while( *s
     && *t
@@ -62,7 +62,7 @@ E_main_I_strcmp( char *s
    return *s - *t;
 }
 int
-E_main_I_strncmp( char *s
+E_main_Q_s0_s0_I_strncmp( char *s
 , char *t
 , unsigned long n
 ){  while( n
@@ -77,7 +77,7 @@ E_main_I_strncmp( char *s
    return !n ? 0 : *s - *t;
 }
 char *
-E_main_I_strchr( char *s
+E_main_Q_s0_I_strchr( char *s
 , char c
 ){  while( *s
     && *s != c
@@ -86,7 +86,7 @@ E_main_I_strchr( char *s
     return *s ? s : 0;
 }
 char *
-E_main_I_strstr( char *s
+E_main_Q_s0_I_strstr( char *s
 , char *t
 ){  char *s_, *t_ = t;
     while( *s
@@ -103,7 +103,7 @@ E_main_I_strstr( char *s
     return !*t_ ? s_ : 0;
 }
 char *
-E_main_I_strcpy( char *s
+E_main_Q_s0_I_strcpy( char *s
 , char *t
 ){  char *s_ = s;
     do
@@ -186,7 +186,7 @@ E_main_Q_build_resources_M( struct E_main_Z_build_resources *data
     data->file_h_to_libs = HeapAlloc( E_main_S_process_heap, 0, 29 + 1 );
     Vv( data->file_h_to_libs, "Unable to allocate" )
         return 1;
-    E_main_I_strcpy( data->file_h_to_libs, "..\\module\\E_cplus_S_to_libs.h" );
+    E_main_Q_s0_I_strcpy( data->file_h_to_libs, "..\\module\\E_cplus_S_to_libs.h" );
     data->file_h_to_libs_buffer_size = 65;
     data->file_h_to_libs_buffer = HeapAlloc( E_main_S_process_heap, 0, data->file_h_to_libs_buffer_size );
     Vv( data->file_h_to_libs_buffer, "Unable to allocate" )
@@ -335,7 +335,7 @@ E_main_Q_file_P_line( HANDLE file
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 char *
 E_main_Q_filename_I_encode( char *filename
-){  unsigned long size = E_main_I_strlen(filename) - 3 + 1;
+){  unsigned long size = E_main_Q_s_R_strlen(filename) - 3 + 1;
     char *ret = HeapAlloc( E_main_S_process_heap, 0, size );
     Vv( ret, "Unable to allocate" )
     {   HeapFree( E_main_S_process_heap, 0, ret );
@@ -380,9 +380,9 @@ E_main_I_cx_to_c( HANDLE h_file_cx
             return 1;
         }
 Redo:   if( inside_comment )
-        {   char *s = E_main_I_strstr( line, "*/" );
+        {   char *s = E_main_Q_s0_I_strstr( line, "*/" );
             if(s)
-            {   MoveMemory( line, s + 2, E_main_I_strlen(s) - 2 + 1 );
+            {   MoveMemory( line, s + 2, E_main_Q_s_R_strlen(s) - 2 + 1 );
                 inside_comment = FALSE;
             }else
             {   if( last_line )
@@ -399,7 +399,7 @@ Redo:   if( inside_comment )
                 goto Cont;
             }
         }
-        char *s = E_main_I_strstr( line, "//" );
+        char *s = E_main_Q_s0_I_strstr( line, "//" );
         if(s)
             *s = '\0';
         if( inside_braces == 1 )
@@ -423,8 +423,8 @@ Redo:   if( inside_comment )
         if( inside_braces == 2 )
         {   if( line[0] == '}' )
             {   if( !inside_enum )
-                {   inside_braces = E_main_I_strchr( line, ';' ) ? 0 : 3;
-                    MoveMemory( line, line + 1, E_main_I_strlen( line + 1 ) + 1 );
+                {   inside_braces = E_main_Q_s0_I_strchr( line, ';' ) ? 0 : 3;
+                    MoveMemory( line, line + 1, E_main_Q_s_R_strlen( line + 1 ) + 1 );
                     if( last_line )
                     {   if( E_main_Q_file_P_line( h_file, last_line ))
                         {   HeapFree( E_main_S_process_heap, 0, last_line );
@@ -522,7 +522,7 @@ Redo:   if( inside_comment )
                                 HeapFree( E_main_S_process_heap, 0, last_line );
                             return 1;
                         }
-                        if( E_main_I_strncmp( line, "/*", 2 ))
+                        if( E_main_Q_s0_s0_I_strncmp( line, "/*", 2 ))
                         {   if( last_line )
                             {   if( E_main_Q_file_P_line( h_file, last_line ))
                                 {   HeapFree( E_main_S_process_heap, 0, last_line );
@@ -532,9 +532,9 @@ Redo:   if( inside_comment )
                             }
                             last_line = line;
                         }else
-                        {   char *s = E_main_I_strstr( line, "*/" );
+                        {   char *s = E_main_Q_s0_I_strstr( line, "*/" );
                             if(s)
-                            {   MoveMemory( line, s + 2, E_main_I_strlen(s) - 2 + 1 );
+                            {   MoveMemory( line, s + 2, E_main_Q_s_R_strlen(s) - 2 + 1 );
                                 goto Redo;
                             }
                             if( last_line )
@@ -559,13 +559,13 @@ Redo:   if( inside_comment )
                             HeapFree( E_main_S_process_heap, 0, last_line );
                         }
                         PCRE2_SIZE *ovector = pcre2_get_ovector_pointer( data->_3_match_data );
-                        last_line = HeapAlloc( E_main_S_process_heap, 0, 16 + ovector[3] - ovector[2] + 7 + E_main_I_strlen(line) + 1 );
+                        last_line = HeapAlloc( E_main_S_process_heap, 0, 16 + ovector[3] - ovector[2] + 7 + E_main_Q_s_R_strlen(line) + 1 );
                         Vv( last_line, "Unable to allocate" )
                             return 1;
-                        E_main_I_strcpy( last_line, "_internal I D_id" );
+                        E_main_Q_s0_I_strcpy( last_line, "_internal I D_id" );
                         CopyMemory( last_line + 16, line + ovector[2], ovector[3] - ovector[2] );
-                        E_main_I_strcpy( last_line + 16 + ovector[3] - ovector[2], " = ~0; " );
-                        E_main_I_strcpy( last_line + 16 + ovector[3] - ovector[2] + 7, line );
+                        E_main_Q_s0_I_strcpy( last_line + 16 + ovector[3] - ovector[2], " = ~0; " );
+                        E_main_Q_s0_I_strcpy( last_line + 16 + ovector[3] - ovector[2] + 7, line );
                     }
                 }else
                 {   if( last_line )
@@ -587,7 +587,7 @@ Redo:   if( inside_comment )
                     }
                     HeapFree( E_main_S_process_heap, 0, last_line );
                 }
-                inside_enum = !E_main_I_strncmp( line, "enum", ovector[3] );
+                inside_enum = !E_main_Q_s0_s0_I_strncmp( line, "enum", ovector[3] );
                 if( !inside_enum )
                     last_line = line;
                 else
@@ -649,17 +649,17 @@ E_main_I_cx_to_h_1( HANDLE h_file_cx
                 return 1;
             }
             CopyMemory( s, line + ovector[2], ovector[3] - ovector[2] );
-            E_main_I_strcpy( s + ( ovector[3] - ovector[2] ), ",X_" );
+            E_main_Q_s0_I_strcpy( s + ( ovector[3] - ovector[2] ), ",X_" );
             CopyMemory( s + ( ovector[3] - ovector[2] ) + 3, line + ovector[4], ovector[5] - ovector[4]);
             s[ ( ovector[3] - ovector[2] ) + 3 + ( ovector[5] - ovector[4] ) ] = '\0';
             unsigned long i;
             for( i = 0; i != xyi_array_b_n; i++ )
-                if( !E_main_I_strcmp( xyi_array_b[i], s ))
+                if( !E_main_Q_s0_s0_I_strcmp( xyi_array_b[i], s ))
                     break;
             if( i == xyi_array_b_n )
             {   for( i = 0; i != data->xyi_array_a_n; i++ )
                     if( data->xyi_array_a[i]
-                    && !E_main_I_strcmp( data->xyi_array_a[i], s )
+                    && !E_main_Q_s0_s0_I_strcmp( data->xyi_array_a[i], s )
                     )
                         break;
                 if( i == data->xyi_array_a_n )
@@ -676,11 +676,11 @@ E_main_I_cx_to_h_1( HANDLE h_file_cx
         }
     }while( !eof );
     if( xyi_array_b_n )
-    {   unsigned long l = E_main_I_strlen( xyi_array_b[0] );
-        unsigned long l_enc = E_main_I_strlen(enc);
+    {   unsigned long l = E_main_Q_s_R_strlen( xyi_array_b[0] );
+        unsigned long l_enc = E_main_Q_s_R_strlen(enc);
         unsigned long buffer_size = 18 + l + 17 + l_enc + 3 + 4;
         for( unsigned long i = 1; i != xyi_array_b_n; i++ )
-        {   unsigned long l = E_main_I_strlen( xyi_array_b[0] );
+        {   unsigned long l = E_main_Q_s_R_strlen( xyi_array_b[0] );
             buffer_size += 12 + l + 17 + l_enc + 4;
         }
         char *buffer = HeapAlloc( E_main_S_process_heap, 0, buffer_size );
@@ -688,19 +688,19 @@ E_main_I_cx_to_h_1( HANDLE h_file_cx
         {   HeapFree( E_main_S_process_heap, 0, xyi_array_b );
             return 1;
         }
-        E_main_I_strcpy( buffer, "enum\r\n{ _XhYi_uid(" );
-        E_main_I_strcpy( buffer + 18, xyi_array_b[0] );
-        E_main_I_strcpy( buffer + 18 + l, ") = _XhYi_F_uid( " );
-        E_main_I_strcpy( buffer + 18 + l + 17, enc );
+        E_main_Q_s0_I_strcpy( buffer, "enum\r\n{ _XhYi_uid(" );
+        E_main_Q_s0_I_strcpy( buffer + 18, xyi_array_b[0] );
+        E_main_Q_s0_I_strcpy( buffer + 18 + l, ") = _XhYi_F_uid( " );
+        E_main_Q_s0_I_strcpy( buffer + 18 + l + 17, enc );
         CopyMemory( buffer + 18 + l + 17 + l_enc, " )\r\n", 4 );
         char *s = buffer + 18 + l + 17 + l_enc + 4;
         for( unsigned long i = 1; i != xyi_array_b_n; i++ )
-        {   unsigned long l = E_main_I_strlen( xyi_array_b[0] );
-            E_main_I_strcpy( s, ", _XhYi_uid(" );
-            E_main_I_strcpy( s + 12, xyi_array_b[i] );
-            E_main_I_strcpy( s + 12 + l, ") = _XhYi_F_uid( " );
-            E_main_I_strcpy( s + 12 + l + 17, enc );
-            E_main_I_strcpy( s + 12 + l + 17 + l_enc, " )\r\n" );
+        {   unsigned long l = E_main_Q_s_R_strlen( xyi_array_b[0] );
+            E_main_Q_s0_I_strcpy( s, ", _XhYi_uid(" );
+            E_main_Q_s0_I_strcpy( s + 12, xyi_array_b[i] );
+            E_main_Q_s0_I_strcpy( s + 12 + l, ") = _XhYi_F_uid( " );
+            E_main_Q_s0_I_strcpy( s + 12 + l + 17, enc );
+            E_main_Q_s0_I_strcpy( s + 12 + l + 17 + l_enc, " )\r\n" );
             s += 12 + l + 17 + l_enc + 4;
         }
         CopyMemory( s, "};\r\n", 4 );
@@ -728,7 +728,7 @@ E_main_I_cx_to_h_2( HANDLE h_file_cx
         eof = E_main_Q_file_R_line( h_file_cx, &line );
         if( !line )
             return 1;
-        char *s = E_main_I_strstr( line, "//" );
+        char *s = E_main_Q_s0_I_strstr( line, "//" );
         if(s)
             *s = '\0';
         int match_res = pcre2_match( data->preproc_if_regex, ( PCRE2_SPTR8 )line, PCRE2_ZERO_TERMINATED, 0, 0, data->_3_match_data, 0 );
@@ -749,7 +749,7 @@ E_main_I_cx_to_h_2( HANDLE h_file_cx
                 if( !line_out )
                     return 1;
                 CopyMemory( line_out, line, ovector[1] );
-                E_main_I_strcpy( line_out + ovector[1], ";" );
+                E_main_Q_s0_I_strcpy( line_out + ovector[1], ";" );
                 if( E_main_Q_file_P_line( h_file, line_out ))
                 {   HeapFree( E_main_S_process_heap, 0, line_out );
                     return 1;
@@ -779,7 +779,7 @@ E_main_I_cx_to_h_3( HANDLE h_file_cx
                 HeapFree( E_main_S_process_heap, 0, last_line );
             return 1;
         }
-        char *s = E_main_I_strstr( line, "//" );
+        char *s = E_main_Q_s0_I_strstr( line, "//" );
         if(s)
             *s = '\0';
         if( inside_braces == 1 )
@@ -849,7 +849,7 @@ E_main_I_cx_to_h_3( HANDLE h_file_cx
                     }
                     s = s_;
                     MoveMemory( s + 7 + ( s[ ovector[2] ] ? 0 : 1 ), s + 1, l - 1 + 1 );
-                    E_main_I_strcpy( s, "extern" );
+                    E_main_Q_s0_I_strcpy( s, "extern" );
                     if( !s[ ovector[2] ] )
                         s[7] = ' ';
                     l = 7 + ( s[ ovector[2] ] ? 0 : 1 ) + l - 1;
@@ -863,7 +863,7 @@ E_main_I_cx_to_h_3( HANDLE h_file_cx
                     return 1;
                 }
                 s = s_;
-                E_main_I_strcpy( s + l, ";" );
+                E_main_Q_s0_I_strcpy( s + l, ";" );
                 if( E_main_Q_file_P_line( h_file, s ))
                 {   HeapFree( E_main_S_process_heap, 0, s );
                     if( last_line )
@@ -892,7 +892,7 @@ E_main_I_cx_to_h_3( HANDLE h_file_cx
                     return 1;
                 }
                 s[0] = ')';
-                E_main_I_strcpy( s + 1, ";" );
+                E_main_Q_s0_I_strcpy( s + 1, ";" );
                 if( E_main_Q_file_P_line( h_file, s ))
                 {   HeapFree( E_main_S_process_heap, 0, s );
                     if( last_line )
@@ -961,7 +961,7 @@ E_main_I_cx_to_h_3( HANDLE h_file_cx
                             last_line = line;
                         }else
                         {   PCRE2_SIZE *ovector = pcre2_get_ovector_pointer( data->_3_match_data );
-                            unsigned long l = E_main_I_strlen(line);
+                            unsigned long l = E_main_Q_s_R_strlen(line);
                             char *s = HeapAlloc( E_main_S_process_heap, 0, 13 + ( ovector[3] - ovector[2] ) + 2 + l + 1 + 1 );
                             Vv( s, "Unable to allocate" )
                             {   if( last_line )
@@ -969,11 +969,11 @@ E_main_I_cx_to_h_3( HANDLE h_file_cx
                                 HeapFree( E_main_S_process_heap, 0, line );
                                 return 1;
                             }
-                            E_main_I_strcpy( s, "extern I D_id" );
+                            E_main_Q_s0_I_strcpy( s, "extern I D_id" );
                             CopyMemory( s + 13, line + ovector[2], ovector[3] - ovector[2] );
-                            E_main_I_strcpy( s + 13 + ( ovector[3] - ovector[2] ), "; " );
-                            E_main_I_strcpy( s + 13 + ( ovector[3] - ovector[2] ) + 2, line );
-                            E_main_I_strcpy( s + 13 + ( ovector[3] - ovector[2] ) + 2 + l, ";" );
+                            E_main_Q_s0_I_strcpy( s + 13 + ( ovector[3] - ovector[2] ), "; " );
+                            E_main_Q_s0_I_strcpy( s + 13 + ( ovector[3] - ovector[2] ) + 2, line );
+                            E_main_Q_s0_I_strcpy( s + 13 + ( ovector[3] - ovector[2] ) + 2 + l, ";" );
                             if( E_main_Q_file_P_line( h_file, s ))
                             {   HeapFree( E_main_S_process_heap, 0, s );
                                 if( last_line )
@@ -1014,9 +1014,9 @@ E_main_I_cx_to_h_3( HANDLE h_file_cx
                     HeapFree( E_main_S_process_heap, 0, line );
                     return 1;
                 }
-                E_main_I_strcpy( s, "extern " );
+                E_main_Q_s0_I_strcpy( s, "extern " );
                 CopyMemory( s + 7, line, l );
-                E_main_I_strcpy( s + 7 + l, ";" );
+                E_main_Q_s0_I_strcpy( s + 7 + l, ";" );
                 if( E_main_Q_file_P_line( h_file, s ))
                 {   HeapFree( E_main_S_process_heap, 0, s );
                     if( last_line )
@@ -1063,18 +1063,18 @@ E_main_I_cx_to_xyi_array( HANDLE h_file_cx
             Vv( s, "Unable to allocate" )
                 return 1;
             CopyMemory( s, line + ovector[2], ovector[3] - ovector[2] );
-            E_main_I_strcpy( s + ( ovector[3] - ovector[2] ), ",X_" );
+            E_main_Q_s0_I_strcpy( s + ( ovector[3] - ovector[2] ), ",X_" );
             CopyMemory( s + ( ovector[3] - ovector[2] ) + 3, line + ovector[4], ovector[5] - ovector[4]);
             s[ ( ovector[3] - ovector[2] ) + 3 + ( ovector[5] - ovector[4] ) ] = '\0';
             unsigned long i;
             for( i = 0; i != data->xyi_array_a_n; i++ )
                 if( data->xyi_array_a[i]
-                && !E_main_I_strcmp( data->xyi_array_a[i], s )
+                && !E_main_Q_s0_s0_I_strcmp( data->xyi_array_a[i], s )
                 )
                     break;
             if( i == data->xyi_array_a_n )
             {   for( i = 0; i != data->xyi_array_b_n; i++ )
-                    if( !E_main_I_strcmp( data->xyi_array_b[i], s ))
+                    if( !E_main_Q_s0_s0_I_strcmp( data->xyi_array_b[i], s ))
                         break;
                 if( i == data->xyi_array_b_n )
                     if( line[ ovector[0] + 2 + ( line[ ovector[0] ] == 'Y' ? 1 : 0 ) ] == 'A' )
@@ -1106,18 +1106,18 @@ E_main_I_cx_to_xyi_array( HANDLE h_file_cx
             Vv( s, "Unable to allocate" )
                 return 1;
             CopyMemory( s, line + ovector[2], ovector[3] - ovector[2] );
-            E_main_I_strcpy( s + ( ovector[3] - ovector[2] ), ",Yi_" );
+            E_main_Q_s0_I_strcpy( s + ( ovector[3] - ovector[2] ), ",Yi_" );
             CopyMemory( s + ( ovector[3] - ovector[2] ) + 4, line + ovector[4], ovector[5] - ovector[4]);
             s[ ( ovector[3] - ovector[2] ) + 4 + ( ovector[5] - ovector[4] ) ] = '\0';
             unsigned long i;
             for( i = 0; i != data->xyi_array_a_n; i++ )
                 if( data->xyi_array_a[i]
-                && !E_main_I_strcmp( data->xyi_array_a[i], s )
+                && !E_main_Q_s0_s0_I_strcmp( data->xyi_array_a[i], s )
                 )
                     break;
             if( i == data->xyi_array_a_n )
             {   for( i = 0; i != data->xyi_array_b_n; i++ )
-                    if( !E_main_I_strcmp( data->xyi_array_b[i], s ))
+                    if( !E_main_Q_s0_s0_I_strcmp( data->xyi_array_b[i], s ))
                         break;
                 if( i == data->xyi_array_b_n )
                     if( line[ ovector[0] + 2 + ( line[ ovector[0] ] == 'Y' ? 1 : 0 ) ] == 'A' )
@@ -1146,8 +1146,8 @@ int
 E_main_I_find_file( char *file_mask
 , E_main_I_find_file_Z_proc proc
 , void *context
-){  WIN32_FIND_DATA found_dir;
-    int ret = 1;
+){  int ret = 1;
+    WIN32_FIND_DATA found_dir;
     HANDLE h_find_dir = FindFirstFile( file_mask, &found_dir );
     if( h_find_dir != INVALID_HANDLE_VALUE )
     {   do
@@ -1172,15 +1172,15 @@ E_main_I_find_file_I_module_1( WIN32_FIND_DATA *found_file
 ){  char *file;
     HANDLE h_file_cx, h_file;
     if( !( found_file->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ))
-    {   unsigned long l_dir = E_main_I_strlen( data->found_dir );
-        unsigned long l_file = E_main_I_strlen( found_file->cFileName );
+    {   unsigned long l_dir = E_main_Q_s_R_strlen( data->found_dir );
+        unsigned long l_file = E_main_Q_s_R_strlen( found_file->cFileName );
         file = HeapAlloc( E_main_S_process_heap, 0, 10 + l_dir + 1 + l_file + 1 );
         Vv( file, "Unable to allocate" )
             return 1;
-        E_main_I_strcpy( file, "..\\module\\" );
-        E_main_I_strcpy( file + 10, data->found_dir );
+        E_main_Q_s0_I_strcpy( file, "..\\module\\" );
+        E_main_Q_s0_I_strcpy( file + 10, data->found_dir );
         file[ 10 + l_dir ] = '\\';
-        E_main_I_strcpy( file + 10 + l_dir + 1, found_file->cFileName );
+        E_main_Q_s0_I_strcpy( file + 10 + l_dir + 1, found_file->cFileName );
         h_file_cx = CreateFile( file, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0 );
         V( h_file_cx != INVALID_HANDLE_VALUE, "Unable to open file" )
             goto Err_1;
@@ -1217,27 +1217,27 @@ Cont_1: CloseHandle( h_file );
         data->file_h_to_libs_buffer = file_h_to_libs_buffer_;
         MoveMemory( data->file_h_to_libs_buffer + l_added, data->file_h_to_libs_buffer, data->file_h_to_libs_buffer_size );
         data->file_h_to_libs_buffer_size += l_added;
-        E_main_I_strcpy( data->file_h_to_libs_buffer, "#include \"E_cplus_S_0_" );
-        E_main_I_strcpy( data->file_h_to_libs_buffer + 22, data->found_dir );
-        E_main_I_strcpy( data->file_h_to_libs_buffer + 22 + l_dir, "__" );
+        E_main_Q_s0_I_strcpy( data->file_h_to_libs_buffer, "#include \"E_cplus_S_0_" );
+        E_main_Q_s0_I_strcpy( data->file_h_to_libs_buffer + 22, data->found_dir );
+        E_main_Q_s0_I_strcpy( data->file_h_to_libs_buffer + 22 + l_dir, "__" );
         CopyMemory( data->file_h_to_libs_buffer + 22 + l_dir + 2, found_file->cFileName, l_file - 2 );
         CopyMemory( data->file_h_to_libs_buffer + 22 + l_dir + 2 + l_file - 2, "h\"\r\n", 4 );
         char *path = HeapAlloc( E_main_S_process_heap, 0, l_dir + 1 + l_file + 1 );
         Vv( path, "Unable to allocate" )
             goto Err_2;
-        E_main_I_strcpy( path, data->found_dir );
+        E_main_Q_s0_I_strcpy( path, data->found_dir );
         path[ l_dir ] = '\\';
-        E_main_I_strcpy( path + l_dir + 1, found_file->cFileName );
+        E_main_Q_s0_I_strcpy( path + l_dir + 1, found_file->cFileName );
         char *enc = E_main_Q_filename_I_encode(path);
         if( !enc )
         {   HeapFree( E_main_S_process_heap, 0, path );
             goto Err_2;
         }
         HeapFree( E_main_S_process_heap, 0, path );
-        unsigned long pos = E_main_I_strstr( data->file_h_to_libs_buffer, "#include \"E_cplus_S_language.h\"\r\n" ) + 33 - data->file_h_to_libs_buffer;
-        unsigned long l_enc = E_main_I_strlen(enc);
+        unsigned long pos = E_main_Q_s0_I_strstr( data->file_h_to_libs_buffer, "#include \"E_cplus_S_language.h\"\r\n" ) + 33 - data->file_h_to_libs_buffer;
+        unsigned long l_enc = E_main_Q_s_R_strlen(enc);
         l_added = 10 + l_enc + 4;
-        if( E_main_I_strncmp( data->file_h_to_libs_buffer + pos, "enum\r\n{ _F_uid( ", 16 ))
+        if( E_main_Q_s0_s0_I_strncmp( data->file_h_to_libs_buffer + pos, "enum\r\n{ _F_uid( ", 16 ))
             l_added += 6 + 43;
         file_h_to_libs_buffer_ = HeapReAlloc( E_main_S_process_heap, 0, data->file_h_to_libs_buffer, data->file_h_to_libs_buffer_size + l_added );
         if( !file_h_to_libs_buffer_ )
@@ -1245,17 +1245,17 @@ Cont_1: CloseHandle( h_file );
             goto Err_2;
         }
         data->file_h_to_libs_buffer = file_h_to_libs_buffer_;
-        if( !E_main_I_strncmp( data->file_h_to_libs_buffer + pos, "enum\r\n{ _F_uid( ", 16 ))
-        {   char *s = E_main_I_strstr( data->file_h_to_libs_buffer + pos + 16, "\r\n" ) + 2;
+        if( !E_main_Q_s0_s0_I_strncmp( data->file_h_to_libs_buffer + pos, "enum\r\n{ _F_uid( ", 16 ))
+        {   char *s = E_main_Q_s0_I_strstr( data->file_h_to_libs_buffer + pos + 16, "\r\n" ) + 2;
             MoveMemory( s + l_added, s, data->file_h_to_libs_buffer_size - ( s - data->file_h_to_libs_buffer ));
-            E_main_I_strcpy( s, ", _F_uid( " );
-            E_main_I_strcpy( s + 10, enc );
+            E_main_Q_s0_I_strcpy( s, ", _F_uid( " );
+            E_main_Q_s0_I_strcpy( s + 10, enc );
             CopyMemory( s + 10 + l_enc, " )\r\n", 4 );
             pos = s + 10 + l_enc + 3 - data->file_h_to_libs_buffer - 1;
         }else
         {   MoveMemory( data->file_h_to_libs_buffer + pos + l_added, data->file_h_to_libs_buffer + pos, data->file_h_to_libs_buffer_size - pos );
-            E_main_I_strcpy( data->file_h_to_libs_buffer + pos, "enum\r\n{ _F_uid( " );
-            E_main_I_strcpy( data->file_h_to_libs_buffer + pos + 16, enc );
+            E_main_Q_s0_I_strcpy( data->file_h_to_libs_buffer + pos, "enum\r\n{ _F_uid( " );
+            E_main_Q_s0_I_strcpy( data->file_h_to_libs_buffer + pos + 16, enc );
             CopyMemory( data->file_h_to_libs_buffer + pos + 16 + l_enc, " ) = ( ~0 << ( sizeof(int) * 8 / 2 - 1 )) | 1\r\n", 47 );
             pos += 16 + l_enc + 47 - 2;
         }
@@ -1263,7 +1263,7 @@ Cont_1: CloseHandle( h_file );
         HeapFree( E_main_S_process_heap, 0, enc );
         char *s = data->file_h_to_libs_buffer + pos;
         do
-        {   s = E_main_I_strstr( s, "\r\n" ) + 2;
+        {   s = E_main_Q_s0_I_strstr( s, "\r\n" ) + 2;
             if( s - data->file_h_to_libs_buffer == data->file_h_to_libs_buffer_size
             || *s != ','
             )
@@ -1277,16 +1277,16 @@ Cont_1: CloseHandle( h_file );
         data->file_h_to_libs_buffer = file_h_to_libs_buffer_;
         MoveMemory( s + l_added, s, data->file_h_to_libs_buffer_size - ( s - data->file_h_to_libs_buffer ));
         data->file_h_to_libs_buffer_size += l_added;
-        E_main_I_strcpy( s, "#include \"E_cplus_S_1_" );
-        E_main_I_strcpy( s + 22, data->found_dir );
-        E_main_I_strcpy( s + 22 + l_dir, "__" );
+        E_main_Q_s0_I_strcpy( s, "#include \"E_cplus_S_1_" );
+        E_main_Q_s0_I_strcpy( s + 22, data->found_dir );
+        E_main_Q_s0_I_strcpy( s + 22 + l_dir, "__" );
         CopyMemory( s + 22 + l_dir + 2, found_file->cFileName, l_file - 2 );
         CopyMemory( s + 22 + l_dir + 2 + l_file - 2, "h\"\r\n", 4 );
         s += 22 + l_dir + 2 + l_file - 2 + 4 - 2;
         do
-        {   s = E_main_I_strstr( s, "\r\n" ) + 2;
+        {   s = E_main_Q_s0_I_strstr( s, "\r\n" ) + 2;
             if( s - data->file_h_to_libs_buffer == data->file_h_to_libs_buffer_size
-            || E_main_I_strncmp( s, "#include \"E_cplus_S_1_", 22 )
+            || E_main_Q_s0_s0_I_strncmp( s, "#include \"E_cplus_S_1_", 22 )
             )
                 break;
         }while(TRUE);
@@ -1297,9 +1297,9 @@ Cont_1: CloseHandle( h_file );
         data->file_h_to_libs_buffer = file_h_to_libs_buffer_;
         MoveMemory( s + l_added, s, data->file_h_to_libs_buffer_size - ( s - data->file_h_to_libs_buffer ));
         data->file_h_to_libs_buffer_size += l_added;
-        E_main_I_strcpy( s, "#include \"E_cplus_S_2_" );
-        E_main_I_strcpy( s + 22, data->found_dir );
-        E_main_I_strcpy( s + 22 + l_dir, "__" );
+        E_main_Q_s0_I_strcpy( s, "#include \"E_cplus_S_2_" );
+        E_main_Q_s0_I_strcpy( s + 22, data->found_dir );
+        E_main_Q_s0_I_strcpy( s + 22 + l_dir, "__" );
         CopyMemory( s + 22 + l_dir + 2, found_file->cFileName, l_file - 2 );
         CopyMemory( s + 22 + l_dir + 2 + l_file - 2, "h\"\r\n", 4 );
         if( E_main_I_cx_to_xyi_array( h_file_cx, data ))
@@ -1321,14 +1321,14 @@ E_main_I_find_file_I_modules_1( WIN32_FIND_DATA *found_file
     if(( found_file->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )
     && found_file->cFileName[0] != '.'
     )
-    {   unsigned long l_dir = E_main_I_strlen( found_file->cFileName );
+    {   unsigned long l_dir = E_main_Q_s_R_strlen( found_file->cFileName );
         data->found_dir = found_file->cFileName;
         char *file_mask = HeapAlloc( E_main_S_process_heap, 0, 10 + l_dir + 5 + 1 );
         Vv( file_mask, "Unable to allocate" )
             return 1;
-        E_main_I_strcpy( file_mask, "..\\module\\" );
-        E_main_I_strcpy( file_mask + 10, found_file->cFileName );
-        E_main_I_strcpy( file_mask + 10 + l_dir, "\\*.cx" );
+        E_main_Q_s0_I_strcpy( file_mask, "..\\module\\" );
+        E_main_Q_s0_I_strcpy( file_mask + 10, found_file->cFileName );
+        E_main_Q_s0_I_strcpy( file_mask + 10 + l_dir, "\\*.cx" );
         ret = E_main_I_find_file( file_mask, ( E_main_I_find_file_Z_proc )E_main_I_find_file_I_module_1, data );
         HeapFree( E_main_S_process_heap, 0, file_mask );
     }
@@ -1340,15 +1340,15 @@ E_main_I_find_file_I_module_2( WIN32_FIND_DATA *found_file
 ){  char *file, *file_h;
     HANDLE h_file_cx, h_file;
     if( !( found_file->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ))
-    {   unsigned long l_dir = E_main_I_strlen( data->found_dir );
-        unsigned long l_file = E_main_I_strlen( found_file->cFileName );
+    {   unsigned long l_dir = E_main_Q_s_R_strlen( data->found_dir );
+        unsigned long l_file = E_main_Q_s_R_strlen( found_file->cFileName );
         file = HeapAlloc( E_main_S_process_heap, 0, 10 + l_dir + 1 + l_file + 1 );
         Vv( file, "Unable to allocate" )
             return 1;
-        E_main_I_strcpy( file, "..\\module\\" );
-        E_main_I_strcpy( file + 10, data->found_dir );
+        E_main_Q_s0_I_strcpy( file, "..\\module\\" );
+        E_main_Q_s0_I_strcpy( file + 10, data->found_dir );
         file[ 10 + l_dir ] = '\\';
-        E_main_I_strcpy( file + 10 + l_dir + 1, found_file->cFileName );
+        E_main_Q_s0_I_strcpy( file + 10 + l_dir + 1, found_file->cFileName );
         h_file_cx = CreateFile( file, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0 );
         V( h_file_cx != INVALID_HANDLE_VALUE, "Unable to open file" )
         {   HeapFree( E_main_S_process_heap, 0, file );
@@ -1359,11 +1359,11 @@ E_main_I_find_file_I_module_2( WIN32_FIND_DATA *found_file
         Vv( file_h, "Unable to allocate" )
             goto Err_1;
         CopyMemory( file_h, file, 10 + l_dir + 1 );
-        E_main_I_strcpy( file_h + 10 + l_dir + 1, "E_cplus_S_1_" );
-        E_main_I_strcpy( file_h + 10 + l_dir + 1 + 12, data->found_dir );
-        E_main_I_strcpy( file_h + 10 + l_dir + 1 + 12 + l_dir, "__" );
+        E_main_Q_s0_I_strcpy( file_h + 10 + l_dir + 1, "E_cplus_S_1_" );
+        E_main_Q_s0_I_strcpy( file_h + 10 + l_dir + 1 + 12, data->found_dir );
+        E_main_Q_s0_I_strcpy( file_h + 10 + l_dir + 1 + 12 + l_dir, "__" );
         CopyMemory( file_h + 10 + l_dir + 1 + 12 + l_dir + 2, found_file->cFileName, l_file - 2 );
-        E_main_I_strcpy( file_h + 10 + l_dir + 1 + 12 + l_dir + 2 + l_file - 2, "h" );
+        E_main_Q_s0_I_strcpy( file_h + 10 + l_dir + 1 + 12 + l_dir + 2 + l_file - 2, "h" );
         h_file = CreateFile( file_h, GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0 );
         if( h_file != INVALID_HANDLE_VALUE )
         {   FILETIME file_time;
@@ -1443,19 +1443,19 @@ E_main_I_find_file_I_modules_2( WIN32_FIND_DATA *found_file
     if(( found_file->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )
     && found_file->cFileName[0] != '.'
     )
-    {   unsigned long l_dir = E_main_I_strlen( found_file->cFileName );
+    {   unsigned long l_dir = E_main_Q_s_R_strlen( found_file->cFileName );
         data->found_dir = HeapAlloc( E_main_S_process_heap, 0, l_dir + 1 );
         Vv( data->found_dir, "Unable to allocate" )
             return 1;
-        E_main_I_strcpy( data->found_dir, found_file->cFileName );
+        E_main_Q_s0_I_strcpy( data->found_dir, found_file->cFileName );
         char *file_mask = HeapAlloc( E_main_S_process_heap, 0, 10 + l_dir + 5 + 1 );
         Vv( file_mask, "Unable to allocate" )
         {   HeapFree( E_main_S_process_heap, 0, data->found_dir );
             return 1;
         }
-        E_main_I_strcpy( file_mask, "..\\module\\" );
-        E_main_I_strcpy( file_mask + 10, found_file->cFileName );
-        E_main_I_strcpy( file_mask + 10 + l_dir, "\\*.cx" );
+        E_main_Q_s0_I_strcpy( file_mask, "..\\module\\" );
+        E_main_Q_s0_I_strcpy( file_mask + 10, found_file->cFileName );
+        E_main_Q_s0_I_strcpy( file_mask + 10 + l_dir, "\\*.cx" );
         ret = E_main_I_find_file( file_mask, ( E_main_I_find_file_Z_proc )E_main_I_find_file_I_module_2, data );
         HeapFree( E_main_S_process_heap, 0, file_mask );
         HeapFree( E_main_S_process_heap, 0, data->found_dir );
@@ -1468,7 +1468,7 @@ E_main_I_build_I_to_libs( struct E_main_Z_build_resources *data
     if( data->xyi_array_a_n )
     {   for( unsigned long i = 0; i != data->xyi_array_a_n; i++ )
              for( unsigned long j = 0; j != data->xyi_array_b_n; j++ )
-                  if( !E_main_I_strcmp( data->xyi_array_a[i], data->xyi_array_b[j] ))
+                  if( !E_main_Q_s0_s0_I_strcmp( data->xyi_array_a[i], data->xyi_array_b[j] ))
                   {   HeapFree( E_main_S_process_heap, 0, data->xyi_array_a[i] );
                       data->xyi_array_a[i] = 0;
                       break;
@@ -1480,11 +1480,11 @@ E_main_I_build_I_to_libs( struct E_main_Z_build_resources *data
         if( i == data->xyi_array_a_n )
             data->xyi_array_a_n = 0;
         else
-        {   unsigned long l = E_main_I_strlen( data->xyi_array_a[i] );
+        {   unsigned long l = E_main_Q_s_R_strlen( data->xyi_array_a[i] );
             l_added += 18 + l + 50 + 4;
-            char *s = E_main_I_strstr( data->file_h_to_libs_buffer, "enum\r\n{ _F_uid( " ) + 6;
+            char *s = E_main_Q_s0_I_strstr( data->file_h_to_libs_buffer, "enum\r\n{ _F_uid( " ) + 6;
             do
-            {   s = E_main_I_strstr( s + 10, "\r\n" ) + 2;
+            {   s = E_main_Q_s0_I_strstr( s + 10, "\r\n" ) + 2;
                 if( s - data->file_h_to_libs_buffer == data->file_h_to_libs_buffer_size
                 || *s != ','
                 )
@@ -1492,12 +1492,12 @@ E_main_I_build_I_to_libs( struct E_main_Z_build_resources *data
             }while(TRUE);
             for( i++; i != data->xyi_array_a_n; i++ )
                 if( data->xyi_array_a[i] )
-                    l_added += 12 + E_main_I_strlen( data->xyi_array_a[i] ) + 3;
+                    l_added += 12 + E_main_Q_s_R_strlen( data->xyi_array_a[i] ) + 3;
         }
     }
-    char *s = E_main_I_strstr( data->file_h_to_libs_buffer, "enum\r\n{ _F_uid( " ) + 6;
+    char *s = E_main_Q_s0_I_strstr( data->file_h_to_libs_buffer, "enum\r\n{ _F_uid( " ) + 6;
     do
-    {   s = E_main_I_strstr( s + 10, "\r\n" ) + 2;
+    {   s = E_main_Q_s0_I_strstr( s + 10, "\r\n" ) + 2;
         if( s - data->file_h_to_libs_buffer == data->file_h_to_libs_buffer_size
         || *s != ','
         )
@@ -1518,20 +1518,20 @@ E_main_I_build_I_to_libs( struct E_main_Z_build_resources *data
         for( i = 0; i != data->xyi_array_a_n; i++ )
             if( data->xyi_array_a[i] )
                 break;
-        unsigned long l = E_main_I_strlen( data->xyi_array_a[i] );
+        unsigned long l = E_main_Q_s_R_strlen( data->xyi_array_a[i] );
         MoveMemory( s + l_added, s, data->file_h_to_libs_buffer_size - ( s - data->file_h_to_libs_buffer ));
         data->file_h_to_libs_buffer_size += l_added;
-        E_main_I_strcpy( s, "enum\r\n{ _XhYi_uid(" );
-        E_main_I_strcpy( s + 18, data->xyi_array_a[i] );
+        E_main_Q_s0_I_strcpy( s, "enum\r\n{ _XhYi_uid(" );
+        E_main_Q_s0_I_strcpy( s + 18, data->xyi_array_a[i] );
         CopyMemory( s + 18 + l, ") = _F_uid_v( ~0 << ( sizeof(int) * 8 / 2 - 1 ))\r\n", 50 );
         s += 18 + l + 50;
         for( i++; i != data->xyi_array_a_n; i++ )
         {   if( !data->xyi_array_a[i] )
                 continue; 
-            E_main_I_strcpy( s, ", _XhYi_uid(" );
-            E_main_I_strcpy( s + 12, data->xyi_array_a[i] );
-            unsigned long l = E_main_I_strlen( data->xyi_array_a[i] );
-            E_main_I_strcpy( s + 12 + l, ")\r\n" );
+            E_main_Q_s0_I_strcpy( s, ", _XhYi_uid(" );
+            E_main_Q_s0_I_strcpy( s + 12, data->xyi_array_a[i] );
+            unsigned long l = E_main_Q_s_R_strlen( data->xyi_array_a[i] );
+            E_main_Q_s0_I_strcpy( s + 12 + l, ")\r\n" );
             s += 12 + l + 3;
         }
         CopyMemory( s, "};\r\n", 4 );
@@ -1553,12 +1553,12 @@ E_main_I_build_I_to_libs( struct E_main_Z_build_resources *data
 int
 E_main_I_build_program_I_not_to_libs( struct E_main_Z_build_resources *data
 ){  if( data->file_h_not_to_libs_buffer_size != data->file_h_to_libs_buffer_size )
-    {   unsigned long l_file_mask = E_main_I_strlen( data->found_dir );
+    {   unsigned long l_file_mask = E_main_Q_s_R_strlen( data->found_dir );
         char *file_h_not_to_libs = HeapAlloc( E_main_S_process_heap, 0, l_file_mask - 1 + 23 + 1 );
         Vv( file_h_not_to_libs, "Unable to allocate" )
             return 1;
         CopyMemory( file_h_not_to_libs, data->found_dir, l_file_mask - 1 );
-        E_main_I_strcpy( file_h_not_to_libs + l_file_mask - 1, "E_cplus_S_not_to_libs.h" );
+        E_main_Q_s0_I_strcpy( file_h_not_to_libs + l_file_mask - 1, "E_cplus_S_not_to_libs.h" );
         HANDLE h_file_h_not_to_libs = CreateFile( file_h_not_to_libs, GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0 );
         V( h_file_h_not_to_libs != INVALID_HANDLE_VALUE, "Unable to create file" )
         {   HeapFree( E_main_S_process_heap, 0, file_h_not_to_libs );
@@ -1584,7 +1584,7 @@ E_main_I_find_file_I_program( WIN32_FIND_DATA *found_file
     char *file, *enc;
     HANDLE h_file_cx, h_file;
     if( found_file->cFileName[0] != '.' )
-    {   unsigned long l_file_mask = E_main_I_strlen( data->found_dir );
+    {   unsigned long l_file_mask = E_main_Q_s_R_strlen( data->found_dir );
         if( found_file->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )
         {   unsigned long file_h_not_to_libs_buffer_size = data->file_h_not_to_libs_buffer_size;
             char *file_h_not_to_libs_buffer = data->file_h_not_to_libs_buffer;
@@ -1593,13 +1593,13 @@ E_main_I_find_file_I_program( WIN32_FIND_DATA *found_file
             Vv( data->file_h_not_to_libs_buffer, "Unable to allocate" )
                 return 1;
             CopyMemory( data->file_h_not_to_libs_buffer, data->file_h_to_libs_buffer, data->file_h_to_libs_buffer_size );
-            unsigned long l_dir = E_main_I_strlen( found_file->cFileName );
+            unsigned long l_dir = E_main_Q_s_R_strlen( found_file->cFileName );
             char *file_mask = HeapAlloc( E_main_S_process_heap, 0, l_file_mask - 1 + l_dir + 2 + 1 );
             Vv( file_mask, "Unable to allocate" )
                 return 1;
             CopyMemory( file_mask, data->found_dir, l_file_mask - 1 );
-            E_main_I_strcpy( file_mask + l_file_mask - 1, found_file->cFileName );
-            E_main_I_strcpy( file_mask + l_file_mask - 1 + l_dir, "\\*" );
+            E_main_Q_s0_I_strcpy( file_mask + l_file_mask - 1, found_file->cFileName );
+            E_main_Q_s0_I_strcpy( file_mask + l_file_mask - 1 + l_dir, "\\*" );
             char *found_dir = data->found_dir;
             data->found_dir = file_mask;
             ret = E_main_I_find_file( file_mask, ( E_main_I_find_file_Z_proc )E_main_I_find_file_I_program, data );
@@ -1611,15 +1611,15 @@ E_main_I_find_file_I_program( WIN32_FIND_DATA *found_file
             HeapFree( E_main_S_process_heap, 0, data->file_h_not_to_libs_buffer );
             data->file_h_not_to_libs_buffer = file_h_not_to_libs_buffer;
         }else
-        {   unsigned long l_file = E_main_I_strlen( found_file->cFileName );
+        {   unsigned long l_file = E_main_Q_s_R_strlen( found_file->cFileName );
             if( l_file > 3
-            && !E_main_I_strcmp( found_file->cFileName + l_file - 3, ".cx" )
+            && !E_main_Q_s0_s0_I_strcmp( found_file->cFileName + l_file - 3, ".cx" )
             )
             {   file = HeapAlloc( E_main_S_process_heap, 0, l_file_mask - 1 + l_file + 1 );
                 Vv( file, "Unable to allocate" )
                     return 1;
                 CopyMemory( file, data->found_dir, l_file_mask - 1 );
-                E_main_I_strcpy( file + l_file_mask - 1, found_file->cFileName );
+                E_main_Q_s0_I_strcpy( file + l_file_mask - 1, found_file->cFileName );
                 h_file_cx = CreateFile( file, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0 );
                 V( h_file_cx != INVALID_HANDLE_VALUE, "Unable to open file" )
                    goto Err_1;
@@ -1657,30 +1657,30 @@ Cont_1:         CloseHandle( h_file );
                 data->file_h_not_to_libs_buffer = file_h_not_to_libs_buffer_;
                 MoveMemory( data->file_h_not_to_libs_buffer + l_added, data->file_h_not_to_libs_buffer, data->file_h_not_to_libs_buffer_size );
                 data->file_h_not_to_libs_buffer_size += l_added;
-                E_main_I_strcpy( data->file_h_not_to_libs_buffer, "#include \"E_cplus_S_0_" );
+                E_main_Q_s0_I_strcpy( data->file_h_not_to_libs_buffer, "#include \"E_cplus_S_0_" );
                 CopyMemory( data->file_h_not_to_libs_buffer + 22, found_file->cFileName, l_file - 2 );
                 CopyMemory( data->file_h_not_to_libs_buffer + 22 + l_file - 2, "h\"\r\n", 4 );
                 enc = E_main_Q_filename_I_encode( found_file->cFileName );
                 if( !enc )
                     goto Err_3;
-                unsigned long pos = E_main_I_strstr( data->file_h_not_to_libs_buffer, "#include \"E_cplus_S_language.h\"\r\n" ) + 33 - data->file_h_not_to_libs_buffer;
-                unsigned long l_enc = E_main_I_strlen(enc);
+                unsigned long pos = E_main_Q_s0_I_strstr( data->file_h_not_to_libs_buffer, "#include \"E_cplus_S_language.h\"\r\n" ) + 33 - data->file_h_not_to_libs_buffer;
+                unsigned long l_enc = E_main_Q_s_R_strlen(enc);
                 l_added = 10 + l_enc + 4;
                 file_h_not_to_libs_buffer_ = HeapReAlloc( E_main_S_process_heap, 0, data->file_h_not_to_libs_buffer, data->file_h_not_to_libs_buffer_size + l_added );
                 Vv( file_h_not_to_libs_buffer_, "Unable to reallocate" )
                     goto Err_3;
                 data->file_h_not_to_libs_buffer = file_h_not_to_libs_buffer_;
-                char *s = E_main_I_strstr( data->file_h_not_to_libs_buffer + pos + 15, "\r\n" ) + 2;
+                char *s = E_main_Q_s0_I_strstr( data->file_h_not_to_libs_buffer + pos + 15, "\r\n" ) + 2;
                 MoveMemory( s + l_added, s, data->file_h_not_to_libs_buffer_size - ( s - data->file_h_not_to_libs_buffer ));
-                E_main_I_strcpy( s, ", _F_uid( " );
-                E_main_I_strcpy( s + 10, enc );
+                E_main_Q_s0_I_strcpy( s, ", _F_uid( " );
+                E_main_Q_s0_I_strcpy( s + 10, enc );
                 CopyMemory( s + 10 + l_enc, " )\r\n", 4 );
                 s += 10 + l_enc + 4 - 2;
                 data->file_h_not_to_libs_buffer_size += l_added;
                 do
-                {   s = E_main_I_strstr( s, "\r\n" ) + 2;
+                {   s = E_main_Q_s0_I_strstr( s, "\r\n" ) + 2;
                     if( s - data->file_h_not_to_libs_buffer == data->file_h_not_to_libs_buffer_size
-                    || !E_main_I_strncmp( s, "#include \"E_cplus_S_1_", 22 )
+                    || !E_main_Q_s0_s0_I_strncmp( s, "#include \"E_cplus_S_1_", 22 )
                     )
                         break;
                 }while(TRUE);
@@ -1692,14 +1692,14 @@ Cont_1:         CloseHandle( h_file );
                 data->file_h_not_to_libs_buffer = file_h_not_to_libs_buffer_;
                 MoveMemory( s + l_added, s, data->file_h_not_to_libs_buffer_size - ( s - data->file_h_not_to_libs_buffer ));
                 data->file_h_not_to_libs_buffer_size += l_added;
-                E_main_I_strcpy( s, "#include \"E_cplus_S_1_" );
+                E_main_Q_s0_I_strcpy( s, "#include \"E_cplus_S_1_" );
                 CopyMemory( s + 22, found_file->cFileName, l_file - 2 );
                 CopyMemory( s + 22 + l_file - 2, "h\"\r\n", 4 );
                 s += 22 + l_file - 2 + 4 - 1;
                 do
-                {   s = E_main_I_strstr( s, "\r\n" ) + 2;
+                {   s = E_main_Q_s0_I_strstr( s, "\r\n" ) + 2;
                     if( s - data->file_h_not_to_libs_buffer == data->file_h_not_to_libs_buffer_size
-                    || E_main_I_strncmp( s, "#include \"E_cplus_S_1_", 22 )
+                    || E_main_Q_s0_s0_I_strncmp( s, "#include \"E_cplus_S_1_", 22 )
                     )
                         break;
                 }while(TRUE);
@@ -1710,16 +1710,16 @@ Cont_1:         CloseHandle( h_file );
                 data->file_h_not_to_libs_buffer = file_h_not_to_libs_buffer_;
                 MoveMemory( s + l_added, s, data->file_h_not_to_libs_buffer_size - ( s - data->file_h_not_to_libs_buffer ));
                 data->file_h_not_to_libs_buffer_size += l_added;
-                E_main_I_strcpy( s, "#include \"E_cplus_S_2_" );
+                E_main_Q_s0_I_strcpy( s, "#include \"E_cplus_S_2_" );
                 CopyMemory( s + 22, found_file->cFileName, l_file - 2 );
                 CopyMemory( s + 22 + l_file - 2, "h\"\r\n", 4 );
                 char *file_ = HeapReAlloc( E_main_S_process_heap, 0, file, l_file_mask - 1 + 12 + l_file - 2 + 1 + 1 );
                 Vv( file_, "Unable to reallocate" )
                     goto Err_3;
                 file = file_;
-                E_main_I_strcpy( file + l_file_mask - 1, "E_cplus_S_1_" );
+                E_main_Q_s0_I_strcpy( file + l_file_mask - 1, "E_cplus_S_1_" );
                 CopyMemory( file + l_file_mask - 1 + 12, found_file->cFileName, l_file - 2 );
-                E_main_I_strcpy( file + l_file_mask - 1 + 12 + l_file - 2, "h" );
+                E_main_Q_s0_I_strcpy( file + l_file_mask - 1 + 12 + l_file - 2, "h" );
                 h_file = CreateFile( file, GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0 );
                 if( h_file != INVALID_HANDLE_VALUE )
                 {   FILETIME file_time;
@@ -1793,13 +1793,13 @@ E_main_I_find_file_I_programs( WIN32_FIND_DATA *found_file
     if(( found_file->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )
     && found_file->cFileName[0] != '.'
     )
-    {   unsigned long l_dir = E_main_I_strlen( found_file->cFileName );
+    {   unsigned long l_dir = E_main_Q_s_R_strlen( found_file->cFileName );
         char *file_h_not_to_libs = HeapAlloc( E_main_S_process_heap, 0, 11 + l_dir + 24 + 1 );
         Vv( file_h_not_to_libs, "Unable to allocate" )
             return 1;
-        E_main_I_strcpy( file_h_not_to_libs, "..\\program\\" );
-        E_main_I_strcpy( file_h_not_to_libs + 11, found_file->cFileName );
-        E_main_I_strcpy( file_h_not_to_libs + 11 + l_dir, "\\E_cplus_S_not_to_libs.h" );
+        E_main_Q_s0_I_strcpy( file_h_not_to_libs, "..\\program\\" );
+        E_main_Q_s0_I_strcpy( file_h_not_to_libs + 11, found_file->cFileName );
+        E_main_Q_s0_I_strcpy( file_h_not_to_libs + 11 + l_dir, "\\E_cplus_S_not_to_libs.h" );
         DeleteFile( file_h_not_to_libs );
         HeapFree( E_main_S_process_heap, 0, file_h_not_to_libs );
         data->file_h_not_to_libs_buffer_size = data->file_h_to_libs_buffer_size;
@@ -1808,9 +1808,9 @@ E_main_I_find_file_I_programs( WIN32_FIND_DATA *found_file
             return 1;
         CopyMemory( data->file_h_not_to_libs_buffer, data->file_h_to_libs_buffer, data->file_h_to_libs_buffer_size );
         char *file_mask = HeapAlloc( E_main_S_process_heap, 0, 11 + l_dir + 2 + 1 );
-        E_main_I_strcpy( file_mask, "..\\program\\" );
-        E_main_I_strcpy( file_mask + 11, found_file->cFileName );
-        E_main_I_strcpy( file_mask + 11 + l_dir, "\\*" );
+        E_main_Q_s0_I_strcpy( file_mask, "..\\program\\" );
+        E_main_Q_s0_I_strcpy( file_mask + 11, found_file->cFileName );
+        E_main_Q_s0_I_strcpy( file_mask + 11 + l_dir, "\\*" );
         data->found_dir = file_mask;
         ret = E_main_I_find_file( file_mask, ( E_main_I_find_file_Z_proc )E_main_I_find_file_I_program, data );
         HeapFree( E_main_S_process_heap, 0, file_mask );
@@ -1836,13 +1836,13 @@ int
 E_main_I_find_file_I_clean_module( WIN32_FIND_DATA *found_file
 , struct E_main_Z_build_resources *data
 ){  if( !( found_file->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY ))
-    {   unsigned long l_dir = E_main_I_strlen( data->found_dir );
-        unsigned long l_file = E_main_I_strlen( found_file->cFileName );
+    {   unsigned long l_dir = E_main_Q_s_R_strlen( data->found_dir );
+        unsigned long l_file = E_main_Q_s_R_strlen( found_file->cFileName );
         char *file = HeapAlloc( E_main_S_process_heap, 0, 10 + l_dir + 1 + l_file - 1 + 1 );
         Vv( file, "Unable to allocate" )
             return 1;
-        E_main_I_strcpy( file, "..\\module\\" );
-        E_main_I_strcpy( file + 10, data->found_dir );
+        E_main_Q_s0_I_strcpy( file, "..\\module\\" );
+        E_main_Q_s0_I_strcpy( file + 10, data->found_dir );
         file[ 10 + l_dir ] = '\\';
         CopyMemory( file + 10 + l_dir + 1, found_file->cFileName, l_file - 1 );
         file[ 10 + l_dir + 1 + l_file - 1 ] = '\0';
@@ -1854,11 +1854,11 @@ E_main_I_find_file_I_clean_module( WIN32_FIND_DATA *found_file
             return 1;
         }
         file = file_;
-        E_main_I_strcpy( file + 10 + l_dir + 1, "E_cplus_S_0_" );
-        E_main_I_strcpy( file + 10 + l_dir + 1 + 12, data->found_dir );
-        E_main_I_strcpy( file + 10 + l_dir + 1 + 12 + l_dir, "__" );
+        E_main_Q_s0_I_strcpy( file + 10 + l_dir + 1, "E_cplus_S_0_" );
+        E_main_Q_s0_I_strcpy( file + 10 + l_dir + 1 + 12, data->found_dir );
+        E_main_Q_s0_I_strcpy( file + 10 + l_dir + 1 + 12 + l_dir, "__" );
         CopyMemory( file + 10 + l_dir + 1 + 12 + l_dir + 2, found_file->cFileName, l_file - 2 );
-        E_main_I_strcpy( file + 10 + l_dir + 1 + 12 + l_dir + 2 + l_file - 2, "h" );
+        E_main_Q_s0_I_strcpy( file + 10 + l_dir + 1 + 12 + l_dir + 2 + l_file - 2, "h" );
         printf( "Removing file \"%s\"...\n", file );
         DeleteFile(file);
         file[ 10 + l_dir + 1 + 10 ] = '1';
@@ -1878,11 +1878,11 @@ E_main_I_find_file_I_clean_modules( WIN32_FIND_DATA *found_file
     if(( found_file->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )
     && found_file->cFileName[0] != '.'
     )
-    {   unsigned long l_dir = E_main_I_strlen( found_file->cFileName );
+    {   unsigned long l_dir = E_main_Q_s_R_strlen( found_file->cFileName );
         char *file_mask = HeapAlloc( E_main_S_process_heap, 0, 10 + l_dir + 5 + 1 );
-        E_main_I_strcpy( file_mask, "..\\module\\" );
-        E_main_I_strcpy( file_mask + 10, found_file->cFileName );
-        E_main_I_strcpy( file_mask + 10 + l_dir, "\\*.cx" );
+        E_main_Q_s0_I_strcpy( file_mask, "..\\module\\" );
+        E_main_Q_s0_I_strcpy( file_mask + 10, found_file->cFileName );
+        E_main_Q_s0_I_strcpy( file_mask + 10 + l_dir, "\\*.cx" );
         data->found_dir = found_file->cFileName;
         ret = E_main_I_find_file( file_mask, ( E_main_I_find_file_Z_proc )E_main_I_find_file_I_clean_module, data );
     }
@@ -1893,32 +1893,32 @@ E_main_I_find_file_I_clean_program( WIN32_FIND_DATA *found_file
 , struct E_main_Z_build_resources *data
 ){  int ret = 0;
     if( found_file->cFileName[0] != '.' )
-    {   unsigned long l_file_mask = E_main_I_strlen( data->found_dir );
+    {   unsigned long l_file_mask = E_main_Q_s_R_strlen( data->found_dir );
         if( found_file->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )
         {   char *file = HeapAlloc( E_main_S_process_heap, 0, l_file_mask - 1 + 23 + 1 );
             Vv( file, "Unable to allocate" )
                 return 1;
             CopyMemory( file, data->found_dir, l_file_mask - 1 );
-            E_main_I_strcpy( file + l_file_mask - 1, "E_cplus_S_not_to_libs.h" );
+            E_main_Q_s0_I_strcpy( file + l_file_mask - 1, "E_cplus_S_not_to_libs.h" );
             printf( "Removing file \"%s\"...\n", file );
             DeleteFile(file);
             HeapFree( E_main_S_process_heap, 0, file );
-            unsigned long l_dir = E_main_I_strlen( found_file->cFileName );
+            unsigned long l_dir = E_main_Q_s_R_strlen( found_file->cFileName );
             char *file_mask = HeapAlloc( E_main_S_process_heap, 0, l_file_mask - 1 + l_dir + 2 + 1 );
             CopyMemory( file_mask, data->found_dir, l_file_mask - 1 );
-            E_main_I_strcpy( file_mask + l_file_mask - 1, found_file->cFileName );
-            E_main_I_strcpy( file_mask + l_file_mask - 1 + l_dir, "\\*" );
+            E_main_Q_s0_I_strcpy( file_mask + l_file_mask - 1, found_file->cFileName );
+            E_main_Q_s0_I_strcpy( file_mask + l_file_mask - 1 + l_dir, "\\*" );
             char *found_dir = data->found_dir;
             data->found_dir = file_mask;
             ret = E_main_I_find_file( file_mask, ( E_main_I_find_file_Z_proc )E_main_I_find_file_I_clean_program, data );
             data->found_dir = found_dir;
             HeapFree( E_main_S_process_heap, 0, file_mask );
         }else
-        {   unsigned long l_file = E_main_I_strlen( found_file->cFileName );
+        {   unsigned long l_file = E_main_Q_s_R_strlen( found_file->cFileName );
             if( l_file > 3
-            && !E_main_I_strcmp( found_file->cFileName + l_file - 3, ".cx" )
+            && !E_main_Q_s0_s0_I_strcmp( found_file->cFileName + l_file - 3, ".cx" )
             )
-            {   unsigned long l_file = E_main_I_strlen( found_file->cFileName );
+            {   unsigned long l_file = E_main_Q_s_R_strlen( found_file->cFileName );
                 char *file = HeapAlloc( E_main_S_process_heap, 0, l_file_mask - 1 + l_file + 1 );
                 Vv( file, "Unable to allocate" )
                     return 1;
@@ -1933,9 +1933,9 @@ E_main_I_find_file_I_clean_program( WIN32_FIND_DATA *found_file
                     return 1;
                 }
                 file = file_;
-                E_main_I_strcpy( file + l_file_mask - 1 , "E_cplus_S_0_" );
+                E_main_Q_s0_I_strcpy( file + l_file_mask - 1 , "E_cplus_S_0_" );
                 CopyMemory( file + l_file_mask - 1 + 12, found_file->cFileName, l_file - 2 );
-                E_main_I_strcpy( file + l_file_mask - 1 + 12 + l_file - 2, "h" );
+                E_main_Q_s0_I_strcpy( file + l_file_mask - 1 + 12 + l_file - 2, "h" );
                 printf( "Removing file \"%s\"...\n", file );
                 DeleteFile(file);
                 file[ l_file_mask - 1 + 10 ] = '1';
@@ -1957,13 +1957,13 @@ E_main_I_find_file_I_clean_programs( WIN32_FIND_DATA *found_file
     if(( found_file->dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY )
     && found_file->cFileName[0] != '.'
     )
-    {   unsigned long l_dir = E_main_I_strlen( found_file->cFileName );
+    {   unsigned long l_dir = E_main_Q_s_R_strlen( found_file->cFileName );
         char *file = HeapAlloc( E_main_S_process_heap, 0, 11 + l_dir + 24 + 1 );
         Vv( file, "Unable to allocate" )
             return 1;
-        E_main_I_strcpy( file, "..\\program\\" );
-        E_main_I_strcpy( file + 11, found_file->cFileName );
-        E_main_I_strcpy( file + 11 + l_dir, "\\E_cplus_S_not_to_libs.h" );
+        E_main_Q_s0_I_strcpy( file, "..\\program\\" );
+        E_main_Q_s0_I_strcpy( file + 11, found_file->cFileName );
+        E_main_Q_s0_I_strcpy( file + 11 + l_dir, "\\E_cplus_S_not_to_libs.h" );
         printf( "Removing file \"%s\"...\n", file );
         DeleteFile(file);
         char *file_mask = HeapReAlloc( E_main_S_process_heap, 0, file, 11 + l_dir + 1 + 1 + 1 );
@@ -1972,7 +1972,7 @@ E_main_I_find_file_I_clean_programs( WIN32_FIND_DATA *found_file
             return 1;
         }
         data->found_dir = file_mask;
-        E_main_I_strcpy( file_mask + 11 + l_dir + 1, "*" );
+        E_main_Q_s0_I_strcpy( file_mask + 11 + l_dir + 1, "*" );
         ret = E_main_I_find_file( file_mask, ( E_main_I_find_file_Z_proc )E_main_I_find_file_I_clean_program, data );
         HeapFree( E_main_S_process_heap, 0, file_mask );
     }
@@ -2001,11 +2001,11 @@ main( int argc
     enum E_main_Z_func func;
     if( argc == 1 )
         func = E_main_Z_func_S_build;
-    else if( E_main_I_strcmp( argv[1], "all" ) == 0
-    || E_main_I_strcmp( argv[1], "build" ) == 0
+    else if( E_main_Q_s0_s0_I_strcmp( argv[1], "all" ) == 0
+    || E_main_Q_s0_s0_I_strcmp( argv[1], "build" ) == 0
     )
         func = E_main_Z_func_S_build;
-    else if( E_main_I_strcmp( argv[1], "clean" ) == 0 )
+    else if( E_main_Q_s0_s0_I_strcmp( argv[1], "clean" ) == 0 )
         func = E_main_Z_func_S_clean;
     else
     {   fputs( "Invalid command.", stderr );
