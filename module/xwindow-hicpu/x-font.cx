@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
-*   ---   â€ŸX windowâ€ â€”high â€˜cpuâ€™
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
+*   ---   "X window” —high ‘cpu’
 *         bitmap font manager
-* Â©overcq                on â€ŸGentoo Linux 17.1â€ â€œx86_64â€            2019â€’11â€’23 V
+* ©overcq                on "Gentoo Linux 17.1” “x86_64”            2019-11-23 V
 *******************************************************************************/
 struct E_x_Q_font_Z
 { Pc name;

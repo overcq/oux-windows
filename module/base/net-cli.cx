@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   base
 *         network client connection
-* Â©overcq                on â€ŸGentoo Linux 17.1â€ â€œx86_64â€             2021â€’10â€’4 N
+* ©overcq                on "Gentoo Linux 17.1” “x86_64”             2021-10-4 N
 *******************************************************************************/
 #define S_keepalive_timeout     5
 #define S_system_idle_time      0
@@ -264,7 +264,7 @@ Cont:   ai_1 = ai_1->ai_next;
         E_net_http2_S_connect_n++;
         E_net_http2_S_connect[ E_net_http2_S_connect_n - 1 ].ssl = ssl;
         E_net_http2_S_connect[ E_net_http2_S_connect_n - 1 ].connect_sock = fd;
-        E_net_http2_S_connect[ E_net_http2_S_connect_n - 1 ].hostname = hostname; //NDFN Nie wiadomo, skÄ…d pochodzi, ale na razie tak.
+        E_net_http2_S_connect[ E_net_http2_S_connect_n - 1 ].hostname = hostname; //NDFN Nie wiadomo, sk¹d pochodzi, ale na razie tak.
         E_net_http2_S_connect[ E_net_http2_S_connect_n - 1 ].buf_l = 0;
         E_net_http2_S_connect[ E_net_http2_S_connect_n - 1 ].send_dynamic_table_size_max = 4096; //CONF
         E_net_http2_S_connect[ E_net_http2_S_connect_n - 1 ].send_dynamic_table_size_max_hit = no;
@@ -456,7 +456,7 @@ Cont:   ai_1 = ai_1->ai_next;
     E_net_http_S_connect_n++;
     E_net_http_S_connect[ E_net_http_S_connect_n - 1 ].ssl = ssl;
     E_net_http_S_connect[ E_net_http_S_connect_n - 1 ].connect_sock = fd;
-    E_net_http_S_connect[ E_net_http_S_connect_n - 1 ].hostname = hostname; //NDFN Nie wiadomo, skÄ…d pochodzi, ale na razie tak.
+    E_net_http_S_connect[ E_net_http_S_connect_n - 1 ].hostname = hostname; //NDFN Nie wiadomo, sk¹d pochodzi, ale na razie tak.
     E_net_http_S_connect[ E_net_http_S_connect_n - 1 ].buf_l = 0;
     E_net_http_S_connect[ E_net_http_S_connect_n - 1 ].recv_frame_size_max = 64 * 1024; //CONF
     E_net_http_S_connect[ E_net_http_S_connect_n - 1 ].send_frame_size_max = 16384; //CONF
@@ -802,7 +802,7 @@ End_1:      if( E_net_http_S_connect[i].ssl )
             if( !E_mem_Q_blk_I_remove( &E_net_http_S_connect, i, 1 ))
                 V();
             E_net_http_S_connect_n--;
-            G_(); Gd(i); Gs0_( "koniec poÅ‚Ä…czenia" );
+            G_(); Gd(i); Gs0_( "koniec po³¹czenia" );
             i--;
         }
         for_n_( i, E_net_http2_S_connect_n )
@@ -1342,7 +1342,7 @@ End2_1:     ;
             if( !E_mem_Q_blk_I_remove( &E_net_http2_S_connect, i, 1 ))
                 V();
             E_net_http2_S_connect_n--;
-            G_(); Gd(i); Gs0_( "koniec poÅ‚Ä…czenia HTTP/2" );
+            G_(); Gd(i); Gs0_( "koniec po³¹czenia HTTP/2" );
             i--;
         }
     }

@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
-*   ---   â€ŸX windowâ€ â€”high â€˜cpuâ€™
-*         tworzenie â€¹moduÅ‚uâ€º przy rozpoczÄ™ciu programu
-* Â©overcq                on â€ŸGentoo Linux 17.0â€ â€œx86_64â€             2018â€’12â€’7 T
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
+*   ---   "X window” —high ‘cpu’
+*         tworzenie ‹modu³u› przy rozpoczêciu programu
+* ©overcq                on "Gentoo Linux 17.0” “x86_64”             2018-12-7 T
 *******************************************************************************/
 void
 E_x_M( void
@@ -92,7 +92,7 @@ E_x_M_font( void
               })[0];
               break;
           case 2:
-              font->bitmap[i].u = L'Ä„';
+              font->bitmap[i].u = L'¥';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 0, 3, 3, 0
@@ -134,7 +134,7 @@ E_x_M_font( void
               })[0];
               break;
           case 5:
-              font->bitmap[i].u = L'Ä†';
+              font->bitmap[i].u = L'Æ';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 1, 3, 3, 3
@@ -176,7 +176,7 @@ E_x_M_font( void
               })[0];
               break;
           case 8:
-              font->bitmap[i].u = L'Ä˜';
+              font->bitmap[i].u = L'Ê';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 3, 3, 3, 3
@@ -288,7 +288,7 @@ E_x_M_font( void
               })[0];
               break;
           case 16:
-              font->bitmap[i].u = L'Å';
+              font->bitmap[i].u = L'£';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 3, 0, 0
@@ -330,7 +330,7 @@ E_x_M_font( void
               })[0];
               break;
           case 19:
-              font->bitmap[i].u = L'Åƒ';
+              font->bitmap[i].u = L'Ñ';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 3, 0, 3, 2
@@ -358,7 +358,7 @@ E_x_M_font( void
               })[0];
               break;
           case 21:
-              font->bitmap[i].u = L'Ã“';
+              font->bitmap[i].u = L'Ó';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 1, 3, 3, 1
@@ -428,7 +428,7 @@ E_x_M_font( void
               })[0];
               break;
           case 26:
-              font->bitmap[i].u = L'Åš';
+              font->bitmap[i].u = L'Œ';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 1, 3, 3, 2
@@ -540,7 +540,7 @@ E_x_M_font( void
               })[0];
               break;
           case 34:
-              font->bitmap[i].u = L'Å¹';
+              font->bitmap[i].u = L'';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 3, 3, 3, 3
@@ -554,7 +554,7 @@ E_x_M_font( void
               })[0];
               break;
           case 35:
-              font->bitmap[i].u = L'Å»';
+              font->bitmap[i].u = L'¯';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 3, 3, 3, 3
@@ -582,7 +582,7 @@ E_x_M_font( void
               })[0];
               break;
           case 37:
-              font->bitmap[i].u = L'Ä…';
+              font->bitmap[i].u = L'¹';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 0, 0, 0, 0
@@ -624,7 +624,7 @@ E_x_M_font( void
               })[0];
               break;
           case 40:
-              font->bitmap[i].u = L'Ä‡';
+              font->bitmap[i].u = L'æ';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 0, 1, 3
@@ -666,7 +666,7 @@ E_x_M_font( void
               })[0];
               break;
           case 43:
-              font->bitmap[i].u = L'Ä™';
+              font->bitmap[i].u = L'ê';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 0, 0, 0, 0
@@ -778,7 +778,7 @@ E_x_M_font( void
               })[0];
               break;
           case 51:
-              font->bitmap[i].u = L'Å‚';
+              font->bitmap[i].u = L'³';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 0, 3, 0
@@ -820,7 +820,7 @@ E_x_M_font( void
               })[0];
               break;
           case 54:
-              font->bitmap[i].u = L'Å„';
+              font->bitmap[i].u = L'ñ';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 0, 1, 3
@@ -848,7 +848,7 @@ E_x_M_font( void
               })[0];
               break;
           case 56:
-              font->bitmap[i].u = L'Ã³';
+              font->bitmap[i].u = L'ó';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 0, 1, 3
@@ -918,7 +918,7 @@ E_x_M_font( void
               })[0];
               break;
           case 61:
-              font->bitmap[i].u = L'Å›';
+              font->bitmap[i].u = L'œ';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 0, 0, 3
@@ -1030,7 +1030,7 @@ E_x_M_font( void
               })[0];
               break;
           case 69:
-              font->bitmap[i].u = L'Åº';
+              font->bitmap[i].u = L'Ÿ';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 0, 1, 2
@@ -1044,7 +1044,7 @@ E_x_M_font( void
               })[0];
               break;
           case 70:
-              font->bitmap[i].u = L'Å¼';
+              font->bitmap[i].u = L'¿';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 0, 3, 0
@@ -1646,7 +1646,7 @@ E_x_M_font( void
               })[0];
               break;
           case 113:
-              font->bitmap[i].u = L'â€²';
+              font->bitmap[i].u = L'´';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 0, 3
@@ -1660,7 +1660,7 @@ E_x_M_font( void
               })[0];
               break;
           case 114:
-              font->bitmap[i].u = L'âˆ’';
+              font->bitmap[i].u = L'–';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 0, 0, 0
@@ -1674,7 +1674,7 @@ E_x_M_font( void
               })[0];
               break;
           case 115:
-              font->bitmap[i].u = L'Â¡';
+              font->bitmap[i].u = L'!';
               font->bitmap[i].width = 1;
               bitmap = &((N8 [])
               { 0
@@ -1688,7 +1688,7 @@ E_x_M_font( void
               })[0];
               break;
           case 116:
-              font->bitmap[i].u = L'â€½';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 1, 3, 1
@@ -1702,7 +1702,7 @@ E_x_M_font( void
               })[0];
               break;
           case 117:
-              font->bitmap[i].u = L'Â²';
+              font->bitmap[i].u = L'2';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 1, 3, 1
@@ -1716,7 +1716,7 @@ E_x_M_font( void
               })[0];
               break;
           case 118:
-              font->bitmap[i].u = L'âª';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 0, 0, 0, 0, 0
@@ -1730,7 +1730,7 @@ E_x_M_font( void
               })[0];
               break;
           case 119:
-              font->bitmap[i].u = L'Â³';
+              font->bitmap[i].u = L'3';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 2, 3, 2
@@ -1744,7 +1744,7 @@ E_x_M_font( void
               })[0];
               break;
           case 120:
-              font->bitmap[i].u = L'â„–';
+              font->bitmap[i].u = L'No';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 3, 0, 3, 0, 0
@@ -1758,7 +1758,7 @@ E_x_M_font( void
               })[0];
               break;
           case 121:
-              font->bitmap[i].u = L'âŸ';
+              font->bitmap[i].u = L' ';
               font->bitmap[i].width = 1;
               bitmap = &((N8 [])
               { 0
@@ -1772,7 +1772,7 @@ E_x_M_font( void
               })[0];
               break;
           case 122:
-              font->bitmap[i].u = L'â€’';
+              font->bitmap[i].u = L'-';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 0, 0, 0, 0
@@ -1786,7 +1786,7 @@ E_x_M_font( void
               })[0];
               break;
           case 123:
-              font->bitmap[i].u = L'â„';
+              font->bitmap[i].u = L'/';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 0, 0, 0, 2, 3
@@ -1800,7 +1800,7 @@ E_x_M_font( void
               })[0];
               break;
           case 124:
-              font->bitmap[i].u = L'Ã·';
+              font->bitmap[i].u = L'÷';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 0, 0, 0
@@ -1814,7 +1814,7 @@ E_x_M_font( void
               })[0];
               break;
           case 125:
-              font->bitmap[i].u = L'Â°';
+              font->bitmap[i].u = L'°';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 1, 3, 1
@@ -1828,7 +1828,7 @@ E_x_M_font( void
               })[0];
               break;
           case 126:
-              font->bitmap[i].u = L'ã€ƒ';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 0, 0, 0, 0, 0
@@ -1842,7 +1842,7 @@ E_x_M_font( void
               })[0];
               break;
           case 127:
-              font->bitmap[i].u = L'â‡¢';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 0, 0, 0, 0, 0
@@ -1856,7 +1856,7 @@ E_x_M_font( void
               })[0];
               break;
           case 128:
-              font->bitmap[i].u = L'Ã—';
+              font->bitmap[i].u = L'×';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 0, 0, 0, 0
@@ -1870,7 +1870,7 @@ E_x_M_font( void
               })[0];
               break;
           case 129:
-              font->bitmap[i].u = L'â‘';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 1, 3, 1
@@ -1884,7 +1884,7 @@ E_x_M_font( void
               })[0];
               break;
           case 130:
-              font->bitmap[i].u = L'â‚';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 0, 1, 3, 1, 0
@@ -1898,7 +1898,7 @@ E_x_M_font( void
               })[0];
               break;
           case 131:
-              font->bitmap[i].u = L'â€“';
+              font->bitmap[i].u = L'–';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 0, 0, 0, 0
@@ -1912,7 +1912,7 @@ E_x_M_font( void
               })[0];
               break;
           case 132:
-              font->bitmap[i].u = L'â€”';
+              font->bitmap[i].u = L'—';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 0, 0, 0, 0, 0
@@ -1926,7 +1926,7 @@ E_x_M_font( void
               })[0];
               break;
           case 133:
-              font->bitmap[i].u = L'â‰ˆ';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 0, 0, 0, 0
@@ -1940,7 +1940,7 @@ E_x_M_font( void
               })[0];
               break;
           case 134:
-              font->bitmap[i].u = L'Â±';
+              font->bitmap[i].u = L'±';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 0, 0, 0
@@ -1954,7 +1954,7 @@ E_x_M_font( void
               })[0];
               break;
           case 135:
-              font->bitmap[i].u = L'âƒ';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 0, 0
@@ -1968,7 +1968,7 @@ E_x_M_font( void
               })[0];
               break;
           case 136:
-              font->bitmap[i].u = L'â€•';
+              font->bitmap[i].u = L'-';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 0, 0, 0, 0, 0
@@ -1982,7 +1982,7 @@ E_x_M_font( void
               })[0];
               break;
           case 137:
-              font->bitmap[i].u = L'â€£';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 0, 0, 0
@@ -1996,7 +1996,7 @@ E_x_M_font( void
               })[0];
               break;
           case 138:
-              font->bitmap[i].u = L'â€¢';
+              font->bitmap[i].u = L'•';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 0, 0, 0
@@ -2010,7 +2010,7 @@ E_x_M_font( void
               })[0];
               break;
           case 139:
-              font->bitmap[i].u = L'Â®';
+              font->bitmap[i].u = L'®';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 1, 3, 3, 1
@@ -2024,7 +2024,7 @@ E_x_M_font( void
               })[0];
               break;
           case 140:
-              font->bitmap[i].u = L'â„ ';
+              font->bitmap[i].u = L'SM';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 0, 3, 2, 0, 3
@@ -2038,7 +2038,7 @@ E_x_M_font( void
               })[0];
               break;
           case 141:
-              font->bitmap[i].u = L'Â©';
+              font->bitmap[i].u = L'©';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 1, 3, 3, 3, 1
@@ -2052,7 +2052,7 @@ E_x_M_font( void
               })[0];
               break;
           case 142:
-              font->bitmap[i].u = L'â„¢';
+              font->bitmap[i].u = L'™';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 3, 3, 3, 0, 3
@@ -2066,7 +2066,7 @@ E_x_M_font( void
               })[0];
               break;
           case 143:
-              font->bitmap[i].u = L'Âµ';
+              font->bitmap[i].u = L'µ';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 0, 0, 0
@@ -2080,7 +2080,7 @@ E_x_M_font( void
               })[0];
               break;
           case 144:
-              font->bitmap[i].u = L'â›';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 1, 2
@@ -2094,7 +2094,7 @@ E_x_M_font( void
               })[0];
               break;
           case 145:
-              font->bitmap[i].u = L'â';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 1, 2, 1, 2
@@ -2108,7 +2108,7 @@ E_x_M_font( void
               })[0];
               break;
           case 146:
-              font->bitmap[i].u = L'âœ';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 0, 3
@@ -2122,7 +2122,7 @@ E_x_M_font( void
               })[0];
               break;
           case 147:
-              font->bitmap[i].u = L'â';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 0, 3, 0, 3
@@ -2136,7 +2136,7 @@ E_x_M_font( void
               })[0];
               break;
           case 148:
-              font->bitmap[i].u = L'â…';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 3, 3
@@ -2150,7 +2150,7 @@ E_x_M_font( void
               })[0];
               break;
           case 149:
-              font->bitmap[i].u = L'âŒ©';
+              font->bitmap[i].u = L'<';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 0, 3
@@ -2164,7 +2164,7 @@ E_x_M_font( void
               })[0];
               break;
           case 150:
-              font->bitmap[i].u = L'â†';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 3, 3
@@ -2178,7 +2178,7 @@ E_x_M_font( void
               })[0];
               break;
           case 151:
-              font->bitmap[i].u = L'âŒª';
+              font->bitmap[i].u = L'>';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 3, 0
@@ -2192,11 +2192,11 @@ E_x_M_font( void
               })[0];
               break;
           case 152:
-              font->bitmap[i].u = L'â€‰';
+              font->bitmap[i].u = L' ';
               font->bitmap[i].width = 0;
               break;
           case 153:
-              font->bitmap[i].u = L'Â¦';
+              font->bitmap[i].u = L'¦';
               font->bitmap[i].width = 1;
               bitmap = &((N8 [])
               { 3
@@ -2210,7 +2210,7 @@ E_x_M_font( void
               })[0];
               break;
           case 154:
-              font->bitmap[i].u = L'â€';
+              font->bitmap[i].u = L'-';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 0, 0
@@ -2224,7 +2224,7 @@ E_x_M_font( void
               })[0];
               break;
           case 155:
-              font->bitmap[i].u = L'Õš';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 1;
               bitmap = &((N8 [])
               { 3
@@ -2238,7 +2238,7 @@ E_x_M_font( void
               })[0];
               break;
           case 156:
-              font->bitmap[i].u = L'â€›';
+              font->bitmap[i].u = L''';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 3, 0
@@ -2252,7 +2252,7 @@ E_x_M_font( void
               })[0];
               break;
           case 157:
-              font->bitmap[i].u = L'â€Ÿ';
+              font->bitmap[i].u = L'"';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 3, 0, 3, 0
@@ -2266,7 +2266,7 @@ E_x_M_font( void
               })[0];
               break;
           case 158:
-              font->bitmap[i].u = L'â€š';
+              font->bitmap[i].u = L'‚';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 0, 0
@@ -2280,7 +2280,7 @@ E_x_M_font( void
               })[0];
               break;
           case 159:
-              font->bitmap[i].u = L'â€';
+              font->bitmap[i].u = L'„';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 0, 0, 0, 0
@@ -2294,7 +2294,7 @@ E_x_M_font( void
               })[0];
               break;
           case 160:
-              font->bitmap[i].u = L'â€˜';
+              font->bitmap[i].u = L'‘';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 1, 2
@@ -2308,7 +2308,7 @@ E_x_M_font( void
               })[0];
               break;
           case 161:
-              font->bitmap[i].u = L'â€œ';
+              font->bitmap[i].u = L'“';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 1, 2, 1, 2
@@ -2322,7 +2322,7 @@ E_x_M_font( void
               })[0];
               break;
           case 162:
-              font->bitmap[i].u = L'â€™';
+              font->bitmap[i].u = L'’';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 0, 3
@@ -2336,7 +2336,7 @@ E_x_M_font( void
               })[0];
               break;
           case 163:
-              font->bitmap[i].u = L'â€';
+              font->bitmap[i].u = L'”';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 0, 3, 0, 3
@@ -2350,7 +2350,7 @@ E_x_M_font( void
               })[0];
               break;
           case 164:
-              font->bitmap[i].u = L'â';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 0, 0, 0, 3, 3
@@ -2364,7 +2364,7 @@ E_x_M_font( void
               })[0];
               break;
           case 165:
-              font->bitmap[i].u = L'â‹';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 3, 3, 3, 1
@@ -2378,7 +2378,7 @@ E_x_M_font( void
               })[0];
               break;
           case 166:
-              font->bitmap[i].u = L'âœ“';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 0, 0, 0, 0, 3
@@ -2392,7 +2392,7 @@ E_x_M_font( void
               })[0];
               break;
           case 167:
-              font->bitmap[i].u = L'Â·';
+              font->bitmap[i].u = L'·';
               font->bitmap[i].width = 1;
               bitmap = &((N8 [])
               { 0
@@ -2406,7 +2406,7 @@ E_x_M_font( void
               })[0];
               break;
           case 168:
-              font->bitmap[i].u = L'â€¦';
+              font->bitmap[i].u = L'…';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 0, 0, 0, 0, 0
@@ -2420,7 +2420,7 @@ E_x_M_font( void
               })[0];
               break;
           case 169:
-              font->bitmap[i].u = L'â€¹';
+              font->bitmap[i].u = L'‹';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 0, 0
@@ -2434,7 +2434,7 @@ E_x_M_font( void
               })[0];
               break;
           case 170:
-              font->bitmap[i].u = L'Â«';
+              font->bitmap[i].u = L'«';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 0, 0, 0, 0
@@ -2448,7 +2448,7 @@ E_x_M_font( void
               })[0];
               break;
           case 171:
-              font->bitmap[i].u = L'â€º';
+              font->bitmap[i].u = L'›';
               font->bitmap[i].width = 2;
               bitmap = &((N8 [])
               { 0, 0
@@ -2462,7 +2462,7 @@ E_x_M_font( void
               })[0];
               break;
           case 172:
-              font->bitmap[i].u = L'Â»';
+              font->bitmap[i].u = L'»';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 0, 0, 0, 0
@@ -2476,7 +2476,7 @@ E_x_M_font( void
               })[0];
               break;
           case 173:
-              font->bitmap[i].u = L'â€ƒ';
+              font->bitmap[i].u = L' ';
               font->bitmap[i].width = 5;
               bitmap = &((N8 [])
               { 0, 0, 0, 0, 0
@@ -2490,7 +2490,7 @@ E_x_M_font( void
               })[0];
               break;
           case 174:
-              font->bitmap[i].u = L'Â¿';
+              font->bitmap[i].u = L'?';
               font->bitmap[i].width = 3;
               bitmap = &((N8 [])
               { 0, 0, 0
@@ -2504,7 +2504,7 @@ E_x_M_font( void
               })[0];
               break;
           case 175:
-              font->bitmap[i].u = L'â‚¬';
+              font->bitmap[i].u = L'€';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 0, 1, 3, 3
@@ -2518,7 +2518,7 @@ E_x_M_font( void
               })[0];
               break;
           case 176:
-              font->bitmap[i].u = L'Â¢';
+              font->bitmap[i].u = L'c';
               font->bitmap[i].width = 4;
               bitmap = &((N8 [])
               { 0, 0, 2, 0

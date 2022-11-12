@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
-*   ---   â€ŸXorgâ€ â€”low â€˜cpuâ€™
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
+*   ---   "Xorg” —low ‘cpu’
 *         global defines
-* Â©overcq                on â€ŸGentoo Linux 13.0â€ â€œx86_64â€              2015â€’9â€’4 *
+* ©overcq                on "Gentoo Linux 13.0” “x86_64”              2015-9-4 *
 *******************************************************************************/
     #ifdef C_id_small
 #define E_x_Q_obj_C_id_bits         16
@@ -32,7 +32,7 @@
 , _( _NET_WM_WINDOW_TYPE ) \
 , _( _NET_WM_WINDOW_TYPE_DND ) \
 , _( _NET_WM_WINDOW_TYPE_NORMAL ) \
-//tutaj kolejne uÅ¼ywane â€˜atomyâ€™ â€˜xâ€™.
+//tutaj kolejne u¿ywane ‘atomy’ ‘x’.
 //==============================================================================
 #define _(atom) J_ab( XCB_ATOM_, atom )
 enum E_x_Q_display_Z_atom

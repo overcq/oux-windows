@@ -1,13 +1,13 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   base
-*         tworzenie â€¹moduÅ‚uâ€º przy rozpoczÄ™ciu programu
-* Â©overcq                on â€ŸGentoo Linux 13.0â€ â€œx86_64â€             2016â€’2â€’28 N
+*         tworzenie ‹modu³u› przy rozpoczêciu programu
+* ©overcq                on "Gentoo Linux 13.0” “x86_64”             2016-2-28 N
 *******************************************************************************/
-//DFN Globalnie: utworzenie â€¹moduÅ‚uâ€º ([â€¦]â€œ_Mâ€) moÅ¼e byÄ‡ wykonane w programie tylko raz.
+//DFN Globalnie: utworzenie ‹modu³u› ([…]“_M”) mo¿e byæ wykonane w programie tylko raz.
 //==============================================================================
     #ifdef E_flow_C_errno_p
 int *E_flow_S_errno;
@@ -31,15 +31,15 @@ struct E_base_Z
   struct E_mem_Q_blk_Z_allocated *E_mem_Q_blk_S_allocated;
   N E_mem_Q_blk_S_table_allocated_id;
   N E_flow_Z_task_stacks_S_n_pages;
-  struct E_mem_Q_tab_Z *E_flow_Q_task_S; // Ta tablica nie moÅ¼e mieÄ‡ tworzonego â€œE_mem_Q_tab_Q_iterâ€.
+  struct E_mem_Q_tab_Z *E_flow_Q_task_S; // Ta tablica nie mo¿e mieæ tworzonego “E_mem_Q_tab_Q_iter”.
     #ifdef E_flow_C_thread_system_unblock_reports
   struct E_mem_Q_tab_Z *E_flow_Q_task_S_uid_subid;
     #endif
   struct E_mem_Q_tab_Z *E_flow_Q_report_S;
     #ifdef E_flow_C_itimer_system_unblock_report
-  // W danym czasie moÅ¼e byÄ‡ zarejestrowany najwyÅ¼ej jeden â€¹systemowy raport odblokowujÄ…cyâ€º typu â€œitimerâ€; przez ustawienie procedur zastÄ™pujÄ…cych funkcjonalnoÅ›Ä‡ systemowych â€œsetitimerâ€ i â€œsigsuspendâ€, np. â€œgetchâ€ opakowanej dla uzgodnienia â€˜intefejsuâ€™.â€ƒZmienne nie mogÄ… byÄ‡ ustawiane w procedurze obsÅ‚ugi â€œsygnaÅ‚uâ€ â€˜uniksowegoâ€™.
-  B (* E_flow_Z_itimer_system_unblock_report_I_sigsuspend )( sigset_t * ); // W wyniku jest to, czy wraca z â€¹systemowym raportem odblokowujÄ…cymâ€º.
-  void (* E_flow_Z_itimer_system_unblock_report_I_setitimer )( Z_clock_time * ); // JeÅ›li nie jest ustawiona albo â€”bezwarunkowoâ€” jeÅ›li uÅ¼yte sÄ… â€¹zadaniaâ€º â€œwÄ…tkowaneâ€, to â€œSIGALRMâ€ musi odblokowywaÄ‡ (zakaÅ„czaÄ‡) procedurÄ™ opakowanÄ….
+  // W danym czasie mo¿e byæ zarejestrowany najwy¿ej jeden ‹systemowy raport odblokowuj¹cy› typu “itimer”; przez ustawienie procedur zastêpuj¹cych funkcjonalnoœæ systemowych “setitimer” i “sigsuspend”, np. “getch” opakowanej dla uzgodnienia ‘intefejsu’. Zmienne nie mog¹ byæ ustawiane w procedurze obs³ugi “sygna³u” ‘uniksowego’.
+  B (* E_flow_Z_itimer_system_unblock_report_I_sigsuspend )( sigset_t * ); // W wyniku jest to, czy wraca z ‹systemowym raportem odblokowuj¹cym›.
+  void (* E_flow_Z_itimer_system_unblock_report_I_setitimer )( Z_clock_time * ); // Jeœli nie jest ustawiona albo —bezwarunkowo— jeœli u¿yte s¹ ‹zadania› “w¹tkowane”, to “SIGALRM” musi odblokowywaæ (zakañczaæ) procedurê opakowan¹.
     #endif
   Z_clock_time E_flow_Q_process_call_S_ping_period;
   struct E_mem_Q_tab_Z *E_flow_Q_timer_S;
@@ -201,7 +201,7 @@ E_mem_M_blk( void
     Vr_( pthread_mutex_init( &E_base_S->E_mem_Q_blk_S_threads_sync_mutex, &mutexattr ));
     Vr_( pthread_mutexattr_destroy( &mutexattr ));
             #endif
-    // JeÅ›li ktÃ³raÅ› uÅ¼yta do tego miejsca procedura systemu operacyjnego uÅ¼ywaÅ‚aby menedÅ¼era pamiÄ™ci z â€œlibcâ€, to trzeba by zrobiÄ‡ specjalny sposÃ³b alokowania pamiÄ™ci poczÄ…tkowej.
+    // Jeœli któraœ u¿yta do tego miejsca procedura systemu operacyjnego u¿ywa³aby mened¿era pamiêci z “libc”, to trzeba by zrobiæ specjalny sposób alokowania pamiêci pocz¹tkowej.
     P libc;
     if( !( libc = dlopen( C_to_libs_C_replace_c_alloc_S_libc_filename, RTLD_LAZY | RTLD_GLOBAL )))
     {   Pc s = dlerror();
@@ -224,7 +224,7 @@ E_mem_M_file( void
     if( !E_base_S->E_mem_Q_file_S )
     {   GV_(NA); V();
     }
-    E_base_S->E_mem_Q_file_S_buffer_l = E_base_S->E_mem_S_page_size; //CONF WartoÅ›Ä‡ optymalna, ale moÅ¼e byÄ‡ wymagana wiÄ™ksza.
+    E_base_S->E_mem_Q_file_S_buffer_l = E_base_S->E_mem_S_page_size; //CONF Wartoœæ optymalna, ale mo¿e byæ wymagana wiêksza.
         #if defined( __gnu_linux__ )
     V1p_( E_base_S->E_mem_Q_file_S_buffer = mmap( 0
     , E_base_S->E_mem_Q_file_S_buffer_l
@@ -288,17 +288,17 @@ E_base_M(
     *( s + 6 + l_1 ) = '\0';
     E_base_S->E_flow_Q_process_call_S_service_path_guid = s;
         #endif
-    // WÅ‚Ä…czenie â€œVâ€[â€¦]â€œ_â€.
+    // W³¹czenie “V”[…]“_”.
     int fd_flags;
     V1_( fd_flags = fcntl( STDERR_FILENO, F_GETFL ));
     fd_flags |= O_NONBLOCK;
     V0_( fcntl( STDERR_FILENO, F_SETFL, fd_flags ));
-    // Procedury wymagane lub zalecane w Å›rodowisku uruchamiania programu.
+    // Procedury wymagane lub zalecane w œrodowisku uruchamiania programu.
     Vp_( setlocale( LC_ALL, "" ));
         #ifdef C_pthreads
     Vr_( pthread_setconcurrency(1) );
         #endif
-    // Odblokowanie dostÄ™pu do tablicy â€¹zadaÅ„â€º.
+    // Odblokowanie dostêpu do tablicy ‹zadañ›.
     E_base_S->E_flow_Q_task_S = E_mem_Q_tab_M( sizeof( struct E_flow_Q_task_Z ), 1 );
     if( !E_base_S->E_flow_Q_task_S )
     {   GV_(NA); V();
@@ -316,7 +316,7 @@ E_base_M(
     E_base_S->switch_back_try = yes;
     E_base_S->switch_back_suspend = no;
         #endif
-    // WyÅ‚Ä…czenie niedozwolonych â€œsygnaÅ‚Ã³wâ€ â€˜uniksowychâ€™, przyblokowanie, ustawienie â€œmasekâ€.
+    // Wy³¹czenie niedozwolonych “sygna³ów” ‘uniksowych’, przyblokowanie, ustawienie “masek”.
     struct sigaction sa =
     { .sa_handler = SIG_IGN
     , .sa_flags = 0
@@ -370,8 +370,8 @@ E_base_M(
         #else
     _sigprocmask( SIG_SETMASK, &sigset, &E_base_S->E_flow_Z_saved_initial_S_blocked_signals );
         #endif
-    // Ustawienie podstawowych zmiennych â€¹moduÅ‚uâ€º.
-    if(argc) //NDFN Dlaczego to sprawdzenie?â€ƒCzy standard nie gwarantuje â€œ>= 1â€?
+    // Ustawienie podstawowych zmiennych ‹modu³u›.
+    if(argc) //NDFN Dlaczego to sprawdzenie? Czy standard nie gwarantuje “>= 1”?
     {   Pc s = E_text_Z_s0_R_c_search_last( argv[0], E_mem_Q_file_S_filename_separator );
         E_base_S->E_flow_S_exe_name = *s == E_mem_Q_file_S_filename_separator ? s + 1 : argv[0];
     }
@@ -391,7 +391,7 @@ E_base_M(
     {   W( E_base_S->E_flow_S_cwd );
         E_base_S->E_flow_S_cwd = E_mem_Q_file_S_filename_separator_s;
     }
-    // Ustawienie obsÅ‚ugi â€œsygnaÅ‚Ã³wâ€ â€˜uniksowychâ€™.
+    // Ustawienie obs³ugi “sygna³ów” ‘uniksowych’.
     sa.sa_handler = E_flow_Z_signal_V_term;
     _sigaction_M( SIGHUP, &sa );
     _sigaction_M( SIGINT, &sa );
@@ -426,7 +426,7 @@ E_base_M(
     sa.sa_sigaction = E_flow_Z_signal_V_io_ready;
     _sigaction_M( SIGIO, &sa );
         #endif
-    // Ustawienie procedury â€œsygnaÅ‚uâ€ â€œSEGVâ€â€” do obsÅ‚ugi pamiÄ™ci stosÃ³w â€¹zadaÅ„â€º.
+    // Ustawienie procedury “sygna³u” “SEGV”— do obs³ugi pamiêci stosów ‹zadañ›.
     stack_t alt_stack =
     { .ss_flags = 0
         #if defined( __gnu_linux__ ) || defined( __FreeBSD__ )
@@ -462,9 +462,9 @@ E_base_M(
     sa.sa_sigaction = E_flow_Z_signal_V_segv;
     sa.sa_flags = SA_ONSTACK | SA_SIGINFO;
     _sigaction_M( SIGSEGV, &sa );
-    // Odblokowanie â€œsygnaÅ‚Ã³wâ€ â€˜uniksowychâ€™.
+    // Odblokowanie “sygna³ów” ‘uniksowych’.
     _sigprocmask( SIG_SETMASK, &E_base_S->E_flow_Z_sigset_S_empty, 0 );
-    // Uruchomienie funkcjonalnoÅ›ci â€¹moduÅ‚uâ€º.
+    // Uruchomienie funkcjonalnoœci ‹modu³u›.
         #if defined( __gnu_linux__ ) || defined( __OpenBSD__ )
     V1_( E_base_S->E_flow_Z_task_stacks_S_n_pages = sysconf( _SC_AVPHYS_PAGES ));
         #elif defined( __FreeBSD__ )
@@ -507,7 +507,7 @@ E_base_M(
     E_base_S->E_flow_Q_process_call_S_shm_key = ftok( E_base_S->E_flow_Q_process_call_S_service_path_guid, E_flow_Q_process_call_S_ftok_id );
         #endif
         #ifdef E_flow_drv_C_timer_monotonic
-    V0_( timer_create( CLOCK_MONOTONIC, 0, &E_base_S->E_flow_S_timer )); //NDFN FunkcjonalnoÅ›Ä‡ na â€ŸLinuksachâ€.â€ƒâ€œCLOCK_REALTIMEâ€ przy stosowanym we â€œflow_drvâ€ ustawianiu wartoÅ›ci wzglÄ™dnych (domyÅ›lnych) ma zapisane w dokumentacji (â€œmanâ€), Å¼e â€œadjtimeâ€ nie zmienia jego czasu odliczania, co jest oczekiwane przy â€œE_flow_drv_C_clock_monotonicâ€, ale nigdzie nie ma napisane, ktÃ³rego typu zegara moÅ¼na uÅ¼ywaÄ‡ dla zgodnoÅ›ci z â€œCLOCK_BOOTTIMEâ€ od â€œclock_gettimeâ€, by byÅ‚ zaliczony czas trwania â€œsuspendâ€: â€œCLOCK_REALTIMEâ€ czy â€œCLOCK_MONOTONICâ€.â€ƒZ testu wynika, Å¼e oba zegary sÄ… natychmiast zakaÅ„czane po zakoÅ„czeniu â€œsuspendâ€ komputeraâ€¦
+    V0_( timer_create( CLOCK_MONOTONIC, 0, &E_base_S->E_flow_S_timer )); //NDFN Funkcjonalnoœæ na "Linuksach”. “CLOCK_REALTIME” przy stosowanym we “flow_drv” ustawianiu wartoœci wzglêdnych (domyœlnych) ma zapisane w dokumentacji (“man”), ¿e “adjtime” nie zmienia jego czasu odliczania, co jest oczekiwane przy “E_flow_drv_C_clock_monotonic”, ale nigdzie nie ma napisane, którego typu zegara mo¿na u¿ywaæ dla zgodnoœci z “CLOCK_BOOTTIME” od “clock_gettime”, by by³ zaliczony czas trwania “suspend”: “CLOCK_REALTIME” czy “CLOCK_MONOTONIC”. Z testu wynika, ¿e oba zegary s¹ natychmiast zakañczane po zakoñczeniu “suspend” komputera…
         #endif
     E_mem_M_file();
     E_io_M_stream();

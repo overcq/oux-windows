@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   user interface
-*         tworzenie â€¹moduÅ‚uâ€º przy rozpoczÄ™ciu programu
-* Â©overcq                on â€ŸGentoo Linux 17.1â€ â€œx86_64â€             2022â€’5â€’29 K
+*         tworzenie ‹modu³u› przy rozpoczêciu programu
+* ©overcq                on "Gentoo Linux 17.1” “x86_64”             2022-5-29 K
 *******************************************************************************/
 _internal
 void

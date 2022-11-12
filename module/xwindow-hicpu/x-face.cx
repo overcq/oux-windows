@@ -1,27 +1,27 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
-*   ---   â€ŸX windowâ€ â€”high â€˜cpuâ€™
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
+*   ---   "X window” —high ‘cpu’
 *         window manager
-* Â©overcq                on â€ŸGentoo Linux 13.0â€ â€œx86_64â€             2015â€’4â€’28 *
+* ©overcq                on "Gentoo Linux 13.0” “x86_64”             2015-4-28 *
 *******************************************************************************/
-// MenedÅ¼er funkcji podstawowych â€ŸXâ€.
+// Mened¿er funkcji podstawowych "X”.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Docelowa obsÅ‚uga â€œscreenâ€, teoretycznie: â€¢ â€œscreenâ€â€“ jak dotychczas czyli bez â€œXineramaâ€ lub Â·ponad â€œXineramaâ€Â· (przyszÅ‚oÅ›Ä‡) to wyÅ›wietlacze odrÄ™bnych â€œvisualiâ€, â€¢ â€œscreenâ€ czytany z â€œXineramaâ€â€“ uÅ¼ywany do funkcji wysokopoziomowych (wÅ‚asnej organizacji okien), poniewaÅ¼ â€˜serverâ€™ â€ŸXâ€ scala wyÅ›wietlacze przynaleÅ¼ne â€œXineramaâ€ do wspÃ³lnej przestrzeni automatycznie ujednoliconej.
-// Okno bÄ™dzie mogÅ‚o byÄ‡ przeniesione (przez odtworzenie) pomiÄ™dzy â€œscreenâ€ nieprzynaleÅ¼nym do â€œXineramaâ€.â€ƒOraz trzeba uwzglÄ™dniaÄ‡ dodatkowe informacje z â€œXineramaâ€.
-// WydzieliÄ‡ elementy procedur tworzenia w celu odtwarzania okien i poÅ‚Ä…czeÅ„ z â€˜serveremâ€™ â€ŸXâ€: â€£ zmienne stanu poczÄ…tkowego (â€˜resetowaneâ€™), â€£ zasoby tworzone na â€˜serverzeâ€™ â€ŸXâ€, â€£ zasoby (dane) tworzone dla nowego, a przenoszone (obiektyâ€“ przez wskaÅºniki) dla odtwarzanego obiektu tego menedÅ¼era.
-// Co jest jako â€œdataâ€ procedur â€œxcbâ€*â€œ_replyâ€, gdy wystÄ…pi bÅ‚Ä…d przy â€œuncheckedâ€?
-// UtworzyÄ‡ okna â€œInputOnlyâ€ do rÃ³Å¼nych celÃ³w i na nich ustawiaÄ‡ wÅ‚aÅ›ciwoÅ›ci okna zamiast na widzialnych, monitorowanych przez menedÅ¼era okien i inne programy.
-// ZintegrowaÄ‡ â€”jeÅ›li siÄ™ daâ€” â€¹zdarzeniaâ€º z bÅ‚Ä™dami z â€˜serveraâ€™ â€ŸXâ€ wynikajÄ…cymi z niezdefiniowanego zasobu â€˜xâ€™ usuniÄ™tego przez obcy program, by opuÅ›ciÄ‡ najszerszy blok przetwarzania danego zasobu, wyrzuciÄ‡ go i kontynuowaÄ‡.
-// Kolory w nowo utworzonej czÄ™Å›ci â€œdrawâ€ moduÅ‚u obsÅ‚ugiwaÄ‡ uniwersalnie, jak dla przyszÅ‚ej obsÅ‚ugi wszystkich â€œvisualiâ€.
+// Docelowa obs³uga “screen”, teoretycznie: • “screen”– jak dotychczas czyli bez “Xinerama” lub ·ponad “Xinerama”· (przysz³oœæ) to wyœwietlacze odrêbnych “visuali”, • “screen” czytany z “Xinerama”– u¿ywany do funkcji wysokopoziomowych (w³asnej organizacji okien), poniewa¿ ‘server’ "X” scala wyœwietlacze przynale¿ne “Xinerama” do wspólnej przestrzeni automatycznie ujednoliconej.
+// Okno bêdzie mog³o byæ przeniesione (przez odtworzenie) pomiêdzy “screen” nieprzynale¿nym do “Xinerama”. Oraz trzeba uwzglêdniaæ dodatkowe informacje z “Xinerama”.
+// Wydzieliæ elementy procedur tworzenia w celu odtwarzania okien i po³¹czeñ z ‘serverem’ "X”: ? zmienne stanu pocz¹tkowego (‘resetowane’), ? zasoby tworzone na ‘serverze’ "X”, ? zasoby (dane) tworzone dla nowego, a przenoszone (obiekty– przez wskaŸniki) dla odtwarzanego obiektu tego mened¿era.
+// Co jest jako “data” procedur “xcb”*“_reply”, gdy wyst¹pi b³¹d przy “unchecked”?
+// Utworzyæ okna “InputOnly” do ró¿nych celów i na nich ustawiaæ w³aœciwoœci okna zamiast na widzialnych, monitorowanych przez mened¿era okien i inne programy.
+// Zintegrowaæ —jeœli siê da— ‹zdarzenia› z b³êdami z ‘servera’ "X” wynikaj¹cymi z niezdefiniowanego zasobu ‘x’ usuniêtego przez obcy program, by opuœciæ najszerszy blok przetwarzania danego zasobu, wyrzuciæ go i kontynuowaæ.
+// Kolory w nowo utworzonej czêœci “draw” modu³u obs³ugiwaæ uniwersalnie, jak dla przysz³ej obs³ugi wszystkich “visuali”.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// SkrÃ³ty do dokumentacji:
-// â€˜stateâ€™â€“ stan obiektu.
-// â€˜modeâ€™ wewnÄ…trzprogramowyâ€“ ze wzglÄ™du na odwewnÄ™trznÄ… dezintegralnoÅ›Ä‡ (nieprzewidywalnoÅ›Ä‡ przychodzÄ…cych sygnaÅ‚Ã³w) wejÅ›Ä‡/wyjÅ›Ä‡ deterministycznych algorytmÃ³w przetwarzania danych w sterownikuâ€“ wyjÄ…tkowy (oparty na Â·alternatywnych fragmentachÂ· tego samego algorytmu w peÅ‚nym determinizmie) tryb przetwarzania danych podczas przemiany wewnÄ™trznej.
-// â€˜reqâ€™â€“ Å¼Ä…danie realizacji funkcji zbiorczej.
-// â€˜exâ€™â€“ uzupeÅ‚nienie rodzaju nastÄ™pujÄ…cej zmiany (np. â€˜modeâ€™).
+// Skróty do dokumentacji:
+// ‘state’– stan obiektu.
+// ‘mode’ wewn¹trzprogramowy– ze wzglêdu na odwewnêtrzn¹ dezintegralnoœæ (nieprzewidywalnoœæ przychodz¹cych sygna³ów) wejœæ/wyjœæ deterministycznych algorytmów przetwarzania danych w sterowniku– wyj¹tkowy (oparty na ·alternatywnych fragmentach· tego samego algorytmu w pe³nym determinizmie) tryb przetwarzania danych podczas przemiany wewnêtrznej.
+// ‘req’– ¿¹danie realizacji funkcji zbiorczej.
+// ‘ex’– uzupe³nienie rodzaju nastêpuj¹cej zmiany (np. ‘mode’).
 //==============================================================================
 _internal
 N32 *E_x_S_wm_icon;
@@ -47,7 +47,7 @@ struct E_x_Q_window_Z
   N32 *drawable;
   I *object_mask;
   xcb_timestamp_t last_user_activity_time, user_activity_time;
-  S16 x, y; //NDFN niekoniecznie jest poprawne, bo â€œconfigure_notifyâ€ wzglÄ™dem â€œrootâ€ nie muszÄ… byÄ‡ przysyÅ‚ane.â€ƒale narazie nie jest niezbÄ™dne.
+  S16 x, y; //NDFN niekoniecznie jest poprawne, bo “configure_notify” wzglêdem “root” nie musz¹ byæ przysy³ane. ale narazie nie jest niezbêdne.
   N16 width, height, width_new, height_new;
   I screen_id;
   unsigned U_R( state, visible )                        :1;
@@ -70,8 +70,8 @@ struct E_x_Q_screen_Z
   xcb_gcontext_t bitmask_0_gc, bitmask_1_gc;
     #endif
   //S16 pointer_button_drag_copy_x_delta, pointer_button_drag_copy_y_delta;
-  N8 depth; //NDFN w trakcie przeprojektowywania â€œscreenâ€.
-  struct E_x_Q_window_Z dnd_window; // UÅ¼ywane dane obecne w caÅ‚oÅ›ci tylko w trybie â€œdragâ€.
+  N8 depth; //NDFN w trakcie przeprojektowywania “screen”.
+  struct E_x_Q_window_Z dnd_window; // U¿ywane dane obecne w ca³oœci tylko w trybie “drag”.
   unsigned U_R( state, draw_object_drag_move )          :1;
   unsigned U_R( mode, animation )                       :1;
 };
@@ -85,9 +85,9 @@ struct E_x_Z_keysym_to_unicode
   U u;
 };
 //------------------------------------------------------------------------------
-// â€œpointerâ€â€“ rozszerzenie â€œzdarzeÅ„â€ â€˜xâ€™ dla przesuwania wskazania.
-// â€œpointer_buttonâ€â€“ rozszerzenie â€œzdarzeÅ„â€ â€˜xâ€™ dla â€œbuttonâ€.
-// â€œdragâ€â€“ rozszerzenie â€œzdarzeÅ„â€ â€˜xâ€™ dla przeciÄ…gania.
+// “pointer”– rozszerzenie “zdarzeñ” ‘x’ dla przesuwania wskazania.
+// “pointer_button”– rozszerzenie “zdarzeñ” ‘x’ dla “button”.
+// “drag”– rozszerzenie “zdarzeñ” ‘x’ dla przeci¹gania.
 struct E_x_Q_display_Z
 { xcb_connection_t *x_display;
     #ifdef __gnu_linux__
@@ -101,11 +101,11 @@ struct E_x_Q_display_Z
   F blue_luminance_ratio;
   xcb_setup_t *setup;
   xcb_get_keyboard_mapping_reply_t *keyboard_mapping;
-  struct E_mem_Q_tab_Z *screen; // Indeksy wyÅ›wietlaczy â€˜serveraâ€™ â€ŸXâ€ sÄ… utoÅ¼samione z indeksami tablicy; w protokole â€ŸXâ€ jest â€œN8â€ dla numeru wyÅ›wietlacza, co wystarcza, by â€œ(I)~0â€ byÅ‚o rÃ³Å¼ne od â€œ(N8)~0â€.
+  struct E_mem_Q_tab_Z *screen; // Indeksy wyœwietlaczy ‘servera’ "X” s¹ uto¿samione z indeksami tablicy; w protokole "X” jest “N8” dla numeru wyœwietlacza, co wystarcza, by “(I)~0” by³o ró¿ne od “(N8)~0”.
   struct E_mem_Q_tab_Z *window;
-  struct E_x_Z_drag_object_src *drag_S_object_src; //NDFN przed zaprojektowaniem â€˜dropâ€™.
-  N drag_S_object_src_n; //NDFN przed zaprojektowaniem â€˜dropâ€™.
-  xcb_timestamp_t pointer_button_S_time, pointer_button_S_start_time, pointer_button_S_grab_time; // â€˜GrabniÄ™cieâ€™ jest rozszerzeniem â€œzdarzeÅ„â€ â€œpointer_buttonâ€.
+  struct E_x_Z_drag_object_src *drag_S_object_src; //NDFN przed zaprojektowaniem ‘drop’.
+  N drag_S_object_src_n; //NDFN przed zaprojektowaniem ‘drop’.
+  xcb_timestamp_t pointer_button_S_time, pointer_button_S_start_time, pointer_button_S_grab_time; // ‘Grabniêcie’ jest rozszerzeniem “zdarzeñ” “pointer_button”.
     #ifdef E_flow_C_thread_system_unblock_reports
   xcb_timestamp_t pointer_button_S_impulser_time;
     #endif
@@ -113,13 +113,13 @@ struct E_x_Q_display_Z
   xcb_cursor_t drag_S_cursor, drag_S_copy_cursor;
   S16 pointer_button_S_root_x, pointer_button_S_root_y;
   S16 pointer_button_S_x, pointer_button_S_y;
-  S16 drag_S_stop_root_x, drag_S_stop_root_y; //NDFN Przed zaprojektowaniem â€˜dropâ€™.
+  S16 drag_S_stop_root_x, drag_S_stop_root_y; //NDFN Przed zaprojektowaniem ‘drop’.
   S16 drag_S_grab_x, drag_S_grab_y;
   I pointer_button_S_window_id;
   I drag_S_dnd_window_screen_id;
   I Z_screen_id_S_default;
   N8 pointer_button;
-  N8 pointer_button_S_seq_i; // â€œ== 0â€ to stan oczekiwania przeciwny do stanu â€›klikania przycisku do czasu oznaczenia â€œzdarzeniaâ€ klikniÄ™ciaâ€™.
+  N8 pointer_button_S_seq_i; // “== 0” to stan oczekiwania przeciwny do stanu 'klikania przycisku do czasu oznaczenia “zdarzenia” klikniêcia’.
   N8 drag_S_pointer_button;
   I cursor_window;
   I cursor_object;
@@ -135,7 +135,7 @@ struct E_x_Q_display_Z
   unsigned U_R( req, draw )                         :1;
   //unsigned U_R( req, draw_click )                   :1;
   unsigned U_R( req, flush )                        :1;
-  unsigned U_R( req, restart )                      :1; //TODO wymagana obsÅ‚uga.
+  unsigned U_R( req, restart )                      :1; //TODO wymagana obs³uga.
 };
 struct E_mem_Q_tab_Z *E_x_Q_display_S;
 //==============================================================================
@@ -145,7 +145,7 @@ E_x_Q_display_M( void
     if( !~display_id )
         return ~0;
     struct E_x_Q_display_Z *display = E_mem_Q_tab_R( E_x_Q_display_S, display_id );
-    //NDFN moÅ¼na szukaÄ‡ innych dostÄ™pnych poÅ‚Ä…czeÅ„ z serwerem â€ŸXâ€ na lokalnej maszynie i wykrywaÄ‡ nie poÅ‚Ä…czenie juÅ¼ tutaj.
+    //NDFN mo¿na szukaæ innych dostêpnych po³¹czeñ z serwerem "X” na lokalnej maszynie i wykrywaæ nie po³¹czenie ju¿ tutaj.
     int x_screen_id_default_;
     display->x_display = xcb_connect( 0, &x_screen_id_default_ );
     display->Z_screen_id_S_default = x_screen_id_default_;
@@ -222,7 +222,7 @@ E_x_Q_display_M( void
     }
     E_text_Z_s_P_s0_copy_0( E_text_Z_s_P_s0_copy_0( display->class_name, E_base_S->E_flow_S_exe_name ), E_base_S->E_flow_S_system_name );
     display->setup = xcb_get_setup( display->x_display );
-    xcb_get_keyboard_mapping_cookie_t keyboard_mapping_req_id = xcb_get_keyboard_mapping_unchecked( display->x_display, display->setup->min_keycode, 135 ); //NDFN maksymalna wartoÅ›Ä‡
+    xcb_get_keyboard_mapping_cookie_t keyboard_mapping_req_id = xcb_get_keyboard_mapping_unchecked( display->x_display, display->setup->min_keycode, 135 ); //NDFN maksymalna wartoœæ
     display->keyboard_mapping = xcb_get_keyboard_mapping_reply( display->x_display, keyboard_mapping_req_id, 0 );
     xcb_xkb_use_extension_cookie_t xkb_use_extension_req_id = xcb_xkb_use_extension_unchecked( display->x_display, 1, 0 );
     xcb_xkb_use_extension_reply_t *ret = xcb_xkb_use_extension_reply( display->x_display, xkb_use_extension_req_id, 0 );
@@ -500,7 +500,7 @@ E_x_Q_window_M( I display_id
     , screen->x_root_window
     , window->x, window->y, window->width, window->height, 0
     , XCB_WINDOW_CLASS_INPUT_OUTPUT
-    , XCB_COPY_FROM_PARENT //NDFN zrobiÄ‡ wÅ‚asne funkcje rysowania przy dostÄ™pnych skopiowanych parametrach kolorÃ³w okna.
+    , XCB_COPY_FROM_PARENT //NDFN zrobiæ w³asne funkcje rysowania przy dostêpnych skopiowanych parametrach kolorów okna.
     , XCB_CW_BIT_GRAVITY | XCB_CW_EVENT_MASK
     , ( N32[] )
       { XCB_GRAVITY_STATIC
@@ -519,7 +519,7 @@ E_x_Q_window_M( I display_id
     );
         #endif
     E_x_Z_property_P_text( display, window, WM_NAME
-    , C_STRING // â€˜window managerâ€™ â€œtwmâ€ ? STRING : C_STRING
+    , C_STRING // ‘window manager’ “twm” ? STRING : C_STRING
     , E_base_S->E_flow_S_exe_name, ~0
     );
     E_x_Z_property_P_text( display, window, _NET_WM_NAME
@@ -527,7 +527,7 @@ E_x_Q_window_M( I display_id
     , E_base_S->E_flow_S_exe_name, ~0
     );
     E_x_Z_property_P_text( display, window, WM_ICON_NAME
-    , C_STRING // â€˜window managerâ€™ â€œtwmâ€ ? STRING : C_STRING
+    , C_STRING // ‘window manager’ “twm” ? STRING : C_STRING
     , E_base_S->E_flow_S_exe_name, ~0
     );
     E_x_Z_property_P_text( display, window, _NET_WM_ICON_NAME
@@ -552,9 +552,9 @@ E_x_Q_window_M( I display_id
     );
     E_x_Z_property_P_text( display, window, WM_CLASS
     , STRING
-    , display->class_name, display->class_name_l //NDFN do konwersji stratnej do wymaganego typu â€˜xâ€™ â€œSTRINGâ€?
+    , display->class_name, display->class_name_l //NDFN do konwersji stratnej do wymaganego typu ‘x’ “STRING”?
     );
-    // â€œ_NET_WM_SYNC_REQUESTâ€ nie jest uÅ¼ywane, poniewaÅ¼ jest sprzeczne z automatycznym doregulowywaniem do dostÄ™pnych zasobÃ³w obliczeniowychâ€” przez wymuszanie kolejkowania kolejnych zmian raz rozpoczÄ™tego zmieniania rozmiaru okna, nie pozwalajÄ…c na szybkie dopasowanie do odlegÅ‚ego od poczÄ…tku Å¼Ä…dania bieÅ¼Ä…cego.â€ƒsprawdzone w â€œmenedÅ¼erze okienâ€ â€ŸEnlightenment 16â€.
+    // “_NET_WM_SYNC_REQUEST” nie jest u¿ywane, poniewa¿ jest sprzeczne z automatycznym doregulowywaniem do dostêpnych zasobów obliczeniowych— przez wymuszanie kolejkowania kolejnych zmian raz rozpoczêtego zmieniania rozmiaru okna, nie pozwalaj¹c na szybkie dopasowanie do odleg³ego od pocz¹tku ¿¹dania bie¿¹cego. sprawdzone w “mened¿erze okien” "Enlightenment 16”.
     E_x_Z_property_P( display, window, WM_PROTOCOLS
     , ATOM
     , (( xcb_atom_t[] )

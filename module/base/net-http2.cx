@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   base
 *         network HTTP/2
-* Â©overcq                on â€ŸGentoo Linux 17.1â€ â€œx86_64â€             2021â€’10â€’2 O
+* ©overcq                on "Gentoo Linux 17.1” “x86_64”             2021-10-2 O
 *******************************************************************************/
 N E_net_http2_S_static_table_first_index = 15;
 Pc

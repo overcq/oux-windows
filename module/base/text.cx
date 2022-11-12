@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   base
 *         text
-* Â©overcq                on â€ŸGentoo Linux 13.0â€ â€œx86_64â€             2015â€’4â€’28 *
+* ©overcq                on "Gentoo Linux 13.0” “x86_64”             2015-4-28 *
 *******************************************************************************/
 B
 E_text_Z_c_T_alpha( C c
@@ -42,9 +42,9 @@ E_text_Z_c_I_upper( C c
 }
 //==============================================================================
 // Szkic standardu:
-// Adres wynikowy procedur obiektÃ³w â€œsâ€:
-// â€¢na poczÄ…tku znalezionych albo
-// â€¢po wszystkich danych.
+// Adres wynikowy procedur obiektów “s”:
+// •na pocz¹tku znalezionych albo
+// •po wszystkich danych.
 //------------------------------------------------------------------------------
 Pc
 E_text_Z_s0_I_lower( Pc s
@@ -1375,7 +1375,7 @@ E_text_Z_s_Z_cmdline_N_quote( Pc cmdline
                     *( cmdline + l ) = '\'';
                     l++;
                 }
-            if( arg == args->argv[i] ) // Nie znalazÅ‚ Å¼adnego cudzysÅ‚owu.
+            if( arg == args->argv[i] ) // Nie znalaz³ ¿adnego cudzys³owu.
             {   if( arg == args->argv[i] )
                     arg_ = E_text_Z_s0_R_end( args->argv[i] );
                 N arg_quote = 0;
@@ -1390,7 +1390,7 @@ E_text_Z_s_Z_cmdline_N_quote( Pc cmdline
                 l += arg_ - arg;
                 if( arg_quote )
                     E_text_Z_s_Z_cmdline_N_quote_I_close( cmdline, &l, &inside, level + arg_quote );
-            }else if( *arg ) // ZnalazÅ‚ i na koÅ„cu jest jeszcze coÅ› oprÃ³cz zastÄ…pionego cudzysÅ‚owu.
+            }else if( *arg ) // Znalaz³ i na koñcu jest jeszcze coœ oprócz zast¹pionego cudzys³owu.
             {   if( arg == args->argv[i] )
                     arg_ = E_text_Z_s0_R_end( args->argv[i] );
                 N arg_quote = 0;
@@ -1532,7 +1532,7 @@ E_text_Z_su0_R_n( Pc s
     }
     return n;
 }
-N // Ile bajtÃ³w zapisano lub bÅ‚Ä…d.
+N // Ile bajtów zapisano lub b³¹d.
 E_text_Z_u_R_su( U u
 , Pc s
 ){  if( u <= 0x7f )
@@ -1568,7 +1568,7 @@ E_text_Z_u_R_su_G( U u
     }
     return i + 1;
 }
-//TODO DodaÄ‡ sprawdzanie najkrÃ³tszego kodowania oraz powiadamianie o nieprawidÅ‚owym znaku UTF-8.
+//TODO Dodaæ sprawdzanie najkrótszego kodowania oraz powiadamianie o nieprawid³owym znaku UTF-8.
 Pc
 E_text_Z_su_R_u( Pc s
 , U *u
@@ -1626,7 +1626,7 @@ E_text_Z_su0_R_l( Pc s
     }
     return i;
 }
-N // Ile bajtÃ³w przeczytano lub bÅ‚Ä…d.
+N // Ile bajtów przeczytano lub b³¹d.
 E_text_Z_getter_Z_c_R_u( N (*getter)(void)
 , U *u
 ){  N c = getter();

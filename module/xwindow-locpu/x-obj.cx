@@ -1,14 +1,14 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
-*   ---   â€ŸX windowâ€ â€”low â€˜cpuâ€™
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
+*   ---   "X window” —low ‘cpu’
 *         window objects manager
-* Â©overcq                on â€ŸGentoo Linux 13.0â€ â€œx86_64â€             2015â€’4â€’28 *
+* ©overcq                on "Gentoo Linux 13.0” “x86_64”             2015-4-28 *
 *******************************************************************************/
-// SÄ… to obiekty wizualne.
-// KaÅ¼dy obiekt okna jest jednokrotny w konkretnym oknie.
+// S¹ to obiekty wizualne.
+// Ka¿dy obiekt okna jest jednokrotny w konkretnym oknie.
 //==============================================================================
 typedef
 void
@@ -27,7 +27,7 @@ void
 , N8
 );
 struct E_x_Q_object_Z
-{ void // Ale obiekt zawiera punkty, ktÃ³re narysuje ta funkcja w czasie wywoÅ‚ania.
+{ void // Ale obiekt zawiera punkty, które narysuje ta funkcja w czasie wywo³ania.
   (*draw)(
     struct E_x_Q_display_Z *
   , struct E_x_Q_screen_Z *
@@ -47,7 +47,7 @@ struct E_x_Q_object_Z
   I *child;
   P data;
   S16 x, y;
-  N16 width, height; // ProstokÄ…t oczekiwanej widocznoÅ›ci obiektu.
+  N16 width, height; // Prostok¹t oczekiwanej widocznoœci obiektu.
   unsigned U_R( mode, lay_height )      :1;
   unsigned U_R( mode, draggable )       :1;
   unsigned U_R( mode, drag_src )        :1;

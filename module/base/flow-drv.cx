@@ -1,29 +1,29 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  ¬¶OUX¬¶  C+
-*  ¬¶/C+¬¶  component
+*  ¶OUX¶  C+
+*  ¶/C+¶  component
 *   ---   base
 *         flow driver
-* ¬©overcq                on ‚ÄüGentoo Linux 13.0‚Äù ‚Äúx86_64‚Äù             2015‚Äí1‚Äí26
+* ©overcq                on "Gentoo Linux 13.0î ìx86_64î             2015-1-26
 *******************************************************************************/
-// Programista ‚Äüoux‚Äù rozumie nastƒôpujƒÖce zagadnienia podstawowe:
-// ‚Ä£ prze≈ÇƒÖczanie ‚Äπzada≈Ñ‚Ä∫ wykonywane w pƒôtli dla kolejnych obudzonych jako ograniczonƒÖ liniowym czasem aktywacjƒô kolejnych warstw wykonawczej sieci informacyjnej (jak biologicznej sieci neuronowo‚Äêbiochemicznej, inaczej elektryczno‚Äêmolekularnej, inaczej synaptyczno‚Äêorganicznej)
-// ‚Ä£ informacyjno‚ÄêwykonawczƒÖ nienazywajƒÖcƒÖ stw√≥rczo≈õƒá bytowƒÖ (molekularnƒÖ) w postaci bezwarunkowej pƒôtli programowej odpowiednio u≈ºytej
-// ‚Ä£ pe≈ÇnƒÖ dynamiczno≈õƒá systemu ‚Äòuid√≥w‚Äô ‚Äπraport√≥w‚Ä∫/‚Äπimpulsator√≥w‚Ä∫, kt√≥ra jest odrƒôbna od u≈ºywanego systemu zapewniania unikalno≈õci ‚Äòid√≥w‚Äô zarejestrowanych ‚Äπraport√≥w‚Ä∫/‚Äπimpulsator√≥w‚Ä∫ u≈ºywanych pomiƒôdzy ‚Äπzadaniami‚Ä∫‚Äî jak rzeczywisto≈õƒá wykonawcza nie jest zale≈ºna od nazw, ale zosta≈Ça oparta na statycznych nazwach, bo tutaj program jest kompilowany ca≈Ço≈õciowo, wiƒôc nie potrzeba uzgadniaƒá ‚Äòuidu‚Äô ‚Äπraportu‚Ä∫/‚Äπimpulsatora‚Ä∫
+// Programista "ouxî rozumie nastÍpujπce zagadnienia podstawowe:
+// ? prze≥πczanie ãzadaÒõ wykonywane w pÍtli dla kolejnych obudzonych jako ograniczonπ liniowym czasem aktywacjÍ kolejnych warstw wykonawczej sieci informacyjnej (jak biologicznej sieci neuronowo-biochemicznej, inaczej elektryczno-molekularnej, inaczej synaptyczno-organicznej)
+// ? informacyjno-wykonawczπ nienazywajπcπ stwÛrczoúÊ bytowπ (molekularnπ) w postaci bezwarunkowej pÍtli programowej odpowiednio uøytej
+// ? pe≥nπ dynamicznoúÊ systemu ëuidÛwí ãraportÛwõ/ãimpulsatorÛwõ, ktÛra jest odrÍbna od uøywanego systemu zapewniania unikalnoúci ëidÛwí zarejestrowanych ãraportÛwõ/ãimpulsatorÛwõ uøywanych pomiÍdzy ãzadaniamiõó jak rzeczywistoúÊ wykonawcza nie jest zaleøna od nazw, ale zosta≥a oparta na statycznych nazwach, bo tutaj program jest kompilowany ca≥oúciowo, wiÍc nie potrzeba uzgadniaÊ ëuiduí ãraportuõ/ãimpulsatoraõ
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // Przeprojektowywane pod rzeczywiste potrzeby.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// [ta linia‚Äì do aktualizacji.]‚ÄÉInstrukcje mogƒÖce prze≈ÇƒÖczyƒá ‚Äπzadanie‚Ä∫: ‚ÄúX_B‚Äù, [‚ÄúX_E‚Äù], ‚ÄúY_B‚Äù, ‚ÄúI_B‚Äù.‚ÄÉ‚ÄúD_M‚Äù i ‚ÄúD_W‚Äù zawsze prze≈ÇƒÖczajƒÖ jakby proceduralnie do ‚Äπzadania‚Ä∫ uruchamianego/zwalnianego, wykonujƒÖ blok startowy/ko≈Ñcowy i wracajƒÖ, wiƒôc nie zaliczajƒÖ siƒô do tego zbioru.
-// Bloki startowe i ko≈Ñcowe ‚Äπzada≈Ñ‚Ä∫ s≈Çu≈ºƒÖ obowiƒÖzkowo do rejestracji (np. ‚Äπraport√≥w‚Ä∫) i zwalniania zasob√≥w ‚Äòinterfejsu‚Äô bytu ‚Äπzadania‚Ä∫ ¬∑bezwarunkowo¬∑ widzianych przez inne.‚ÄÉW blokach tych nie wolno prze≈ÇƒÖczaƒá (tzn. jawnie, nie przez normalne wykonywanie siƒô ‚ÄúD_W‚Äù) ani wykonywaƒá celu ‚Äπzadania‚Ä∫.‚ÄÉ(Je≈õli w bloku startowym zostanie u≈ºyta jedna z instrukcji prze≈ÇƒÖczenia, to ‚Äπzadanie‚Ä∫ pozostanie zablokowane dla ‚Äòschedulera‚Äô w nie wznawialnym (nie obs≈Çugiwanym) stanie oczekiwania (‚ÄúE_flow_Z_run_state_S_starting_by_task‚Äù).‚ÄÉJe≈õli zostanie u≈ºyta w bloku ko≈Ñcowym, to ‚Äπzadanie‚Ä∫ zostanie zablokowane (‚ÄúE_flow_Z_run_state_S_stopping_by_task‚Äù) i usuniƒôte przez ‚Äπzadanie‚Ä∫ usuwajƒÖce, po prze≈ÇƒÖczeniu do niego przez ‚Äòschedulera‚Äô‚Äî bez wykonania reszty programu ‚Äπzadania‚Ä∫ usuwanego.)
-// Adresy danych dostƒôpnych przez identyfikatory (adresy ‚Äπokien wglƒÖdu‚Ä∫) muszƒÖ byƒá ponownie odczytane przed u≈ºyciem po mo≈ºliwym prze≈ÇƒÖczeniu ‚Äπzadania‚Ä∫.
+// [ta liniañ do aktualizacji.] Instrukcje mogπce prze≥πczyÊ ãzadanieõ: ìX_Bî, [ìX_Eî], ìY_Bî, ìI_Bî. ìD_Mî i ìD_Wî zawsze prze≥πczajπ jakby proceduralnie do ãzadaniaõ uruchamianego/zwalnianego, wykonujπ blok startowy/koÒcowy i wracajπ, wiÍc nie zaliczajπ siÍ do tego zbioru.
+// Bloki startowe i koÒcowe ãzadaÒõ s≥uøπ obowiπzkowo do rejestracji (np. ãraportÛwõ) i zwalniania zasobÛw ëinterfejsuí bytu ãzadaniaõ ∑bezwarunkowo∑ widzianych przez inne. W blokach tych nie wolno prze≥πczaÊ (tzn. jawnie, nie przez normalne wykonywanie siÍ ìD_Wî) ani wykonywaÊ celu ãzadaniaõ. (Jeúli w bloku startowym zostanie uøyta jedna z instrukcji prze≥πczenia, to ãzadanieõ pozostanie zablokowane dla ëscheduleraí w nie wznawialnym (nie obs≥ugiwanym) stanie oczekiwania (ìE_flow_Z_run_state_S_starting_by_taskî). Jeúli zostanie uøyta w bloku koÒcowym, to ãzadanieõ zostanie zablokowane (ìE_flow_Z_run_state_S_stopping_by_taskî) i usuniÍte przez ãzadanieõ usuwajπce, po prze≥πczeniu do niego przez ëscheduleraíó bez wykonania reszty programu ãzadaniaõ usuwanego.)
+// Adresy danych dostÍpnych przez identyfikatory (adresy ãokien wglπduõ) muszπ byÊ ponownie odczytane przed uøyciem po moøliwym prze≥πczeniu ãzadaniaõ.
 //------------------------------------------------------------------------------
-// ZasadƒÖ jest, ≈ºe instrukcje oczekiwania na co≈õ przez ‚Äπzadanie‚Ä∫ odblokowujƒÖ je dok≈Çadnie po zaistnieniu tego czego≈õ, bez zale≈ºno≈õci raportowania zaistnienia czegokolwiek, co ‚Äπzadanie‚Ä∫ ma zarejestrowane, ale czeka na to innƒÖ instrukcjƒÖ prze≈ÇƒÖczajƒÖcƒÖ ‚Äπzadanie‚Ä∫.‚ÄÉWiƒôc oczekiwanie sekwencyjne na r√≥≈ºne rzeczy przez ‚Äπzadanie‚Ä∫ jest sytuacjƒÖ obs≈ÇugiwanƒÖ (tak jak powy≈ºej napisane), aczkolwiek nie polecanƒÖ.
-// W≈Ça≈õcicielem ‚Äπraportu‚Ä∫/‚Äπimpulsatora‚Ä∫ jest ‚Äπzadanie‚Ä∫, kt√≥re na niego czeka (rejestracja oczekiwania‚Äì ‚ÄúX_M‚Äù/‚ÄúYi_M‚Äù), i tylko to ‚Äπzadanie‚Ä∫ mo≈ºe czekaƒá na ten ‚Äπraport‚Ä∫/‚Äπimpulsator‚Ä∫ (w dowolnej liczbie miejsc wewnƒÖtrz w≈Çasnej procedury); ale w ‚Äòkompilacji‚Äô ‚Äπmodu≈Ç√≥w‚Ä∫ do ‚Äúbibliotek‚Äù ‚Äπzadanie‚Ä∫ w ‚Äπmodule‚Ä∫ ‚Äúmain‚Äù ‚Äîczyli w g≈Ç√≥wnym pliku wykonywalnym programu‚Äî nie jest generatorem ‚Äòuidu‚Äô ‚Äπraportu‚Ä∫/‚Äπimpulsatora‚Ä∫, kt√≥ry emituje kt√≥ry≈õ ‚Äπmodu≈Ç‚Ä∫ ‚Äúbiblioteczny‚Äù.‚ÄÉW≈Ça≈õcicielem ‚Äöraport√≥w znacznikowych‚Äô ‚Äîstatycznych, nierejestrowanych, pochodzƒÖcych z ‚Äúsygna≈Ç√≥w‚Äù ‚Äòuniksowych‚Äô‚Äî jest ‚Äπzadanie‚Ä∫ ‚Äúmain‚Äù (a procedura), poniewa≈º tylko to ‚Äπzadanie‚Ä∫ mo≈ºe obs≈Çugiwaƒá stany programu uruchomionego przez nie w sk≈Çadnikach, a niekt√≥rych ‚Äöraport√≥w znacznikowych‚Äô‚Äì ‚Äöscheduler‚Äô, poniewa≈º tylko on mo≈ºe zarzƒÖdzaƒá systemowym przep≈Çywem wykonania i go prze≈ÇƒÖczaƒá.
+// Zasadπ jest, øe instrukcje oczekiwania na coú przez ãzadanieõ odblokowujπ je dok≥adnie po zaistnieniu tego czegoú, bez zaleønoúci raportowania zaistnienia czegokolwiek, co ãzadanieõ ma zarejestrowane, ale czeka na to innπ instrukcjπ prze≥πczajπcπ ãzadanieõ. WiÍc oczekiwanie sekwencyjne na rÛøne rzeczy przez ãzadanieõ jest sytuacjπ obs≥ugiwanπ (tak jak powyøej napisane), aczkolwiek nie polecanπ.
+// W≥aúcicielem ãraportuõ/ãimpulsatoraõ jest ãzadanieõ, ktÛre na niego czeka (rejestracja oczekiwaniañ ìX_Mî/ìYi_Mî), i tylko to ãzadanieõ moøe czekaÊ na ten ãraportõ/ãimpulsatorõ (w dowolnej liczbie miejsc wewnπtrz w≥asnej procedury); ale w ëkompilacjií ãmodu≥Ûwõ do ìbibliotekî ãzadanieõ w ãmoduleõ ìmainî óczyli w g≥Ûwnym pliku wykonywalnym programuó nie jest generatorem ëuiduí ãraportuõ/ãimpulsatoraõ, ktÛry emituje ktÛryú ãmodu≥õ ìbibliotecznyî. W≥aúcicielem ÇraportÛw znacznikowychí óstatycznych, nierejestrowanych, pochodzπcych z ìsygna≥Ûwî ëuniksowychíó jest ãzadanieõ ìmainî (a procedura), poniewaø tylko to ãzadanieõ moøe obs≥ugiwaÊ stany programu uruchomionego przez nie w sk≥adnikach, a niektÛrych ÇraportÛw znacznikowychíñ Çschedulerí, poniewaø tylko on moøe zarzπdzaÊ systemowym przep≥ywem wykonania i go prze≥πczaÊ.
 //------------------------------------------------------------------------------
-// ‚Äúprocess_call‚Äù‚Äì synchroniczne w przep≈Çywie pojedynczego ‚Äπzadania‚Ä∫‚Äî funkcje ≈ºƒÖdane przy u≈ºyciu ‚Äòuniksowego‚Äô ‚Äúsygna≈Çu‚Äù:
-// Tylko jedno ‚Äπzadanie‚Ä∫ w programie (‚Äπsterownik‚Ä∫ funkcji programu zewnƒôtrznego) mo≈ºe implementowaƒá ≈ºƒÖdania funkcji konkretnego (jednego) programu ‚Äüoux‚Äù uruchomionego w systemie operacyjnym.‚ÄÉObecnie w programie ‚Äübis‚Äù rozr√≥≈ºnianie program√≥w jest realizowane przez rozr√≥≈ºnianie nazw proces√≥w, tzn. nie jest uwzglƒôdniony przypadek, gdy program ‚Äüoux‚Äù posiada procesy podrzƒôdne.‚ÄÉ[To zdanie sprawdziƒá, bo co≈õ ju≈º by≈Ço zrobione.]‚ÄÉPonadto nie zosta≈Ço (dla optymalizacji) zaimplementowane rozpoznawanie programu typu ‚Äüoux‚Äù (uzupe≈Çniƒá o autoryzacjƒô potwierdzanƒÖ chwilowo?) oraz w≈Çasnego (wykluczaƒá u ≈∫r√≥d≈Ça), a wykonanie ≈ºƒÖdania funkcji do takiego programu nie jest dozwolone.
-//TODO RozwiƒÖzaƒá inaczej ‚Äúsubid‚Äù ‚Äπzada≈Ñ‚Ä∫ w wƒÖtku systemowym?
+// ìprocess_callîñ synchroniczne w przep≥ywie pojedynczego ãzadaniaõó funkcje øπdane przy uøyciu ëuniksowegoí ìsygna≥uî:
+// Tylko jedno ãzadanieõ w programie (ãsterownikõ funkcji programu zewnÍtrznego) moøe implementowaÊ øπdania funkcji konkretnego (jednego) programu "ouxî uruchomionego w systemie operacyjnym. Obecnie w programie "bisî rozrÛønianie programÛw jest realizowane przez rozrÛønianie nazw procesÛw, tzn. nie jest uwzglÍdniony przypadek, gdy program "ouxî posiada procesy podrzÍdne. [To zdanie sprawdziÊ, bo coú juø by≥o zrobione.] Ponadto nie zosta≥o (dla optymalizacji) zaimplementowane rozpoznawanie programu typu "ouxî (uzupe≥niÊ o autoryzacjÍ potwierdzanπ chwilowo?) oraz w≥asnego (wykluczaÊ u ürÛd≥a), a wykonanie øπdania funkcji do takiego programu nie jest dozwolone.
+//TODO RozwiπzaÊ inaczej ìsubidî ãzadaÒõ w wπtku systemowym?
 _internal
 I _X_var( flow, call_req );
 _internal
@@ -34,48 +34,35 @@ enum E_flow_Z_run_state
 , E_flow_Z_run_state_S_waiting_for_report
 , E_flow_Z_run_state_S_waiting_for_timer
 , E_flow_Z_run_state_S_waiting_for_call_reply
-    #ifdef E_flow_C_itimer_system_unblock_report
-, E_flow_Z_run_state_S_waiting_for_system_unblock_report
-    #endif
 , E_flow_Z_run_state_S_starting_by_task
 , E_flow_Z_run_state_S_stopping_by_task
 };
 struct E_flow_Q_task_Z
 { Pc exe_stack;
-  Z_clock_time run_state_time;
+  N run_state_time;
   Pc stack;
   Pc touched_stack;
     #ifdef C_line_report
   Pc proc_name;
     #endif
-  N run_state_object;
+  I run_state_object;
   N stack_size;
-    #ifdef E_flow_C_thread_system_unblock_reports
-  pthread_mutex_t *thread_flow_mutex;
+  HANDLE thread_flow_mutex;
   volatile B *thread_switch_back;
   P thread_proc_arg;
   void ( *thread_unblock_proc )(P);
-  pthread_t thread;
-    #endif
+  HANDLE thread;
   enum E_flow_Z_run_state run_state;
-    #ifdef E_flow_C_thread_system_unblock_reports
   unsigned U_R( type, system_unblock_report )   :1;
-    #endif
 };
-    #ifdef E_flow_C_thread_system_unblock_reports
-struct E_flow_Q_task_in_thread_I_thread_proc_Z_args
-{ stack_t alt_stack;
-  void (*proc)(P);
-};
-    #endif
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 struct E_flow_Q_report_Z
 { N uid;
   N reported_count;
 };
 struct E_flow_Q_timer_Z
-{ Z_clock_time left;
-  Z_clock_time period;
+{ N left;
+  N period;
   N lost_count;
   N uid;
   I task_to;
@@ -83,11 +70,11 @@ struct E_flow_Q_timer_Z
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 struct E_flow_Q_process_call_srv_Z
 { P shm;
-  pid_t process_id;
+  N process_id;
 };
 struct E_flow_Q_process_call_cli_Z
 { P shm;
-  pid_t process_id;
+  N process_id;
   int shm_id;
   I task_id;
   unsigned U_R( state, active )         :1;
@@ -108,28 +95,6 @@ E_flow_Q_task_I_granulation( void
     N ret = 0;
     for_each_out( 0, task_id_, E_base_S->E_flow_Q_task_S, E_mem_Q_tab )
     {   struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, task_id_ );
-            #ifdef E_flow_C_thread_system_unblock_reports
-        if( U_R( task->type, system_unblock_report ))
-        {
-                #if defined( __gnu_linux__ )
-            N ss_size = 2 * E_base_S->E_mem_S_page_size; //CONF
-                #elif defined( __FreeBSD__ ) || defined( __OpenBSD__ )
-            N ss_size = E_simple_Z_n_I_align_up_to_v2( MINSIGSTKSZ, E_base_S->E_mem_S_page_size ); //CONF
-                #else
-#error not implemented
-                #endif
-            if( granulation_u < ss_size )
-            {   ret--;
-                continue;
-            }
-            granulation_u -= ss_size;
-            N pthread_stack_min = E_simple_Z_n_I_align_up_to_v2( PTHREAD_STACK_MIN, E_base_S->E_mem_S_page_size );
-            if( granulation_u < pthread_stack_min )
-            {   ret--;
-                continue;
-            }
-        }
-            #endif
         if( granulation_u < E_base_S->E_mem_S_page_size )
         {   ret--;
             continue;
@@ -157,10 +122,8 @@ E_flow_Q_task_I_granulation( void
 I
 E_flow_Q_task_M( I *uid
 , void (*task_proc)(P)
-    #ifdef E_flow_C_thread_system_unblock_reports
 , P thread_proc_arg
 , B task_in_thread_kind
-    #endif
     #ifdef C_line_report
 , Pc task_proc_name
     #endif
@@ -170,46 +133,9 @@ E_flow_Q_task_M( I *uid
     : E_base_S->E_flow_Z_task_stacks_S_n_pages * E_base_S->E_mem_S_page_size;
     granulation_u /= E_mem_Q_tab_R_n( E_base_S->E_flow_Q_task_S );
     granulation_u = E_simple_Z_n_I_align_down_to_v2( granulation_u, E_base_S->E_mem_S_page_size );
-        #ifdef E_flow_C_thread_system_unblock_reports
-    struct E_flow_Q_task_in_thread_I_thread_proc_Z_args task_proc_args;
-    if( task_in_thread_kind )
-    {   task_proc_args = ( struct E_flow_Q_task_in_thread_I_thread_proc_Z_args )
-        { .alt_stack = ( stack_t )
-          { .ss_flags = 0
-              #if defined( __gnu_linux__ ) || defined( __FreeBSD__ )
-          , .ss_size = 2 * E_base_S->E_mem_S_page_size //CONF
-              #elif  defined( __OpenBSD__ )
-          , .ss_size = 3 * E_base_S->E_mem_S_page_size //CONF
-              #else
-#error not implemented
-              #endif
-          }
-        , .proc = task_proc
-        };
-        if( granulation_u < task_proc_args.alt_stack.ss_size )
-        {   if( thread_proc_arg )
-                W( thread_proc_arg );
-            GV_(NA); // Late instrumentation error: granulation unit too small because too many tasks in available memory.
-            return ~0;
-        }
-        granulation_u -= task_proc_args.alt_stack.ss_size;
-    }
-    N pthread_stack_min = E_simple_Z_n_I_align_up_to_v2( PTHREAD_STACK_MIN, E_base_S->E_mem_S_page_size );
-    if( task_in_thread_kind
-    && granulation_u < pthread_stack_min
-    )
+    if( granulation_u < E_base_S->E_mem_S_page_size )
     {   if( thread_proc_arg )
             W( thread_proc_arg );
-        GV_(NA); // Late instrumentation error: granulation unit too small because too many tasks in available memory.
-        return ~0;
-    }
-        #endif
-    if( granulation_u < E_base_S->E_mem_S_page_size )
-    {
-            #ifdef E_flow_C_thread_system_unblock_reports
-        if( thread_proc_arg )
-            W( thread_proc_arg );
-            #endif
         GV_(NA); // Late instrumentation error: granulation unit too small because too many tasks in available memory.
         return ~0;
     }
@@ -219,7 +145,7 @@ E_flow_Q_task_M( I *uid
             if( task->stack + task->stack_size - granulation_u <= task->touched_stack )
             {   N subtract = task->stack_size - granulation_u - E_base_S->E_mem_S_page_size;
                 if(subtract)
-                {   V0_( munmap( task->stack, subtract ));
+                {   V_( VirtualFree( task->stack, subtract, MEM_RELEASE ));
                     task->stack += subtract;
                     task->stack_size -= subtract;
                 }
@@ -227,111 +153,69 @@ E_flow_Q_task_M( I *uid
             {   GV_(NDFN); // Late instrumentation error: task stack larger than granulation unit.
                 N subtract = task->touched_stack - E_base_S->E_mem_S_page_size - task->stack;
                 if(subtract)
-                {   V0_( munmap( task->stack, subtract ));
+                {   V_( virtualFree( task->stack, subtract, MEM_RELEASE ));
                     task->stack += subtract;
                     task->stack_size -= subtract;
                 }
             }
     }
-    N stack_size = E_base_S->E_mem_S_page_size + granulation_u; // Jedna strona pamiƒôci ‚ÄúPROT_NONE‚Äù na poczƒÖtku stosu.
+    N stack_size = E_base_S->E_mem_S_page_size + granulation_u; // Jedna strona pamiÍci ìPROT_NONEî na poczπtku stosu.
     Pc stack;
-        #if defined( __gnu_linux__ )
-    V1p( stack = mmap( 0
-    , stack_size
-    , PROT_NONE
-    , MAP_PRIVATE
-    | MAP_ANONYMOUS | MAP_STACK | MAP_GROWSDOWN | MAP_UNINITIALIZED
-    , -1
-    , 0
-    ))
-        #elif defined( __FreeBSD__ ) || defined( __OpenBSD__ )
-    V1p( stack = mmap( 0
-    , stack_size
-    , PROT_READ | PROT_WRITE
-    , MAP_PRIVATE
-    | MAP_ANON | MAP_STACK
-    , -1
-    , 0
-    ))
-        #else
-#error not implemented
-        #endif
-    {
-            #ifdef E_flow_C_thread_system_unblock_reports
-        if( thread_proc_arg )
-            W( thread_proc_arg );
-            #endif
-        return ~0;
+    Pc exe_stack;
+    N touched_size;
+    Pc touched_stack;
+    if( !task_in_thread_kind )
+    {   V( stack = VirtualAlloc( 0
+        , stack_size
+        , MEM_RESERVE
+        , PAGE_NOACCESS
+        ))
+        {   if( thread_proc_arg )
+                W( thread_proc_arg );
+            return ~0;
+        }
+        exe_stack = stack + stack_size;
+        touched_size = E_base_S->E_mem_S_page_size;
+        touched_stack = exe_stack - touched_size;
+        V0( VirtualProtect( touched_stack
+        , touched_size
+        , PAGE_GUARD
+        ))
+        {   V_( VirtualFree( stack, 0, MEM_RELEASE ));
+            if( thread_proc_arg )
+                W( thread_proc_arg );
+            return ~0;
+        }
     }
-    Pc exe_stack = stack + stack_size;
-        #ifndef E_flow_C_thread_system_unblock_reports
-    N touched_size = E_base_S->E_mem_S_page_size;
-        #else
-    N touched_size = task_in_thread_kind ? pthread_stack_min : E_base_S->E_mem_S_page_size;
-        #endif
-    Pc touched_stack = exe_stack - touched_size;
-        #if defined( __gnu_linux__ )
-    V0( mprotect( touched_stack
-    , touched_size
-    , PROT_READ | PROT_WRITE
-    ))
-        #elif defined( __FreeBSD__ ) || defined( __OpenBSD__ )
-    V0( mprotect( stack
-    , stack_size - touched_size
-    , PROT_NONE
-    ))
-        #else
-#error not implemented
-        #endif
-    {   V0_( munmap( stack, stack_size ));
-            #ifdef E_flow_C_thread_system_unblock_reports
-        if( thread_proc_arg )
-            W( thread_proc_arg );
-            #endif
-        return ~0;
-    }
-    struct E_flow_Q_task_Z *task;
-    I task_id = E_mem_Q_tab_I_segv_add_begin( E_base_S->E_flow_Q_task_S, &task );
+    I task_id = E_mem_Q_tab_I_segv_add_begin( E_base_S->E_flow_Q_task_S );
+    struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, task_id );
     task->stack = stack;
     task->touched_stack = touched_stack;
         #ifdef C_line_report
     task->proc_name = task_proc_name;
         #endif
-    E_mem_Q_tab_I_segv_add_end( E_base_S->E_flow_Q_task_S, task_id, task );
     task->run_state = E_flow_Z_run_state_S_starting_by_task;
     task->stack_size = stack_size;
-        #ifdef E_flow_C_thread_system_unblock_reports
     U_R( task->type, system_unblock_report ) = task_in_thread_kind;
     if( task_in_thread_kind )
     {   task->thread_proc_arg = thread_proc_arg;
-        pthread_mutex_t *thread_flow_mutex = E_mem_Q_blk_M_align( sizeof( *thread_flow_mutex ), sizeof(N32) );
-        if( !thread_flow_mutex )
+        HANDLE thread_flow_mutex;
+        V( thread_flow_mutex = CreateMutex( 0, FALSE, 0 ))
         {   _tasks_table_begin;
             E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
             _tasks_table_end;
-            V0_( munmap( stack, stack_size ));
-            if( thread_proc_arg )
-                W( thread_proc_arg );
-            return ~0;
-        }
-        Vr( pthread_mutex_init( thread_flow_mutex, 0 ))
-        {   W( thread_flow_mutex );
-            _tasks_table_begin;
-            E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
-            _tasks_table_end;
-            V0_( munmap( stack, stack_size ));
+            V_( VirtualFree( stack, 0, MEM_RELEASE ));
             if( thread_proc_arg )
                 W( thread_proc_arg );
             return ~0;
         }
         B *M_( thread_switch_back );
         if( !thread_switch_back )
-        {   Vr_( pthread_mutex_destroy( thread_flow_mutex ));
-            W( thread_flow_mutex );
+        {   V_( CloseHandle( thread_flow_mutex ));
             _tasks_table_begin;
             E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
             _tasks_table_end;
-            V0_( munmap( stack, stack_size ));
+            V_( VirtualFree( stack, 0, MEM_RELEASE ));
             if( thread_proc_arg )
                 W( thread_proc_arg );
             return ~0;
@@ -339,162 +223,42 @@ E_flow_Q_task_M( I *uid
         task->thread_flow_mutex = thread_flow_mutex;
         task->thread_switch_back = thread_switch_back;
         *thread_switch_back = no;
-        task_proc_args.alt_stack.ss_size += E_base_S->E_mem_S_page_size;
-            #if defined( __gnu_linux__ )
-        V1p( task_proc_args.alt_stack.ss_sp = mmap( 0
-        , task_proc_args.alt_stack.ss_size
-        , PROT_READ | PROT_WRITE
-        , MAP_PRIVATE
-        | MAP_ANONYMOUS | MAP_STACK | MAP_GROWSDOWN | MAP_UNINITIALIZED
-        , -1
-        , 0
-        ))
-            #elif defined( __FreeBSD__ ) || defined( __OpenBSD__ )
-        V1p( task_proc_args.alt_stack.ss_sp = mmap( 0
-        , task_proc_args.alt_stack.ss_size
-        , PROT_READ | PROT_WRITE
-        , MAP_PRIVATE
-        | MAP_ANON | MAP_STACK
-        , -1
-        , 0
-        ))
-            #else
-#error not implemented
-            #endif
-        {   W( thread_switch_back );
-            Vr_( pthread_mutex_destroy( thread_flow_mutex ));
-            W( thread_flow_mutex );
-            _tasks_table_begin;
-            E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
-            _tasks_table_end;
-            V0_( munmap( stack, stack_size ));
-            if( thread_proc_arg )
-                W( thread_proc_arg );
-            return ~0;
-        }
-        V0( mprotect( task_proc_args.alt_stack.ss_sp
-        , E_base_S->E_mem_S_page_size
-        , PROT_NONE
-        ))
-        {   V0_( munmap( task_proc_args.alt_stack.ss_sp, task_proc_args.alt_stack.ss_size ));
-            W( thread_switch_back );
-            Vr_( pthread_mutex_destroy( thread_flow_mutex ));
-            W( thread_flow_mutex );
-            _tasks_table_begin;
-            E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
-            _tasks_table_end;
-            V0_( munmap( stack, stack_size ));
-            if( thread_proc_arg )
-                W( thread_proc_arg );
-            return ~0;
-        }
-        pthread_attr_t thread_attr;
-        Vr( pthread_attr_init( &thread_attr ))
-        {   V0_( munmap( task_proc_args.alt_stack.ss_sp, task_proc_args.alt_stack.ss_size ));
-            W( thread_switch_back );
-            Vr_( pthread_mutex_destroy( thread_flow_mutex ));
-            W( thread_flow_mutex );
-            _tasks_table_begin;
-            E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
-            _tasks_table_end;
-            V0_( munmap( stack, stack_size ));
-            if( thread_proc_arg )
-                W( thread_proc_arg );
-            return ~0;
-        }
-        Vr( pthread_attr_setstack( &thread_attr, touched_stack, touched_size ))
-        {   Vr_( pthread_attr_destroy( &thread_attr ));
-            V0_( munmap( task_proc_args.alt_stack.ss_sp, task_proc_args.alt_stack.ss_size ));
-            W( thread_switch_back );
-            Vr_( pthread_mutex_destroy( thread_flow_mutex ));
-            W( thread_flow_mutex );
-            _tasks_table_begin;
-            E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
-            _tasks_table_end;
-            V0_( munmap( stack, stack_size ));
-            if( thread_proc_arg )
-                W( thread_proc_arg );
-            return ~0;
-        }
-        Vr( pthread_sigmask( SIG_SETMASK, &E_base_S->E_flow_Z_sigset_S_process_exec, 0 ))
-        {   Vr_( pthread_attr_destroy( &thread_attr ));
-            V0_( munmap( task_proc_args.alt_stack.ss_sp, task_proc_args.alt_stack.ss_size ));
-            W( thread_switch_back );
-            Vr_( pthread_mutex_destroy( thread_flow_mutex ));
-            W( thread_flow_mutex );
-            _tasks_table_begin;
-            E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
-            _tasks_table_end;
-            V0_( munmap( stack, stack_size ));
-            if( thread_proc_arg )
-                W( thread_proc_arg );
-            return ~0;
-        }
         I task_id_ = E_base_S->E_flow_Q_task_S_current;
         E_base_S->E_flow_Q_task_S_current = task_id;
-        Vr( pthread_create( &task->thread, &thread_attr, E_flow_Q_task_in_thread_I_thread_proc, &task_proc_args ))
+        N thread_id;
+        V( task->thread = CreateThread( 0, 0, E_flow_Q_task_in_thread_I_thread_proc, task_proc, 0, &thread_id ))
         {   E_base_S->E_flow_Q_task_S_current = task_id_;
-            Vr_( pthread_sigmask( SIG_SETMASK, &E_base_S->E_flow_Z_sigset_S_empty, 0 ));
-            Vr_( pthread_attr_destroy( &thread_attr ));
-            V0_( munmap( task_proc_args.alt_stack.ss_sp, task_proc_args.alt_stack.ss_size ));
             W( thread_switch_back );
-            Vr_( pthread_mutex_destroy( thread_flow_mutex ));
-            W( thread_flow_mutex );
+            V_( CloseHandle( thread_flow_mutex ));
             _tasks_table_begin;
             E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
             _tasks_table_end;
-            V0_( munmap( stack, stack_size ));
+            V_( VirtualFree( stack, 0, MEM_RELEASE ));
             if( thread_proc_arg )
                 W( thread_proc_arg );
             return ~0;
         }
-        Vr_( pthread_sigmask( SIG_SETMASK, &E_base_S->E_flow_Z_sigset_S_process_call_reply, 0 ));
-        Vr_( pthread_attr_destroy( &thread_attr ));
-            #if defined( C_line_report ) && defined( __gnu_linux__ )
-        task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, task_id );
-        Pc s = E_text_Z_s_R_c_search_( task->proc_name, 'E' ) + 2;
-        Pc s_end = E_text_Z_s0_R_end_le( s, 16 );
-        if( *s_end )
-        {   s = E_text_Z_s_R_c_search_( task->proc_name, 'D' ) + 2;
-            s_end = E_text_Z_s0_R_end_le( s, 16 );
-        }
-        B b = no;
-        if( *s_end )
-        {   Pc s_ = M( s_end + 1 - s + 1 );
-            if( s_ )
-            {   E_text_Z_s_P_s_copy_0( s_, s, s_end + 1 );
-                s = s_;
-            }else
-            {   GV_(NA);
-                b = yes;
-            }
-        }
-        if( !b )
-        {   Vr( pthread_setname_np( task->thread, s )){}
-            if( *s_end )
-                W(s);
-        }
-            #endif
-        O{  V0_( sched_yield() );
-            Vr_( pthread_mutex_lock( thread_flow_mutex ));
+        O{  V_( SwitchToThread() );
+            V_( WaitForSingleObject( thread_flow_mutex ));
             if( *thread_switch_back )
                 break;
-            Vr_( pthread_mutex_unlock( thread_flow_mutex ));
+            Vr_( ReleaseMutex( thread_flow_mutex ));
         }
-        Vr_( pthread_sigmask( SIG_UNBLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply, 0 ));
         task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, task_id );
         if( task->run_state != E_flow_Z_run_state_S_ready )
         {   E_base_S->E_flow_Q_task_S_current = task_id_;
-            Vr_( pthread_mutex_unlock( thread_flow_mutex ));
-            Vr_( pthread_join( task->thread, 0 ));
-            V0_( munmap( task_proc_args.alt_stack.ss_sp, task_proc_args.alt_stack.ss_size ));
-            W( thread_switch_back );
-            Vr_( pthread_mutex_destroy( thread_flow_mutex ));
-            W( thread_flow_mutex );
+            Vr_( ReleaseMutex( thread_flow_mutex ));
+            O{  V_( SwitchToThread() );
+                N exit_code;
+                V_( GetExitCodeThread( thread_flow_mutex, &exit_code ));
+                if( exit_code != STILL_ACTIVE )
+                    break;
+            }
+            V_( CloseHandle( thread_flow_mutex ));
             _tasks_table_begin;
             E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
             _tasks_table_end;
-            V0_( munmap( stack, stack_size ));
+            V_( VirtualFree( stack, 0, MEM_RELEASE ));
             if( thread_proc_arg )
                 W( thread_proc_arg );
             return ~0;
@@ -503,16 +267,12 @@ E_flow_Q_task_M( I *uid
         E_base_S->E_flow_Q_task_S_current = task_id_;
         return task_id;
     }
-        #endif
     task->exe_stack = 0;
     task->run_state_object = E_base_S->E_flow_Q_task_S_current;
-        #ifdef E_flow_C_thread_system_unblock_reports
-    task->thread = pthread_self();
-        #endif
     P *p = ( P * )exe_stack - 1;
     *p = (P)&E_flow_Q_task_I_stop;
     E_flow_Q_task_I_switch( task_id );
-    if( !task->exe_stack ) // W bloku‚Äì nowe ‚Äπzadanie‚Ä∫: nic nie zmieniaƒá na stosie nale≈ºƒÖcym do prze≈ÇƒÖczanego.
+    if( !task->exe_stack ) // W blokuñ nowe ãzadanieõ: nic nie zmieniaÊ na stosie naleøπcym do prze≥πczanego.
     {   __asm__ volatile (
         #if defined( __i386__ ) || defined( __x86_64__ )
             #if defined( __i386__ )
@@ -521,7 +281,7 @@ E_flow_Q_task_M( I *uid
         "\n" "mov   %0,%%rsp"
             #endif
         "\n" "jmp   *%1"
-        //NKN Pozostaje zagwarantowanie, ≈ºe procedura ‚Äπzadania‚Ä∫ nie bƒôdzie nigdy oczekiwaƒá (ze wzglƒôdu na ‚Äòabi‚Äô) niczego tutaj nie zapewnianego przez ‚Äòcallera‚Äô (m.in. rezerwacji obszaru na stosie, gdy argument√≥w i tak nie ma przekazywanych).
+        //NKN Pozostaje zagwarantowanie, øe procedura ãzadaniaõ nie bÍdzie nigdy oczekiwaÊ (ze wzglÍdu na ëabií) niczego tutaj nie zapewnianego przez ëcalleraí (m.in. rezerwacji obszaru na stosie, gdy argumentÛw i tak nie ma przekazywanych).
         :
         : "r" (p), "r" ( task_proc )
                 #if defined( __i386__ )
@@ -538,8 +298,7 @@ E_flow_Q_task_M( I *uid
     *uid = task_id;
     return task_id;
 }
-    #ifdef E_flow_C_thread_system_unblock_reports
-// Nie wolno tworzyƒá ‚ÄúwƒÖtku‚Äù/‚Äòinstancji‚Äô tego samego ‚Äπzadania‚Ä∫ w bloku startowym (innej ‚Äòinstancji‚Äô) tego samego ‚Äπzadania‚Ä∫.‚ÄÉCzyli nie wolno tworzyƒá wog√≥le w takim ‚Äπzadaniu‚Ä∫, poniewa≈º ‚Äπzadania‚Ä∫ tworzy siƒô w bloku startowym.
+// Nie wolno tworzyÊ ìwπtkuî/ëinstancjií tego samego ãzadaniaõ w bloku startowym (innej ëinstancjií) tego samego ãzadaniaõ. Czyli nie wolno tworzyÊ w ogÛle w takim ãzadaniuõ, poniewaø ãzadaniaõ tworzy siÍ w bloku startowym.
 I
 E_flow_Q_task_M_thread( I *uid
 , I subid
@@ -573,57 +332,38 @@ E_flow_Q_task_M_thread( I *uid
     *( I * )E_mem_Q_tab_R( *tab_subid, subid ) = id;
     return *uid;
 }
-// Procedura ‚Äπzada≈Ñ‚Ä∫ w wƒÖtku systemowym.
+// Procedura ãzadaÒõ w wπtku systemowym.
 _internal
 P
-E_flow_Q_task_in_thread_I_thread_proc( P args_
+E_flow_Q_task_in_thread_I_thread_proc( P arg
 ){  Dh_();
     struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
-    Vr( pthread_sigmask( SIG_UNBLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply, 0 ))
-    {   *task->thread_switch_back = yes;
-        return 0;
-    }
-    Vr( pthread_mutex_lock( task->thread_flow_mutex ))
-    {   *task->thread_switch_back = yes;
-        return 0;
-    }
-    struct E_flow_Q_task_in_thread_I_thread_proc_Z_args *args = args_;
-    V0( sigaltstack( &args->alt_stack, 0 ))
-    {   *task->thread_switch_back = yes;
-        Vr_( pthread_mutex_unlock( task->thread_flow_mutex ));
-        return 0;
-    }
-    args->proc( task->thread_proc_arg );
+    WaitForSingleObject( task->thread_flow_mutex );
+    void (*proc)(P);
+    proc = arg;
+    proc( task->thread_proc_arg );
     task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
-    Vr_( pthread_mutex_unlock( task->thread_flow_mutex ));
-    stack_t alt_stack;
-    V0_( sigaltstack( 0, &alt_stack ));
-    V0_( munmap( alt_stack.ss_sp, alt_stack.ss_size ));
+    ReleaseMutex( task->thread_flow_mutex );
     return 0;
 }
-    #endif
-// ‚ÄπZadanie‚Ä∫ wykonuje to przed rozpoczƒôciƒôm swojej pƒôtli; w instrukcji ‚ÄúI_D‚Äù.
+// ãZadanieõ wykonuje to przed rozpoczÍciÍm swojej pÍtli; w instrukcji ìI_Dî.
 B
 E_flow_Q_task_I_begin( void
 ){  struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
     task->run_state = E_flow_Z_run_state_S_ready;
-        #ifdef E_flow_C_thread_system_unblock_reports
     if( U_R( task->type, system_unblock_report ))
     {   B *thread_switch_back = task->thread_switch_back;
         *thread_switch_back = yes;
-        pthread_mutex_t *thread_flow_mutex = task->thread_flow_mutex;
-        Vr_( pthread_sigmask( SIG_BLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply, 0 ));
-        Vr_( pthread_mutex_unlock( thread_flow_mutex ));
-        O{  V0_( sched_yield() );
-            pthread_mutex_lock( thread_flow_mutex );
+        HANDLE thread_flow_mutex = task->thread_flow_mutex;
+        V_( ReleaseMutex( thread_flow_mutex ));
+        O{  V0_( SwitchToThread() );
+            WaitForSingleObject( thread_flow_mutex );
             if( !*thread_switch_back )
                 break;
-            Vr_( pthread_mutex_unlock( thread_flow_mutex ));
+            V_( ReleaseMutex( thread_flow_mutex ));
         }
-        Vr_( pthread_sigmask( SIG_UNBLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply, 0 ));
     }else
-        #endif
-        E_flow_Q_task_I_switch( task->run_state_object ); // Powr√≥t do ‚Äπzadania‚Ä∫ uruchamiajƒÖcego bie≈ºƒÖce.
+        E_flow_Q_task_I_switch( task->run_state_object ); // PowrÛt do ãzadaniaõ uruchamiajπcego bieøπce.
     task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
     return task->run_state == E_flow_Z_run_state_S_stopping_by_task;
 }
@@ -634,36 +374,33 @@ E_flow_Q_task_W( I *uid
     struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, id );
     task->run_state = E_flow_Z_run_state_S_stopping_by_task;
     task->run_state_object = E_base_S->E_flow_Q_task_S_current;
-        #ifdef E_flow_C_thread_system_unblock_reports
     if( U_R( task->type, system_unblock_report ))
     {   if( *task->thread_switch_back )
             task->thread_unblock_proc( task->thread_proc_arg );
         E_base_S->switch_back_try = no;
-        pthread_t thread = task->thread;
+        HANDLE thread = task->thread;
         E_base_S->E_flow_Q_task_S_current = id;
-        Vr_( pthread_sigmask( SIG_BLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply, 0 ));
-        Vr_( pthread_mutex_unlock( task->thread_flow_mutex ));
-        Vr_( pthread_join( thread, 0 ));
-        Vr_( pthread_sigmask( SIG_UNBLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply, 0 ));
+        V_( ReleaseMutex( task->thread_flow_mutex ));
+        O{  V_( SwitchToThread() );
+            N exit_code;
+            V_( GetExitCodeThread( thread_flow_mutex, &exit_code ));
+            if( exit_code != STILL_ACTIVE )
+                break;
+        }
         task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, id );
         E_base_S->E_flow_Q_task_S_current = task->run_state_object;
-        Vr_( pthread_mutex_destroy( task->thread_flow_mutex ));
-        W( task->thread_flow_mutex );
+        V_( CloseHandle( task->thread_flow_mutex ));
         W( task->thread_switch_back );
         if( task->thread_proc_arg )
             W( task->thread_proc_arg );
     }else
-        #endif
-    {   E_flow_Q_task_I_switch(id); // Prze≈ÇƒÖcz tylko po to, by ‚Äπzadanie‚Ä∫ zwalniane zwolni≈Ço zasoby; r√≥wnie≈º stosowo, hierarchicznie z powrotem prze≈ÇƒÖczajƒÖc przy zwalnianiu ‚Äπzada≈Ñ‚Ä∫ przez siebie uruchomionych.
+    {   E_flow_Q_task_I_switch(id); // Prze≥πcz tylko po to, by ãzadanieõ zwalniane zwolni≥o zasoby; rÛwnieø stosowo, hierarchicznie z powrotem prze≥πczajπc przy zwalnianiu ãzadaÒõ przez siebie uruchomionych.
         task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, id );
     }
     E_flow_Q_task_I_touch_stack();
-    V0_( munmap( task->stack, task->stack_size ));
-    _tasks_table_begin;
+    V_( VirtualFree( task->stack, 0, MEM_RELEASE ));
     E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, id );
-    _tasks_table_end;
 }
-    #ifdef E_flow_C_thread_system_unblock_reports
 void
 E_flow_Q_task_W_thread( I *uid
 , I subid
@@ -677,21 +414,20 @@ E_flow_Q_task_W_thread( I *uid
     }
     E_flow_Q_task_W(&id);
 }
-    #endif
-// ‚ÄπZadanie‚Ä∫ wykonuje to po wyj≈õciu z procedury; ma adres powrotu na stosie.
+// ãZadanieõ wykonuje to po wyjúciu z procedury; ma adres powrotu na stosie.
 _internal
 void
 E_flow_Q_task_I_stop( void
 ){  struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
-    E_flow_Q_task_I_switch( task->run_state_object ); // Powr√≥t do ‚Äπzadania‚Ä∫ zwalniajƒÖcego bie≈ºƒÖce.
+    E_flow_Q_task_I_switch( task->run_state_object ); // PowrÛt do ãzadaniaõ zwalniajπcego bieøπce.
     _unreachable;
 }
 //------------------------------------------------------------------------------
-// Wymuszenie ‚Äòprealokacji‚Äô ‚Äústosu‚Äù ‚Äπzadania‚Ä∫, by nie zosta≈Ça wywo≈Çana procedura obs≈Çugi ‚Äúsygna≈Çu‚Äù ‚Äòuniksowego‚Äô ‚ÄúSEGV‚Äù w trakcie zmieniania pamiƒôci ‚Äòalokowanej‚Äô dynamicznie, z kt√≥rej korzysta.
+// Wymuszenie ëprealokacjií ìstosuî ãzadaniaõ, by nie zosta≥a wywo≥ana procedura obs≥ugi ìsygna≥uî ëuniksowegoí ìSEGVî w trakcie zmieniania pamiÍci ëalokowanejí dynamicznie, z ktÛrej korzysta.
 _internal
 void
 E_flow_Q_task_I_touch_stack( void
-){  if( !E_base_S->E_flow_Q_task_S_current ) // ‚ÄπZadanie‚Ä∫ inne ni≈º ‚Äúmain‚Äù, poniewa≈º to ma stos zarzƒÖdzany przez system operacyjny.
+){  if( !E_base_S->E_flow_Q_task_S_current ) // ãZadanieõ inne niø ìmainî, poniewaø to ma stos zarzπdzany przez system operacyjny.
         return;
     N pages = 4; //CONF
     if( !pages )
@@ -710,7 +446,7 @@ E_flow_Q_task_I_touch_stack( void
     #endif
     : "=r" (sp)
     );
-    // Dlatego kolejno ‚Äústrony‚Äù pamiƒôci, poniewa≈º jest tylko jedna zabezpieczajƒÖca na dole ‚Äústosu‚Äù ‚Äπzadania‚Ä∫.
+    // Dlatego kolejno ìstronyî pamiÍci, poniewaø jest tylko jedna zabezpieczajπca na dole ìstosuî ãzadaniaõ.
     while( pages-- )
     {   sp -= E_base_S->E_mem_S_page_size;
         *sp = 0;
@@ -766,7 +502,7 @@ E_flow_Q_report_I_wait( I id
             //)
                 //task->run_state = E_flow_Z_run_state_S_ready;
         //}
-        ret = no; // Nie wywo≈Çuje ‚Äúschedule‚Äù, poniewa≈º w prze≈ÇƒÖczanym tylko w oznaczonych punktach przep≈Çywie wykonania‚Äî bie≈ºƒÖce ‚Äπzadanie‚Ä∫ mog≈Ço umo≈ºliwiƒá zaistnienie ‚Äπraportu‚Ä∫, na kt√≥ry czeka, tylko wtedy, je≈õli prze≈ÇƒÖcza do innych ‚Äπzada≈Ñ‚Ä∫ ¬∑w innych punktach ni≈º to oczekiwanie na ‚Äπraport‚Ä∫¬∑, wiƒôc po co czekaƒá, skoro nie zaburza cyklu prze≈ÇƒÖczania ‚Äπzada≈Ñ‚Ä∫, a tylko w implementacji w≈Çasnego ‚Äπzadania‚Ä∫ zmienia na z≈Ço≈ºonƒÖ (przesuniƒôtƒÖ) sekwencjƒô prze≈ÇƒÖczania.
+        ret = no; // Nie wywo≥uje ìscheduleî, poniewaø w prze≥πczanym tylko w oznaczonych punktach przep≥ywie wykonaniaó bieøπce ãzadanieõ mog≥o umoøliwiÊ zaistnienie ãraportuõ, na ktÛry czeka, tylko wtedy, jeúli prze≥πcza do innych ãzadaÒõ ∑w innych punktach niø to oczekiwanie na ãraportõ∑, wiÍc po co czekaÊ, skoro nie zaburza cyklu prze≥πczania ãzadaÒõ, a tylko w implementacji w≥asnego ãzadaniaõ zmienia na z≥oøonπ (przesuniÍtπ) sekwencjÍ prze≥πczania.
     }else
     {   struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
         task->run_state = E_flow_Z_run_state_S_waiting_for_report;
@@ -802,8 +538,8 @@ E_flow_Q_timer_M( N period
     if( E_mem_Q_tab_R_n( E_base_S->E_flow_Q_timer_S ) != 1 )
     {   for_each_out( timer_id, timer_id_, E_base_S->E_flow_Q_timer_S, E_mem_Q_tab )
         {   struct E_flow_Q_timer_Z *timer_ = E_mem_Q_tab_R( E_base_S->E_flow_Q_timer_S, timer_id_ );
-            if( _timerisset( &timer_->period ) // Jest co najmniej jeden ‚Äπcykler‚Ä∫.
-            || _timerisset( &timer_->left ) // Jest co najmniej jeden wzbudzony ‚Äπimpulsator‚Ä∫.
+            if( _timerisset( &timer_->period ) // Jest co najmniej jeden ãcyklerõ.
+            || _timerisset( &timer_->left ) // Jest co najmniej jeden wzbudzony ãimpulsatorõ.
             )
             {   _timeradd( &tv, &timer->period, &tv );
                 if( _timercmp( &tv, <, &E_base_S->E_flow_Q_timer_S_next_real_time ))
@@ -925,7 +661,7 @@ E_flow_Q_impulser_I_deactivate( I id
     _timerover( &E_base_S->E_flow_Q_timer_S_next_real_time );
 }
 //------------------------------------------------------------------------------
-//NDFN Dodaƒá ‚Äúlost_count‚Äù?
+//NDFN DodaÊ ìlost_countî?
 B
 E_flow_Q_impulser_I_wait( I id
 ){  struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
@@ -934,7 +670,6 @@ E_flow_Q_impulser_I_wait( I id
     return E_flow_Q_task_I_schedule();
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #ifdef E_flow_C_thread_system_unblock_reports
 void
 E_flow_Q_thread_system_unblock_report_M( void ( *thread_unblock_proc )(P)
 , pthread_mutex_t **thread_flow_mutex
@@ -974,39 +709,14 @@ E_flow_Q_thread_system_unblock_report_I_unblock( I task_uid
     struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, *( I * )E_mem_Q_tab_R( *tab_subid, task_subid ));
     task->thread_unblock_proc( task->thread_proc_arg );
 }
-    #endif
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    #ifdef E_flow_C_itimer_system_unblock_report
-void
-E_flow_Q_itimer_system_unblock_report_M( B (*sigsuspend_)( sigset_t * )
-, void (*setitimer_)( Z_clock_time * )
-){  E_base_S->E_flow_Z_itimer_system_unblock_report_I_sigsuspend = sigsuspend_;
-    E_base_S->E_flow_Z_itimer_system_unblock_report_I_setitimer = setitimer_;
-    E_base_S->E_flow_Z_itimer_system_unblock_report_S_task_id = E_base_S->E_flow_Q_task_S_current;
-}
-void
-E_flow_Q_itimer_system_unblock_report_W( void
-){  E_base_S->E_flow_Z_itimer_system_unblock_report_I_sigsuspend = 0;
-    E_base_S->E_flow_Z_itimer_system_unblock_report_I_setitimer = 0;
-}
-//------------------------------------------------------------------------------
-B
-E_flow_Q_itimer_system_unblock_report_I_wait( void
-){  struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
-    task->run_state = E_flow_Z_run_state_S_waiting_for_system_unblock_report;
-    return E_flow_Q_task_I_schedule();
-}
-    #endif
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Ka≈ºde ‚Äπzadanie‚Ä∫ po wywo≈Çaniu ‚ÄúE_flow_Q_task_I_schedule‚Äù i po prze≈ÇƒÖczeniu w tej procedurze do innego ‚Äπzadania‚Ä∫ (‚ÄúE_flow_Q_task_I_switch‚Äù) czeka przed instrukcjƒÖ powrotu z tej procedury, by kontynuowaƒá w miejscu wywo≈Çania i ewentualnie zako≈Ñczyƒá w≈Çasne ‚Äπzadanie‚Ä∫ po powrocie.
+// Kaøde ãzadanieõ po wywo≥aniu ìE_flow_Q_task_I_scheduleî i po prze≥πczeniu w tej procedurze do innego ãzadaniaõ (ìE_flow_Q_task_I_switchî) czeka przed instrukcjπ powrotu z tej procedury, by kontynuowaÊ w miejscu wywo≥ania i ewentualnie zakoÒczyÊ w≥asne ãzadanieõ po powrocie.
 __attribute__ ((__noinline__,__returns_twice__,__hot__))
 B
 E_flow_Q_task_I_schedule( void
 ){  _forced_statement;
-        #ifdef E_flow_C_thread_system_unblock_reports
     I schedule_task_id = E_base_S->E_flow_Q_task_S_current;
 Loop:
-        #endif
     O{  if( U_E( E_base_S->E_flow_S_signal, exit ))
         {
                 #ifdef C_middle_code
@@ -1014,18 +724,14 @@ Loop:
                 #endif
             struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, 0 );
             task->run_state = E_flow_Z_run_state_S_stopping_by_task;
-                #ifdef E_flow_C_thread_system_unblock_reports
             if( E_base_S->E_flow_Q_task_S_current != schedule_task_id )
                 E_base_S->E_flow_Q_task_S_current = schedule_task_id;
             if( E_base_S->E_flow_Q_task_S_current )
-                #endif
             {   E_flow_Q_task_I_switch(0);
                 task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
                 return task->run_state == E_flow_Z_run_state_S_stopping_by_task;
             }
-                #ifdef E_flow_C_thread_system_unblock_reports
             return yes;
-                #endif
         }
         if( U_E( E_base_S->E_flow_S_signal, call_req ))
             X_F( flow, call_req );
@@ -1035,7 +741,6 @@ Loop:
         _timerover( &next_real_time );
         Z_clock_time tv;
         _gettime( &tv );
-        _sigprocmask( SIG_BLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply_pong, 0 );
         for_each( call_id, E_base_S->E_flow_Q_process_call_cli_S, E_mem_Q_tab )
         {   struct E_flow_Q_process_call_cli_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_cli_S, call_id );
             if( !U_R( call->state, active ))
@@ -1059,24 +764,23 @@ Loop:
                 }
             }
         }
-        _sigprocmask( SIG_UNBLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply_pong, 0 );
-        if( U_E( E_base_S->E_flow_S_signal, time ) // Na pewno poni≈ºsza linia, bo przychodzi z obudzenia po up≈Çywie tego czasu.
-        || !_timercmp( &tv, <, &E_base_S->E_flow_Q_timer_S_next_real_time ) // Je≈õli nie przychodzi z obudzenia, a z wywo≈Çania w kt√≥rym≈õ ‚Äπzadaniu‚Ä∫, to trzeba sprawdziƒá najbli≈ºszy czas ‚Äπcykler√≥w>.
-        ) // Czy trzeba uaktualniƒá kolejne czasy ‚Äπcykler√≥w‚Ä∫.
+        if( U_E( E_base_S->E_flow_S_signal, time ) // Na pewno poniøsza linia, bo przychodzi z obudzenia po up≥ywie tego czasu.
+        || !_timercmp( &tv, <, &E_base_S->E_flow_Q_timer_S_next_real_time ) // Jeúli nie przychodzi z obudzenia, a z wywo≥ania w ktÛrymú ãzadaniuõ, to trzeba sprawdziÊ najbliøszy czas ãcyklerÛw>.
+        ) // Czy trzeba uaktualniÊ kolejne czasy ãcyklerÛwõ.
         {   Z_clock_time elapsed_time;
             _timersub( &tv, &E_base_S->E_flow_Q_timer_S_last_real_time, &elapsed_time );
-            //NDFN Uzupe≈Çniƒá o jakie≈õ przewidywanie ‚Äòoverhead‚Äô na podstawie poprzedniego, by wyeliminowaƒá mo≈ºliwo≈õƒá powtarzania pƒôtli w pesymistycznym przypadku dla ka≈ºdego ‚Äπcyklera‚Ä∫?‚ÄÉAle obliczaƒá ten czas tylko wtedy, je≈ºeli ten fragment nie bƒôdzie m√≥g≈Ç byƒá wyw≈Çaszczony z wykonywania w czasie rzeczywistym (wszystkie przerwania wy≈ÇƒÖczone).
+            //NDFN Uzupe≥niÊ o jakieú przewidywanie ëoverheadí na podstawie poprzedniego, by wyeliminowaÊ moøliwoúÊ powtarzania pÍtli w pesymistycznym przypadku dla kaødego ãcykleraõ? Ale obliczaÊ ten czas tylko wtedy, jeøeli ten fragment nie bÍdzie mÛg≥ byÊ wyw≥aszczony z wykonywania w czasie rzeczywistym (wszystkie przerwania wy≥πczone).
             O{  B some_timer_is_active = no, some_timer_has_deactivated = no;
                 B some_task_got_ready = no;
                 Z_clock_time suspend_time;
                 _timerover( &suspend_time );
                 for_each( timer_id, E_base_S->E_flow_Q_timer_S, E_mem_Q_tab )
                 {   struct E_flow_Q_timer_Z *timer = E_mem_Q_tab_R( E_base_S->E_flow_Q_timer_S, timer_id );
-                    if( _timerisset( &timer->period )) // ‚Äπcykler‚Ä∫.
-                    {   if( !_timercmp( &elapsed_time, <, &timer->left )) // ‚Äπcykler‚Ä∫ wykona≈Ç obieg‚Äî ‚Äπzadanie‚Ä∫ do wznowienia.
+                    if( _timerisset( &timer->period )) // ãcyklerõ.
+                    {   if( !_timercmp( &elapsed_time, <, &timer->left )) // ãcyklerõ wykona≥ obiegó ãzadanieõ do wznowienia.
                         {   Z_clock_time overlate_time;
                             _timersub( &elapsed_time, &timer->left, &overlate_time );
-                            if( !_timercmp( &overlate_time, <, &timer->period )) // ‚Äπcykler‚Ä∫ wykona≈Ç wiƒôcej ni≈º jeden obieg.
+                            if( !_timercmp( &overlate_time, <, &timer->period )) // ãcyklerõ wykona≥ wiÍcej niø jeden obieg.
                             {   do
                                 {   timer->lost_count++;
                                     _timersub( &overlate_time, &timer->period, &overlate_time );
@@ -1098,7 +802,7 @@ Loop:
                         {   suspend_time = timer->left;
                             some_timer_is_active = yes;
                         }
-                    }else if( _timerisset( &timer->left )) // Aktywowany ‚Äπimpulsator‚Ä∫.
+                    }else if( _timerisset( &timer->left )) // Aktywowany ãimpulsatorõ.
                     {   if( !_timercmp( &elapsed_time, <, &timer->left ))
                         {   _timerclear( &timer->left );
                             struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, timer->task_to );
@@ -1107,7 +811,7 @@ Loop:
                             )
                             {   task->run_state = E_flow_Z_run_state_S_ready;
                                 some_task_got_ready = yes;
-                            } // Narazie‚Äì je≈õli nie mo≈ºe wznowiƒá ‚Äπzadania‚Ä∫, to gubi impuls.
+                            } // Narazieñ jeúli nie moøe wznowiÊ ãzadaniaõ, to gubi impuls.
                             some_timer_has_deactivated = yes;
                         }else
                         {   _timersub( &timer->left, &elapsed_time, &timer->left );
@@ -1126,10 +830,10 @@ Loop:
                 Z_clock_time tv_2;
                 _gettime( &tv_2 );
                 _timersub( &tv_2, &tv, &elapsed_time );
-                if( _timercmp( &elapsed_time, <, &suspend_time ) // Czy przeliczanie czas√≥w ‚Äπcykler√≥w‚Ä∫ trwa≈Ço kr√≥cej ni≈º obliczony czas oczekiwania do pierwszego budzƒÖcego ‚Äπzadanie‚Ä∫?
+                if( _timercmp( &elapsed_time, <, &suspend_time ) // Czy przeliczanie czasÛw ãcyklerÛwõ trwa≥o krÛcej niø obliczony czas oczekiwania do pierwszego budzπcego ãzadanieõ?
                 || !some_task_got_ready
                 ){  E_base_S->E_flow_Q_timer_S_last_real_time = tv;
-                    _timeradd( &tv, &suspend_time, &E_base_S->E_flow_Q_timer_S_next_real_time ); //NDFN Rozwa≈ºyƒá przepe≈Çnienie licznika czasu rzeczywistego.
+                    _timeradd( &tv, &suspend_time, &E_base_S->E_flow_Q_timer_S_next_real_time ); //NDFN RozwaøyÊ przepe≥nienie licznika czasu rzeczywistego.
                     break;
                 }
                 tv = tv_2;
@@ -1138,7 +842,6 @@ Loop:
         }
         for_each_out( E_base_S->E_flow_Q_task_S_current, task_id, E_base_S->E_flow_Q_task_S, E_mem_Q_tab )
         {   struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, task_id );
-                #ifdef E_flow_C_thread_system_unblock_reports
             if( U_R( task->type, system_unblock_report ))
             {   B *thread_switch_back = task->thread_switch_back;
                 if( !*thread_switch_back )
@@ -1155,12 +858,11 @@ Loop:
                         Vr_( pthread_mutex_unlock( thread_flow_mutex ));
                     }
                     Vr_( pthread_sigmask( SIG_UNBLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply, 0 ));
-                    V0_( sched_yield() ); // ≈ªeby daƒá szansƒô na wykonanie siƒô ‚ÄúwƒÖtku‚Äù ‚Äπzadania‚Ä∫, z kt√≥rego prze≈ÇƒÖczono spowrotem‚Äî od ‚ÄúXh_B_‚Äù do rzeczywistej procedury systemowej, na kt√≥rej siƒô blokuje.
-                    U_L( E_base_S->E_flow_S_signal, time ); // ‚Äúkill‚Äù z ‚ÄúXh_B‚Äù jest niepotrzebne, wiƒôc ‚Äòresetuje‚Äô stan, by nie potrzeba by≈Ço p√≥≈∫niej wykonaƒá ponownej pƒôtli ‚Äúschedule‚Äù ze wzglƒôdu na stan ‚Äúwake‚Äù.
-                    goto Loop; // Wywo≈Çuje ‚ÄúE_flow_Q_task_I_schedule‚Äù w spos√≥b wewnƒôtrzny, gdy nie mo≈ºna u≈ºyƒá funkcjonalno≈õci ‚ÄúE_flow_Q_task_I_switch‚Äù, ale przy pierwszej konieczno≈õci prze≈ÇƒÖczenia standardowego bƒôdzie prze≈ÇƒÖcza≈Ç w trybie ¬∑pominiƒôcia nie ob≈Çugiwanych systemowych danych zatrzymywania przep≈Çywu wykonania z tablicy ‚Äπzada≈Ñ‚Ä∫¬∑ (pominiƒôcia ‚Äπzada≈Ñ‚Ä∫) przekazanych kolejnych typu ‚ÄúwƒÖtkowanych‚Äù ‚Äπsystemowych raport√≥w odblokowujƒÖcych‚Ä∫ z ‚Äúcyklicznej kolejki‚Äù‚Äî na rzecz zwyk≈Çego ‚Äπzadania‚Ä∫ (‚Äúschedule_task_id‚Äù), kt√≥re wywo≈Ça≈Ço ‚Äúschedule‚Äù.
+                    V0_( sched_yield() ); // Øeby daÊ szansÍ na wykonanie siÍ ìwπtkuî ãzadaniaõ, z ktÛrego prze≥πczono spowrotemó od ìXh_B_î do rzeczywistej procedury systemowej, na ktÛrej siÍ blokuje.
+                    U_L( E_base_S->E_flow_S_signal, time ); // ìkillî z ìXh_Bî jest niepotrzebne, wiÍc ëresetujeí stan, by nie potrzeba by≥o pÛüniej wykonaÊ ponownej pÍtli ìscheduleî ze wzglÍdu na stan ìwakeî.
+                    goto Loop; // Wywo≥uje ìE_flow_Q_task_I_scheduleî w sposÛb wewnÍtrzny, gdy nie moøna uøyÊ funkcjonalnoúci ìE_flow_Q_task_I_switchî, ale przy pierwszej koniecznoúci prze≥πczenia standardowego bÍdzie prze≥πcza≥ w trybie ∑pominiÍcia nie ob≥ugiwanych systemowych danych zatrzymywania przep≥ywu wykonania z tablicy ãzadaÒõ∑ (pominiÍcia ãzadaÒõ) przekazanych kolejnych typu ìwπtkowanychî ãsystemowych raportÛw odblokowujπcychõ z ìcyklicznej kolejkiîó na rzecz zwyk≥ego ãzadaniaõ (ìschedule_task_idî), ktÛre wywo≥a≥o ìscheduleî.
                 }
             }else
-                #endif
             {   if( task->run_state == E_flow_Z_run_state_S_ready )
                 {
                         #ifdef E_flow_C_thread_system_unblock_reports
@@ -1176,7 +878,6 @@ Loop:
             }
         }
         struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
-            #ifdef E_flow_C_thread_system_unblock_reports
         if( U_R( task->type, system_unblock_report ))
         {   B *thread_switch_back = task->thread_switch_back;
             if( !*thread_switch_back )
@@ -1197,13 +898,9 @@ Loop:
                 continue;
             }
         }else
-            #endif
             if( task->run_state == E_flow_Z_run_state_S_ready )
-            {
-                    #ifdef E_flow_C_thread_system_unblock_reports
-                if( E_base_S->E_flow_Q_task_S_current != schedule_task_id )
+            {   if( E_base_S->E_flow_Q_task_S_current != schedule_task_id )
                     E_base_S->E_flow_Q_task_S_current = schedule_task_id;
-                    #endif
                 return task->run_state == E_flow_Z_run_state_S_stopping_by_task;
             }
         if( U_R( E_base_S->E_flow_S_signal, exit )
@@ -1221,43 +918,14 @@ Loop:
         || _timercmp( &tv, <, &next_real_time )
         ){  if( U_has_suspend_time )
             {   _timersub( &next_real_time, &tv, &tv );
-                    #ifdef E_flow_C_itimer_system_unblock_report
-                if( E_base_S->E_flow_Z_itimer_system_unblock_report_I_setitimer )
-                    E_base_S->E_flow_Z_itimer_system_unblock_report_I_setitimer( &tv );
-                else
-                    #endif
-                    _setttimer( &tv );
+                _setttimer( &tv );
             }
-            _sigprocmask( SIG_BLOCK, &E_base_S->E_flow_Z_sigset_S_process_volatile, 0 );
             if( !U_R( E_base_S->E_flow_S_signal, exit )
             && !U_R( E_base_S->E_flow_S_signal, time )
             && !U_R( E_base_S->E_flow_S_signal, call_req )
             && !U_R( E_base_S->E_flow_S_signal, io_ready )
             )
                 U_E( E_base_S->E_flow_S_signal, wake );
-                #ifdef E_flow_C_itimer_system_unblock_report
-            if( E_base_S->E_flow_Z_itimer_system_unblock_report_I_sigsuspend )
-            {   B system_unblock_report = no;
-                while( !U_R( E_base_S->E_flow_S_signal, wake ))
-                    if( system_unblock_report = E_base_S->E_flow_Z_itimer_system_unblock_report_I_sigsuspend( &E_base_S->E_flow_Z_sigset_S_empty ))
-                        U_F( E_base_S->E_flow_S_signal, wake );
-                    else
-                    {   if( U_has_suspend_time
-                        && E_base_S->E_flow_Z_itimer_system_unblock_report_I_setitimer
-                        ){  _gettime( &tv );
-                            if( _timercmp( &tv, <, &next_real_time )) // Ustaw pozosta≈Çy czas.
-                            {   _timersub( &next_real_time, &tv, &tv );
-                                E_base_S->E_flow_Z_itimer_system_unblock_report_I_setitimer( &tv );
-                            }else // Lub by≈Ç up≈ÇynƒÖ≈Ç.
-                                U_F( E_base_S->E_flow_S_signal, wake );
-                        }
-                    }
-                if( system_unblock_report )
-                {   struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Z_itimer_system_unblock_report_S_task_id );
-                    task->run_state = E_flow_Z_run_state_S_ready;
-                }
-            }else
-                #endif
                 while( !U_R( E_base_S->E_flow_S_signal, wake ))
                 {
                         #ifdef E_flow_C_thread_system_unblock_reports
@@ -1273,24 +941,18 @@ Loop:
             && !U_R( E_base_S->E_flow_S_signal, time )
             ){  Z_clock_time tv_;
                 _timerclear( &tv_ );
-                    #ifdef E_flow_C_itimer_system_unblock_report
-                if( E_base_S->E_flow_Z_itimer_system_unblock_report_I_setitimer )
-                    E_base_S->E_flow_Z_itimer_system_unblock_report_I_setitimer( &tv_ );
-                else
-                    #endif
-                    _setttimer( &tv_ );
+                _setttimer( &tv_ );
             }
-            _sigprocmask( SIG_UNBLOCK, &E_base_S->E_flow_Z_sigset_S_process_volatile, 0 );
         }
     }
 }
-// Prze≈ÇƒÖczenie do ‚Äπzadania‚Ä∫ przez prze≈ÇƒÖczenie wska≈∫nika ‚Äústosu‚Äù wykonania.
+// Prze≥πczenie do ãzadaniaõ przez prze≥πczenie wskaünika ìstosuî wykonania.
 __attribute__ ((__noinline__,__returns_twice__,__hot__))
 _internal
 void
 E_flow_Q_task_I_switch( I task_to_id
 ){
-//CONF Jest ‚Äòfpu‚Äô?
+//CONF Jest ëfpuí?
         #if 1
     feclearexcept( FE_ALL_EXCEPT );
         #endif
@@ -1302,7 +964,7 @@ E_flow_Q_task_I_switch( I task_to_id
         #if defined( __i386__ )
     "\n" "mov       %%esp,%0"
     "\n" "test      %1,%1"
-//CONF jest ‚Äòcmov‚Äô?
+//CONF jest ëcmoví?
             #if 1
     "\n" "cmovne    %1,%%esp"
             #else
@@ -1318,7 +980,7 @@ E_flow_Q_task_I_switch( I task_to_id
     : "=m" ( task_from->exe_stack )
     : "r" ( task_to->exe_stack )
     : "cc", "memory"
-//CONF Jest ‚Äòfpu‚Äô?
+//CONF Jest ëfpuí?
         #if 1
     , "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)"
             #ifdef __MMX__
@@ -1346,32 +1008,6 @@ E_flow_Q_task_I_switch( I task_to_id
     );
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-_internal
-void
-E_flow_Z_signal_V_chld( int uid
-){  Dh_();
-    int errno_ = _errno;
-    int status;
-    VOp_(( ~waitpid( -1, &status, WNOHANG ) || _errno == ECHILD ));
-    _errno = errno_;
-}
-_internal
-void
-E_flow_Z_signal_V_term( int uid
-){  Dh_();
-    int errno_ = _errno;
-    struct sigaction sa =
-    { .sa_handler = SIG_IGN
-    , .sa_flags = 0
-    };
-    V0_( sigaction( SIGHUP, &sa, 0 ));
-    V0_( sigaction( SIGINT, &sa, 0 ));
-    V0_( sigaction( SIGQUIT, &sa, 0 ));
-    V0_( sigaction( SIGTERM, &sa, 0 ));
-    U_F( E_base_S->E_flow_S_signal, exit );
-    U_F( E_base_S->E_flow_S_signal, wake );
-    _errno = errno_;
-}
 _internal
 void
 E_flow_Z_signal_V_segv( int uid
@@ -1404,18 +1040,6 @@ E_flow_Z_signal_V_segv( int uid
     , .sa_flags = 0
     };
     V0_( sigaction( SIGSEGV, &sa, 0 ));
-    _errno = errno_;
-}
-_internal
-void
-E_flow_Z_signal_V_alrm( int uid
-, siginfo_t *siginfo
-, P data
-){  Dh_();
-    int errno_ = _errno;
-    if( !siginfo->si_pid ) //NDFN Brak w dokumentacji, ale tylko to jest sta≈Çe pomiƒôdzy systemami dla ‚Äúsygna≈Çu‚Äù z ‚Äúsetitimer‚Äù lub ‚Äútimer_settime‚Äù.
-        U_F( E_base_S->E_flow_S_signal, time );
-    U_F( E_base_S->E_flow_S_signal, wake );
     _errno = errno_;
 }
 //------------------------------------------------------------------------------
@@ -1529,85 +1153,6 @@ E_flow_Z_signal_V_process_call_reply( int uid
     GV_(NXP); Gd( siginfo->si_pid ); // Call reply from a unrequested process.
     _errno = errno_;
 }
-//------------------------------------------------------------------------------
-    #if defined( E_io_C_aio ) || defined( E_io_Q_stream_out_C_sig )
-_internal
-void
-E_flow_Z_signal_V_io_ready( int uid
-, siginfo_t *siginfo
-, P data
-){  Dh_();
-    int errno_ = _errno;
-    //if( siginfo->si_code != POLL_OUT )
-    //{   G_(); Gh( siginfo->si_code ); Gd( siginfo->si_fd );
-    //}
-        #if defined( E_io_C_aio ) || defined( E_io_C_sig_has_fd )
-            #ifdef E_io_C_aio
-    if( siginfo->si_code != SI_ASYNCIO )
-    {   _errno = errno_;
-        return;
-    }
-            #else
-    //if( siginfo->si_code != POLL_OUT
-    //){  struct sigaction sa =
-        //{ .sa_handler = SIG_IGN
-        //, .sa_flags = 0
-        //};
-        //V0_( sigaction( SIGHUP, &sa, 0 ));
-        //V0_( sigaction( SIGINT, &sa, 0 ));
-        //V0_( sigaction( SIGQUIT, &sa, 0 ));
-        //V0_( sigaction( SIGTERM, &sa, 0 ));
-        //U_F( E_base_S->E_flow_S_signal, exit );
-        //U_F( E_base_S->E_flow_S_signal, wake );
-        //_errno = errno_;
-        //return;
-    //}
-            #endif
-    B found = no;
-    for_each( id, E_base_S->E_io_Q_stream_out_S, E_mem_Q_tab )
-    {   struct E_io_Q_stream_out_Z *stream = E_mem_Q_tab_R( E_base_S->E_io_Q_stream_out_S, id );
-            #ifdef E_io_C_aio
-        if( stream->aiocb->aio_fildes == siginfo->si_value.sival_int )
-        {   if( !U_R( stream->state, closing ))
-            {   U_F( stream->state, io_ready );
-                found = yes;
-            }
-            break;
-        }
-            #else
-        if( stream->aiocb->aio_fildes == siginfo->si_fd )
-        // Je≈õli oka≈ºe siƒô (a jest to bardzo prawdopodobne), ≈ºe jest generowany ‚Äúsygna≈Ç‚Äù tylko dla jednego strumienia na ‚Äúterminalu‚Äù, to trzeba odpowiednio odkomentowaƒá poni≈ºsze linie.
-        //{   if( stream->tty )
-            //{   Pc tty = stream->tty;
-                //for_each( id, E_base_S->E_io_Q_stream_out_S, E_mem_Q_tab )
-                //{   struct E_io_Q_stream_out_Z *stream = E_mem_Q_tab_R( E_base_S->E_io_Q_stream_out_S, id );
-                    //if( !*stream->tty )
-                        //continue;
-                    {if( !U_R( stream->state, closing )
-                    //&& E_text_Z_s0_T_s0_eq( stream->tty, tty )
-                    && ( stream->aiocb->aio_nbytes
-                      || stream->data_l
-                    ))
-                    {   U_F( stream->state, io_ready );
-                        found = yes;
-                    }
-                //}
-            //}else
-            //{   U_F( stream->state, io_ready );
-                //found = yes;
-            //}
-            break;
-        }
-            #endif
-    }
-    if(found)
-        #endif
-    {   U_F( E_base_S->E_flow_S_signal, io_ready );
-        U_F( E_base_S->E_flow_S_signal, wake );
-    }
-    _errno = errno_;
-}
-#endif
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 I
 E_flow_Q_process_call_M( N l

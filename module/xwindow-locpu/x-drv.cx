@@ -1,22 +1,22 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
-*   ---   â€ŸX windowâ€ â€”low â€˜cpuâ€™
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
+*   ---   "X window” —low ‘cpu’
 *         window driver
-* Â©overcq                on â€ŸGentoo Linux 13.0â€ â€œx86_64â€             2015â€’4â€’28 *
+* ©overcq                on "Gentoo Linux 13.0” “x86_64”             2015-4-28 *
 *******************************************************************************/
-//zewnÄ™trzne trwaÅ‚e â€œXGrabServerâ€ blokuje system; na przykÅ‚ad uÅ¼ywane przez rÃ³Å¼nych â€œmenedÅ¼erÃ³w okienâ€ â€ŸXâ€ podczas przeciÄ…gania okna.
-//w przyszÅ‚oÅ›ci, gdy jakiekolwiek pozostaÅ‚e â€œNDFNâ€ zostanÄ… zrobione, to w celu sprawdzenia poprawnoÅ›ci dziaÅ‚ania tego sterownika nie wystarczy jego uÅ¼ytkowanie w rÃ³Å¼nych warunkach, lecz bÄ™dzie konieczne celowe przetestowanie przez podawanie wszystkich moÅ¼liwych sekwencji â€œzdarzeÅ„â€ odsuniÄ™tych o losowe minimalne odlegÅ‚oÅ›ci czasowe i punktowe: âƒw forsowaniu uÅ¼ytkowania, âƒna wewnÄ™trznie obciÄ…Å¼onym podsystemie â€ŸXâ€.â€ƒby wyszukiwaÄ‡ bÅ‚Ä™dne przeÅ‚Ä…czenie przy ktÃ³rymÅ› ekstremum integralnoÅ›ci i wtedy dezintegracjÄ™ sterownika rozpoznawanÄ… po bÅ‚Ä™dnym pojedynczym stanie, podczas gdy nienadÄ…Å¼anie nie jest bÅ‚Ä™dem.
+//zewnêtrzne trwa³e “XGrabServer” blokuje system; na przyk³ad u¿ywane przez ró¿nych “mened¿erów okien” "X” podczas przeci¹gania okna.
+//w przysz³oœci, gdy jakiekolwiek pozosta³e “NDFN” zostan¹ zrobione, to w celu sprawdzenia poprawnoœci dzia³ania tego sterownika nie wystarczy jego u¿ytkowanie w ró¿nych warunkach, lecz bêdzie konieczne celowe przetestowanie przez podawanie wszystkich mo¿liwych sekwencji “zdarzeñ” odsuniêtych o losowe minimalne odleg³oœci czasowe i punktowe: ?w forsowaniu u¿ytkowania, ?na wewnêtrznie obci¹¿onym podsystemie "X”. by wyszukiwaæ b³êdne prze³¹czenie przy którymœ ekstremum integralnoœci i wtedy dezintegracjê sterownika rozpoznawan¹ po b³êdnym pojedynczym stanie, podczas gdy nienad¹¿anie nie jest b³êdem.
 //------------------------------------------------------------------------------
-//okno â€˜dndâ€™ potrzebuje byÄ‡ utrzymywane w â€œmenedÅ¼erze okienâ€ na wierzchu wszystkich moÅ¼liwych.â€ƒtyp okna â€œ_NET_WM_WINDOW_TYPE_DNDâ€, jeÅ›li â€œmenedÅ¼er okienâ€ go obsÅ‚uguje: czy ma byÄ‡ Å‚Ä…cznie z â€œOVERRIDE_REDIRECTâ€, tak jak musi byÄ‡ dla zwykÅ‚ych â€œmenedÅ¼erÃ³w okienâ€?
-//TODO rozwaÅ¼yÄ‡ jeszcze Â·dodatkowoÂ· blok usuniÄ™tego â€œgrab_serverâ€.
-//TODO uzupeÅ‚niÄ‡ o deterministyczny czas opÃ³Åºnienia przerysowania po ponownym pokazaniu siÄ™ okna â€¹operatorowiâ€º.
-//czy dziaÅ‚a przeciÄ…ganie pomiÄ™dzy przylegÅ‚ymi wyÅ›wietlaczami bez â€œXineramaâ€.
-//âƒuzupeÅ‚niÄ‡ o upuszczanie obiektu.â€ƒpodczas â€œdragâ€ (â€˜grabniÄ™ciaâ€™) â€œconfigure_notifyâ€ raportuje pozycjÄ™ wzglÄ™dem okna â€œrootâ€ z bÅ‚Ä™dnym, pozostawionym z ostatnich operacjiâ€” â€œabove_siblingâ€, ale i tak jest bezuÅ¼yteczne dla â€˜dropâ€™, a tylko sÅ‚uÅ¼y do przyszÅ‚ej zmiany rozmiaru okna â€˜dndâ€™ (np. przez dodawanie obiektÃ³w).
-//âƒzuniwersalizowaÄ‡ synchronizacjÄ™ do zwizualizowania klikniÄ™cia ( â€œU_X( display->req, draw_click )â€ ).
-//TODO kiedyÅ› moÅ¼na zrobiÄ‡ tak, by uchwycenie animowanego elementu obiektu utrzymywaÅ‚o okno â€˜dndâ€™ wzglÄ™dem bieÅ¼Ä…cego poÅ‚oÅ¼enia tego punktu elementu w obiekcie.
+//okno ‘dnd’ potrzebuje byæ utrzymywane w “mened¿erze okien” na wierzchu wszystkich mo¿liwych. typ okna “_NET_WM_WINDOW_TYPE_DND”, jeœli “mened¿er okien” go obs³uguje: czy ma byæ ³¹cznie z “OVERRIDE_REDIRECT”, tak jak musi byæ dla zwyk³ych “mened¿erów okien”?
+//TODO rozwa¿yæ jeszcze ·dodatkowo· blok usuniêtego “grab_server”.
+//TODO uzupe³niæ o deterministyczny czas opóŸnienia przerysowania po ponownym pokazaniu siê okna ‹operatorowi›.
+//czy dzia³a przeci¹ganie pomiêdzy przyleg³ymi wyœwietlaczami bez “Xinerama”.
+//?uzupe³niæ o upuszczanie obiektu. podczas “drag” (‘grabniêcia’) “configure_notify” raportuje pozycjê wzglêdem okna “root” z b³êdnym, pozostawionym z ostatnich operacji— “above_sibling”, ale i tak jest bezu¿yteczne dla ‘drop’, a tylko s³u¿y do przysz³ej zmiany rozmiaru okna ‘dnd’ (np. przez dodawanie obiektów).
+//?zuniwersalizowaæ synchronizacjê do zwizualizowania klikniêcia ( “U_X( display->req, draw_click )” ).
+//TODO kiedyœ mo¿na zrobiæ tak, by uchwycenie animowanego elementu obiektu utrzymywa³o okno ‘dnd’ wzglêdem bie¿¹cego po³o¿enia tego punktu elementu w obiekcie.
 //==============================================================================
     #ifdef E_flow_C_thread_system_unblock_reports
 _internal
@@ -44,7 +44,7 @@ D( x_window, events_pointer_button_check )
     I_D
     {   Yi_B( x_window, events_pointer_button_check )
             break;
-        E_flow_Q_thread_system_unblock_report_I_unblock( D_id(x_window,events), 0 ); //NDFN â€œ0â€.â€ƒzamiast obecnego zrobiÄ‡ ciÄ…gÅ‚y, kolejkowany â€¹impulsatorâ€º.
+        E_flow_Q_thread_system_unblock_report_I_unblock( D_id(x_window,events), 0 ); //NDFN “0”. zamiast obecnego zrobiæ ci¹g³y, kolejkowany ‹impulsator›.
     }
     Yi_W( x_window, events_pointer_button_check );
 }
@@ -59,15 +59,15 @@ D( x_window, events )
     X_A( x_window, close_window );
     X_A( x_window, flush );
 /**
-czÄ™stotliwoÅ›Ä‡ wspomagajÄ…cej wizualizacji rÄ™cznego skokowego przesuwania lub rozmiarowania obiektu przestrzeni, niezaleÅ¼nie od animowanych w czasie zmian zawartoÅ›ci.
-mÄ™czÄ…cy w odbiorze test dokonywany przez czÅ‚owieka: szukaÄ‡ najwiÄ™kszej czÄ™stotliwoÅ›ci przerysowywania obiektÃ³w, przy ktÃ³rej kaÅ¼de przerysowanie jest juÅ¼ zauwaÅ¼one bez umysÅ‚owego bÅ‚ysku preâ€mobilizacji adekwatnego do stanu umysÅ‚u podczas zauwaÅ¼enia jakiegoÅ› krÃ³tkiego migniÄ™cia ruchu przez rzadkie ale liczebne zaroÅ›la w dÅ¼ungli.â€ƒjednak w tym teÅ›cie szuka siÄ™ pÅ‚ynnoÅ›ci takich migniÄ™Ä‡ podczas powolnego ciÄ…gÅ‚ego przesuwania lub rozmiarowania obiektu albo ramki okna, nie dopuszczajÄ…c do zdÄ…Å¼enia przerysowania do punktu uchwycenia w rutynie wyÄ‡wiczenia, a nie reagujÄ…c impulsowo.â€ƒpo przekroczeniu â€”zmniejszajÄ…câ€” czÄ™stotliwoÅ›ci szukanej przerysowanie zaczyna sprawiaÄ‡ wraÅ¼enie â€štrupiegoâ€™.â€ƒtym charakteryzujÄ… siÄ™ czÄ™stotliwoÅ›ci odlegÅ‚e od szukanej w okresie o mikrosekundy, bardziej odlegÅ‚e czÄ™stotliwoÅ›ci zamÄ™czajÄ… ukÅ‚ad interpretacji bez informacji moÅ¼liwych do zinterpretowania w czasie odbioru; jakkolwiek te informacje sÄ…, tylko niszczÄ… ukÅ‚ad interpretacji czÅ‚owieka.â€ƒdobrze znaleziona czÄ™stotliwoÅ›Ä‡ pozwala widzieÄ‡ komponentowo (caÅ‚oÅ›ciowo) przesuwane lub rozmiarowane obiekty.â€ƒprzypuszczalnie jest wiele pochodnych czÄ™stotliwoÅ›ci, ktÃ³re wydajÄ… siÄ™ optymalne, ale tylko jedna przechodzi koÅ„cowy test widzenia komponentowego podczas wizualizacji.
-nie uwzglÄ™dnia bÅ‚Ä™du czasu podawanego podczas testu przez â€œgettimeofdayâ€.
-â€£w testowej metodzie rysowaniaâ€” przez â€œXImageâ€: 193605; 5,16515Â±<â‰ˆ0,000026679âŸHz.
-â€£po zmianie postaci na wektorowÄ…â€” â€œPixmapâ€ z â€œclip-maskâ€: 193609; 5,16505Â±<â‰ˆ0,000026678âŸHz.
-â€£po uzupeÅ‚nieniu o obiekty i poprawieniu na kompletny (z tÅ‚em) bufor okna: 199992; 5,000200Â±â‰ˆ0,000025âŸHz.
-po eliminacji opÃ³ÅºniajÄ…cych (serwer â€ŸXâ€) â€œclip-maskâ€ i innych zmianach:
-â€£podniesiona czÄ™stotliwoÅ›Ä‡ pochodna: 128244; 7,79763576Â±â‰ˆ0,00006080âŸHz.
-â€£stan bieÅ¼Ä…cyâ€” podniesiona czÄ™stotliwoÅ›Ä‡ pochodna: 182999; 5,464510735Â±<â‰ˆ0,000029861âŸHz.
+czêstotliwoœæ wspomagaj¹cej wizualizacji rêcznego skokowego przesuwania lub rozmiarowania obiektu przestrzeni, niezale¿nie od animowanych w czasie zmian zawartoœci.
+mêcz¹cy w odbiorze test dokonywany przez cz³owieka: szukaæ najwiêkszej czêstotliwoœci przerysowywania obiektów, przy której ka¿de przerysowanie jest ju¿ zauwa¿one bez umys³owego b³ysku pre-mobilizacji adekwatnego do stanu umys³u podczas zauwa¿enia jakiegoœ krótkiego migniêcia ruchu przez rzadkie ale liczebne zaroœla w d¿ungli. jednak w tym teœcie szuka siê p³ynnoœci takich migniêæ podczas powolnego ci¹g³ego przesuwania lub rozmiarowania obiektu albo ramki okna, nie dopuszczaj¹c do zd¹¿enia przerysowania do punktu uchwycenia w rutynie wyæwiczenia, a nie reaguj¹c impulsowo. po przekroczeniu —zmniejszaj¹c— czêstotliwoœci szukanej przerysowanie zaczyna sprawiaæ wra¿enie ‚trupiego’. tym charakteryzuj¹ siê czêstotliwoœci odleg³e od szukanej w okresie o mikrosekundy, bardziej odleg³e czêstotliwoœci zamêczaj¹ uk³ad interpretacji bez informacji mo¿liwych do zinterpretowania w czasie odbioru; jakkolwiek te informacje s¹, tylko niszcz¹ uk³ad interpretacji cz³owieka. dobrze znaleziona czêstotliwoœæ pozwala widzieæ komponentowo (ca³oœciowo) przesuwane lub rozmiarowane obiekty. przypuszczalnie jest wiele pochodnych czêstotliwoœci, które wydaj¹ siê optymalne, ale tylko jedna przechodzi koñcowy test widzenia komponentowego podczas wizualizacji.
+nie uwzglêdnia b³êdu czasu podawanego podczas testu przez “gettimeofday”.
+?w testowej metodzie rysowania— przez “XImage”: 193605; 5,16515±<?0,000026679 Hz.
+?po zmianie postaci na wektorow¹— “Pixmap” z “clip-mask”: 193609; 5,16505±<?0,000026678 Hz.
+?po uzupe³nieniu o obiekty i poprawieniu na kompletny (z t³em) bufor okna: 199992; 5,000200±?0,000025 Hz.
+po eliminacji opóŸniaj¹cych (serwer "X”) “clip-mask” i innych zmianach:
+?podniesiona czêstotliwoœæ pochodna: 128244; 7,79763576±?0,00006080 Hz.
+?stan bie¿¹cy— podniesiona czêstotliwoœæ pochodna: 182999; 5,464510735±<?0,000029861 Hz.
 */
         #ifndef E_flow_C_thread_system_unblock_reports
     I timer = Y_M(182999);
@@ -86,7 +86,7 @@ po eliminacji opÃ³ÅºniajÄ…cych (serwer â€ŸXâ€) â€œclip-maskâ€ i innych zmianac
             xcb_generic_event_t *x_event = xcb_poll_for_event( display->x_display );
             int e;
             if( e = xcb_connection_has_error( display->x_display ))
-            {   GV(NA); Gd(e); V(); //NDFN tu powinno byÄ‡ â€¹zdarzenieâ€º.
+            {   GV(NA); Gd(e); V(); //NDFN tu powinno byæ ‹zdarzenie›.
             }
                 #else
             xcb_connection_t *x_display = display->x_display;
@@ -98,7 +98,7 @@ po eliminacji opÃ³ÅºniajÄ…cych (serwer â€ŸXâ€) â€œclip-maskâ€ i innych zmianac
             }
             if( !x_event )
             {   int e = xcb_connection_has_error( display->x_display );
-                GV(NA); Gd(e); V(); //NDFN tu powinno byÄ‡ â€¹zdarzenieâ€º.
+                GV(NA); Gd(e); V(); //NDFN tu powinno byæ ‹zdarzenie›.
             }
             display = E_mem_Q_tab_R( E_x_Q_display_S, display_id );
                 #endif
@@ -114,10 +114,10 @@ po eliminacji opÃ³ÅºniajÄ…cych (serwer â€ŸXâ€) â€œclip-maskâ€ i innych zmianac
             do
             {   if( !x_event->response_type )
                 {   xcb_generic_error_t *x_error = (P)x_event;
-                    GV(NA); Gd( x_error->sequence ); Gd( x_error->major_code ); Gd( x_error->minor_code ); Gd( x_error->error_code ); Gd( x_error->resource_id ); V(); //NDFN Nienaprawialny bÅ‚Ä…d zbiorczy â€ŸX.orgâ€.
+                    GV(NA); Gd( x_error->sequence ); Gd( x_error->major_code ); Gd( x_error->minor_code ); Gd( x_error->error_code ); Gd( x_error->resource_id ); V(); //NDFN Nienaprawialny b³¹d zbiorczy "X.org”.
                 }
                 xcb_window_t x_event_window;
-                // KaÅ¼de â€œzdarzenieâ€ â€˜xâ€™ majÄ…ce byÄ‡ doÅ‚Ä…czone do interpretacji wymaga sprawdzenia osadzenia znaczenia zmiennych dostarczanych z tym â€œzdarzeniemâ€; np. â€œwindowâ€.â€ƒa na koÅ„cu usunÄ…Ä‡ niepotrzebne dla interpretacji â€œzdarzeniaâ€ z obu â€œswitchâ€ i zmieniÄ‡, by bÅ‚Ä™dne â€œzdarzeniaâ€ byÅ‚y ignorowane.
+                // Ka¿de “zdarzenie” ‘x’ maj¹ce byæ do³¹czone do interpretacji wymaga sprawdzenia osadzenia znaczenia zmiennych dostarczanych z tym “zdarzeniem”; np. “window”. a na koñcu usun¹æ niepotrzebne dla interpretacji “zdarzenia” z obu “switch” i zmieniæ, by b³êdne “zdarzenia” by³y ignorowane.
                 switch( x_event->response_type )
                 { case XCB_KEY_PRESS:
                   case XCB_KEY_RELEASE:
@@ -246,14 +246,14 @@ po eliminacji opÃ³ÅºniajÄ…cych (serwer â€ŸXâ€) â€œclip-maskâ€ i innych zmianac
                         else if( ret->group == 2 )
                             modifier = 6;
                         free(ret);
-                        if( x_key->state & 0x80 ) // prawy â€›altâ€™
+                        if( x_key->state & 0x80 ) // prawy 'alt’
                         {   alt_r = yes;
                             if( !modifier )
                                 modifier = 4;
                         }
                         if( x_key->state & 0x40 )
                             logo = yes;
-                        if( x_key->state & XCB_MOD_MASK_1 ) // lewy â€›altâ€™
+                        if( x_key->state & XCB_MOD_MASK_1 ) // lewy 'alt’
                             alt = yes;
                         if( x_key->state & XCB_MOD_MASK_CONTROL )
                             ctrl = yes;
@@ -649,14 +649,14 @@ po eliminacji opÃ³ÅºniajÄ…cych (serwer â€ŸXâ€) â€œclip-maskâ€ i innych zmianac
                         xcb_timestamp_t xbutton_time = display->pointer_button_S_time;
                         display->pointer_button_S_time = x_button->time;
                         U_F( display->state, pointer_button_S_pressing );
-                        if( display->pointer_button_S_seq_i & 1 ) // Podczas sekwencji klikania naciÅ›niÄ™to kolejny przycisk bez zwolnienia poprzedniego (z wyjÄ…tkiem obsÅ‚uÅ¼onego wczeÅ›niej przycisku przeciÄ…gania bÄ™dÄ…cego w stanie wciÅ›niÄ™tym).
-                        {   display->pointer_button_S_seq_i = 0; // Skasuj starÄ… sekwencjÄ™ klikania.
+                        if( display->pointer_button_S_seq_i & 1 ) // Podczas sekwencji klikania naciœniêto kolejny przycisk bez zwolnienia poprzedniego (z wyj¹tkiem obs³u¿onego wczeœniej przycisku przeci¹gania bêd¹cego w stanie wciœniêtym).
+                        {   display->pointer_button_S_seq_i = 0; // Skasuj star¹ sekwencjê klikania.
                             break;
                         }
-                        if( !display->pointer_button_S_seq_i ) // Przed rozpoczÄ™ciem nowej sekwencjiâ€¦
+                        if( !display->pointer_button_S_seq_i ) // Przed rozpoczêciem nowej sekwencji…
                         {   unsigned button_mask = 0;
                             if( U_R( display->mode, drag ))
-                                switch( display->drag_S_pointer_button ) // Ten blok mÃ³gÅ‚by byÄ‡ dla dowolnego trybu z naciÅ›niÄ™tym jednym przyciskiem.
+                                switch( display->drag_S_pointer_button ) // Ten blok móg³by byæ dla dowolnego trybu z naciœniêtym jednym przyciskiem.
                                 { case XCB_BUTTON_INDEX_1:
                                         button_mask = XCB_BUTTON_MASK_1;
                                         break;
@@ -673,9 +673,9 @@ po eliminacji opÃ³ÅºniajÄ…cych (serwer â€ŸXâ€) â€œclip-maskâ€ i innych zmianac
                                         button_mask = XCB_BUTTON_MASK_5;
                                         break;
                                 }
-                            if(( x_button->state & ( XCB_BUTTON_MASK_1 | XCB_BUTTON_MASK_2 | XCB_BUTTON_MASK_3 | XCB_BUTTON_MASK_4 | XCB_BUTTON_MASK_5 )) != button_mask ) // â€¦jest naciÅ›niÄ™ty (po wymuszonym programowo â€˜resecieâ€™ â€œcountâ€, czekajÄ…c na â€˜resetâ€™ przyciskÃ³w) przycisk z tych, ktÃ³re jest w stanie wykryÄ‡ jako bÄ™dÄ…ce naciÅ›niÄ™te.
+                            if(( x_button->state & ( XCB_BUTTON_MASK_1 | XCB_BUTTON_MASK_2 | XCB_BUTTON_MASK_3 | XCB_BUTTON_MASK_4 | XCB_BUTTON_MASK_5 )) != button_mask ) // …jest naciœniêty (po wymuszonym programowo ‘resecie’ “count”, czekaj¹c na ‘reset’ przycisków) przycisk z tych, które jest w stanie wykryæ jako bêd¹ce naciœniête.
                                 break;
-                        }else if( x_button->detail != display->pointer_button ) // Podczas sekwencji klikania naciÅ›niÄ™to inny przycisk zamiast tego samego.
+                        }else if( x_button->detail != display->pointer_button ) // Podczas sekwencji klikania naciœniêto inny przycisk zamiast tego samego.
                             display->pointer_button_S_seq_i = 0;
                         if( display->pointer_button_S_seq_i
                         && x_button->time - xbutton_time > display->pointer_button_C_seq_timeout
@@ -721,7 +721,7 @@ po eliminacji opÃ³ÅºniajÄ…cych (serwer â€ŸXâ€) â€œclip-maskâ€ i innych zmianac
                                 break;
                         }
                         U_R( display->state, pointer_button_S_pressing ) = ( x_button->state & ( XCB_BUTTON_MASK_1 | XCB_BUTTON_MASK_2 | XCB_BUTTON_MASK_3 | XCB_BUTTON_MASK_4 | XCB_BUTTON_MASK_5 )) != button_mask ? yes : no;
-                        if( x_button->detail != display->pointer_button ) // Zwolniono przycisk, ktÃ³ry nie byÅ‚ ostatnio naciÅ›niÄ™ty; jeÅ›li trwaÅ‚a sekwencja do uznania nâ€klikniÄ™cia, to jÄ… â€˜resetujeâ€™.
+                        if( x_button->detail != display->pointer_button ) // Zwolniono przycisk, który nie by³ ostatnio naciœniêty; jeœli trwa³a sekwencja do uznania n-klikniêcia, to j¹ ‘resetuje’.
                             display->pointer_button_S_seq_i = 0;
                         if( U_R( display->mode, drag )
                         && !U_R( display->mode, drag_stop )
@@ -744,7 +744,7 @@ po eliminacji opÃ³ÅºniajÄ…cych (serwer â€ŸXâ€) â€œclip-maskâ€ i innych zmianac
                   case XCB_ENTER_NOTIFY:
                     {   xcb_enter_notify_event_t *x_enter_notify = (P)x_event;
                         G(); Gs0_( "enter" ); Gd( x_enter_notify->mode ); Gd( x_enter_notify->detail );
-                        // W â€ŸX.orgâ€ naciÅ›niÄ™cie 1. przycisku powoduje â€˜leaveâªgrabâ€™ i â€˜enterâªungrabâ€™, wiÄ™c obejÅ›cie nastÄ™pnÄ… liniÄ… warunku sprawdzajÄ…cÄ… posiadanie wskaÅºnika przez okno.
+                        // W "X.org” naciœniêcie 1. przycisku powoduje ‘leave?grab’ i ‘enter?ungrab’, wiêc obejœcie nastêpn¹ lini¹ warunku sprawdzaj¹c¹ posiadanie wskaŸnika przez okno.
                         if( x_enter_notify->mode == XCB_NOTIFY_MODE_UNGRAB )
                         {   U_L( display->req, pointer_S_ungrab );
                             if( !U_R( display->state, pointer_S_in_window ))
@@ -831,7 +831,7 @@ po eliminacji opÃ³ÅºniajÄ…cych (serwer â€ŸXâ€) â€œclip-maskâ€ i innych zmianac
                     {   G(); Gs0_( "reparent" );
                         break;
                     }
-                  case XCB_RESIZE_REQUEST: // To â€œzdarzenieâ€ â€˜xâ€™ jest uÅ¼ywane po to, by po zmianie rozmiaru okna przez operatora â€˜serverâ€™ â€ŸXâ€ nie wypeÅ‚niaÅ‚ wstÄ™pnie tÅ‚a okna (niepowtarzalnÄ…) zawartoÅ›ciÄ… okna z poprzedniego, mniejszego rozmiaru; jest wyÅ‚Ä…czana â€œpixmapaâ€ okna.
+                  case XCB_RESIZE_REQUEST: // To “zdarzenie” ‘x’ jest u¿ywane po to, by po zmianie rozmiaru okna przez operatora ‘server’ "X” nie wype³nia³ wstêpnie t³a okna (niepowtarzaln¹) zawartoœci¹ okna z poprzedniego, mniejszego rozmiaru; jest wy³¹czana “pixmapa” okna.
                     {   xcb_resize_request_event_t *x_resize_req = (P)x_event;
                         G(); Gs0_( "resize request" ); Gd( x_resize_req->width ); Gd( x_resize_req->height );
                         if( window->width_new != x_resize_req->width
@@ -847,7 +847,7 @@ po eliminacji opÃ³ÅºniajÄ…cych (serwer â€ŸXâ€) â€œclip-maskâ€ i innych zmianac
                                   }
                                 );
                             }
-                            //if( window != &screen->dnd_window ) // â€œresize requestâ€ nie wystÄ…pi dla okna â€˜dndâ€™, poniewaÅ¼ brak do tego dostÄ™pnego â€˜interfejsuâ€™ okna (np. ramki do zmiany rozmiaru przez operatora).
+                            //if( window != &screen->dnd_window ) // “resize request” nie wyst¹pi dla okna ‘dnd’, poniewa¿ brak do tego dostêpnego ‘interfejsu’ okna (np. ramki do zmiany rozmiaru przez operatora).
                                 xcb_change_window_attributes( display->x_display
                                 , window->x_window
                                 , XCB_CW_OVERRIDE_REDIRECT
@@ -880,12 +880,12 @@ po eliminacji opÃ³ÅºniajÄ…cych (serwer â€ŸXâ€) â€œclip-maskâ€ i innych zmianac
                         break;
                     }
                   default:
-                        //czy da siÄ™ zrobiÄ‡ uproszczone zabezpieczenie przed â€œzdarzeniamiâ€ â€˜xâ€™ przychodzÄ…cymi nie z â€˜serveraâ€™ â€ŸXâ€â€” przez rozpoznawanie tych od â€œmenedÅ¼era okienâ€ â€ŸXâ€?
+                        //czy da siê zrobiæ uproszczone zabezpieczenie przed “zdarzeniami” ‘x’ przychodz¹cymi nie z ‘servera’ "X”— przez rozpoznawanie tych od “mened¿era okien” "X”?
                         switch( XCB_EVENT_RESPONSE_TYPE( x_event ))
                         { case XCB_CONFIGURE_NOTIFY:
                             {   xcb_configure_notify_event_t *x_configure = (P)x_event;
                                 G(); Gs0_( "configure notify" ); Gd( x_configure->above_sibling ); Gd( x_configure->x ); Gd( x_configure->y ); Gd( x_configure->width ); Gd( x_configure->height );
-                                //NDFN nie wiadomo co robiÄ‡ z obiektami, jeÅ›li nie mieszczÄ… siÄ™ w nowym rozmiarze okna.â€ƒuniemoÅ¼liwiaÄ‡ zmniejszanie okna tak, Å¼e zakrywaÅ‚oby obiekty?
+                                //NDFN nie wiadomo co robiæ z obiektami, jeœli nie mieszcz¹ siê w nowym rozmiarze okna. uniemo¿liwiaæ zmniejszanie okna tak, ¿e zakrywa³oby obiekty?
                                 window->width_new = x_configure->width;
                                 window->height_new = x_configure->height;
                                 U_L( window->mode, resize );
@@ -947,13 +947,13 @@ po eliminacji opÃ³ÅºniajÄ…cych (serwer â€ŸXâ€) â€œclip-maskâ€ i innych zmianac
                       break;
                 }
 Loop:           free( x_event );
-            }while( x_event = xcb_poll_for_queued_event( display->x_display )); //NDFN ograniczyÄ‡ liczbÄ™ â€˜iteracjiâ€™ realizowanych jednorazowo.
-            // PoniÅ¼ej jest punkt przeÅ‚Ä…czenia tymczasowego trybu â€œdrag && drag_stopâ€ na â€œdrag_stopâ€, wiÄ™c tylko w powyÅ¼szym â€œswitchâ€ moÅ¼e byÄ‡ ten pierwszy (zÅ‚oÅ¼ony), ale juÅ¼ nic nie majÄ…cy aktywowaÄ‡.
+            }while( x_event = xcb_poll_for_queued_event( display->x_display )); //NDFN ograniczyæ liczbê ‘iteracji’ realizowanych jednorazowo.
+            // Poni¿ej jest punkt prze³¹czenia tymczasowego trybu “drag && drag_stop” na “drag_stop”, wiêc tylko w powy¿szym “switch” mo¿e byæ ten pierwszy (z³o¿ony), ale ju¿ nic nie maj¹cy aktywowaæ.
             if( U_R( display->mode, drag_stop )
             && U_E( display->mode, drag )
             )
             {   if( !U_R( display->mode_ex, drag_stop_S_cancel ))
-                {   //TODO sprawdÅº miejsce â€˜dropâ€™.
+                {   //TODO sprawdŸ miejsce ‘drop’.
                     if( U_R( display->mode_ex, drag_S_copy ))
                     {   for_n( i, display->drag_S_object_src_n )
                         {   struct E_x_Q_window_Z *window = E_mem_Q_tab_R( display->window, display->drag_S_object_src[i].window_id );
@@ -1016,7 +1016,7 @@ Loop:           free( x_event );
                     U_L( display->mode, drag_stop );
                 U_F( display->req, draw );
                 U_F( display->req, flush );
-            }else if( !U_R( display->mode, drag_stop ) // â€˜dragâ€™ jest wyjÄ…tkowym trybem dla interpretacji â€œpointer_buttonâ€, bo â€˜grabniÄ™cieâ€™ jest wzglÄ™dem okna â€˜dndâ€™â€” i poniÅ¼szy blok nie moÅ¼e do czasu â€˜odgrabniÄ™ciaâ€™ czytaÄ‡ danych z tego okna, poniewaÅ¼ jest ukryte, zasoby wyrzucone.
+            }else if( !U_R( display->mode, drag_stop ) // ‘drag’ jest wyj¹tkowym trybem dla interpretacji “pointer_button”, bo ‘grabniêcie’ jest wzglêdem okna ‘dnd’— i poni¿szy blok nie mo¿e do czasu ‘odgrabniêcia’ czytaæ danych z tego okna, poniewa¿ jest ukryte, zasoby wyrzucone.
             && display->pointer_button_S_seq_i
             )
             {   struct E_x_Q_window_Z *window;
@@ -1043,7 +1043,7 @@ Loop:           free( x_event );
                 , display->pointer_button_S_grab_time
                 );
                 xcb_grab_pointer_reply_t *ret = xcb_grab_pointer_reply( display->x_display, ret_id, 0 );
-                if( ret->status == XCB_GRAB_STATUS_SUCCESS ) // Czy aktualny stan od pierwszego klikniÄ™cia serii.
+                if( ret->status == XCB_GRAB_STATUS_SUCCESS ) // Czy aktualny stan od pierwszego klikniêcia serii.
                 {   free(ret);
                     U_F( display->req, pointer_S_ungrab );
                     xcb_timestamp_t grab_time = display->pointer_button_S_time + ( display->pointer_button_S_seq_i & 1 ? display->pointer_button_C_release_timeout : display->pointer_button_C_seq_timeout );
@@ -1058,7 +1058,7 @@ Loop:           free( x_event );
                     , grab_time
                     );
                     xcb_grab_pointer_reply_t *ret = xcb_grab_pointer_reply( display->x_display, ret_id, 0 );
-                    if( ret->status == XCB_GRAB_STATUS_SUCCESS ) // Czy upÅ‚ynÄ…Å‚ czas akceptacji serii.
+                    if( ret->status == XCB_GRAB_STATUS_SUCCESS ) // Czy up³yn¹³ czas akceptacji serii.
                     {   free(ret);
                         display->pointer_button_S_grab_time = grab_time;
                         G(); Gs0_( "click" ); Gd( display->pointer_button ); Gd( display->pointer_button_S_seq_i );
@@ -1319,12 +1319,12 @@ Drag_start_error:                   {   GV_(NA);
             )
             {   U_L( display->mode, drag_stop );
                 U_F( display->req, flush );
-                xcb_ungrab_pointer( display->x_display, display->pointer_button_S_grab_time ); //NDFN niedoskonaÅ‚oÅ›Ä‡ zachowania: w okreÅ›lonych zestawieniach czasowych (opÃ³ÅºnieÅ„) wskaÅºnik zostanie â€˜odgrabniÄ™tyâ€™ nad cudzym oknem przy dowolnym zestawie przyciskÃ³w naciÅ›niÄ™tych pomiÄ™dzy kolejnymi otrzymanymi pakietami â€œzdarzeÅ„â€ â€˜xâ€™ (co spowoduje reakcjÄ™ tamtego okna na â€œButtonReleaseâ€ lub juÅ¼ â€œMotionNotifyâ€ â€”np. uchwycenie ramki okna w menedÅ¼erze okien â€ŸFluxboxâ€).â€ƒjeÅ›li uÅ¼ytkownik klika pusto, to i tak nic nie pomoÅ¼e oprÃ³cz normalnego â€˜timeoutuâ€™: sprawdziÄ‡, czy obsÅ‚uguje wÅ‚aÅ›ciwie â€œpointer_button_C_restart_delayâ€ w caÅ‚ym trybie â€œdrag_stopâ€, a wtedy pozostanie tylko niemoÅ¼liwa do unikniÄ™cia sytuacja trafienia z â€˜ungrabniÄ™ciemâ€™ w moment, gdy znowu rozpoczÄ™to klikanie, ktÃ³re jakkolwiek wtedy ze wzglÄ™du na zaszÅ‚y â€˜timeoutâ€™ â€˜restartuâ€™ jest rozumiane przez â€¹operatoraâ€º jako rozpoczÄ™cie klikania w miejscu, gdzie wÅ‚aÅ›nie â€˜odgrabniÄ™toâ€™.â€ƒa po tymâ€“ komentarz do usuniÄ™cia.
+                xcb_ungrab_pointer( display->x_display, display->pointer_button_S_grab_time ); //NDFN niedoskona³oœæ zachowania: w okreœlonych zestawieniach czasowych (opóŸnieñ) wskaŸnik zostanie ‘odgrabniêty’ nad cudzym oknem przy dowolnym zestawie przycisków naciœniêtych pomiêdzy kolejnymi otrzymanymi pakietami “zdarzeñ” ‘x’ (co spowoduje reakcjê tamtego okna na “ButtonRelease” lub ju¿ “MotionNotify” —np. uchwycenie ramki okna w mened¿erze okien "Fluxbox”). jeœli u¿ytkownik klika pusto, to i tak nic nie pomo¿e oprócz normalnego ‘timeoutu’: sprawdziæ, czy obs³uguje w³aœciwie “pointer_button_C_restart_delay” w ca³ym trybie “drag_stop”, a wtedy pozostanie tylko niemo¿liwa do unikniêcia sytuacja trafienia z ‘ungrabniêciem’ w moment, gdy znowu rozpoczêto klikanie, które jakkolwiek wtedy ze wzglêdu na zasz³y ‘timeout’ ‘restartu’ jest rozumiane przez ‹operatora› jako rozpoczêcie klikania w miejscu, gdzie w³aœnie ‘odgrabniêto’. a po tym– komentarz do usuniêcia.
             }
             if( U_R( display->mode, drag )
             && U_R( drag, motion )
             )
-            {   //TODO sprawdÅº i wizualizuj moÅ¼liwoÅ›Ä‡ â€˜dropâ€™ w tym miejscu.
+            {   //TODO sprawdŸ i wizualizuj mo¿liwoœæ ‘drop’ w tym miejscu.
                 if( !U_R( drag_S_motion, oth_screen )
                 || drag_S_motion_x_root_window == screen->x_root_window
                 )
@@ -1346,7 +1346,7 @@ Drag_start_error:                   {   GV_(NA);
                     }
                     display->drag_S_dnd_window_screen_id = screen_id;
                     struct E_x_Q_window_Z *dnd_window = &screen_last->dnd_window;
-                    //zmieniÄ‡ tak, by okna â€˜dndâ€™ byÅ‚y jednoczeÅ›nie widoczne do czasu utraty widocznoÅ›ci na jednym z wyÅ›wietlaczy.â€ƒ(nie moÅ¼na teraz, poniewaÅ¼ nie mam konfiguracji bez â€ŸXineramyâ€.)
+                    //zmieniæ tak, by okna ‘dnd’ by³y jednoczeœnie widoczne do czasu utraty widocznoœci na jednym z wyœwietlaczy. (nie mo¿na teraz, poniewa¿ nie mam konfiguracji bez "Xineramy”.)
                     xcb_configure_window( display->x_display
                     , dnd_window->x_window
                     , XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT
@@ -1621,9 +1621,9 @@ D( x_window, draw )
                     && !U_R( window->mode, resize )
                     && U_E( window->req, draw )
                     )
-                    {   // Algorytm uaktualniania zmieniajÄ…cego siÄ™ obrazu juÅ¼ zinterpretowanego jest taki sam jak w umysÅ‚ach biologicznych (jeÅ›li nic innego podczas rysowania nie wymusi â€œexposureâ€, ktÃ³re powoduje, Å¼e pokaÅ¼e chwilowo to, co juÅ¼ zdÄ…Å¼yÅ‚ narysowaÄ‡ w obszarze): 1â€¢ wypeÅ‚nienie tÅ‚em (bez obiektÃ³w) po juÅ¼ nieobecnych obiektach, 2â€¢ narysowanie obiektÃ³w.â€ƒtylko nie ma takiego zaawansowania (rekurencyjnego?) przy rysowaniu obiektÃ³w; ktÃ³re i tak nie sÄ… jeszcze wystarczajÄ…co zdefiniowane.
+                    {   // Algorytm uaktualniania zmieniaj¹cego siê obrazu ju¿ zinterpretowanego jest taki sam jak w umys³ach biologicznych (jeœli nic innego podczas rysowania nie wymusi “exposure”, które powoduje, ¿e poka¿e chwilowo to, co ju¿ zd¹¿y³ narysowaæ w obszarze): 1• wype³nienie t³em (bez obiektów) po ju¿ nieobecnych obiektach, 2• narysowanie obiektów. tylko nie ma takiego zaawansowania (rekurencyjnego?) przy rysowaniu obiektów; które i tak nie s¹ jeszcze wystarczaj¹co zdefiniowane.
                         struct E_x_Q_screen_Z *screen = E_mem_Q_tab_R( display->screen, window->screen_id );
-                        // Przed rysowaniem czyÅ›ci maskÄ™ punktÃ³w okna, ktÃ³re zostanÄ… narysowane.
+                        // Przed rysowaniem czyœci maskê punktów okna, które zostan¹ narysowane.
                         xcb_poly_fill_rectangle( display->x_display
                         , window->drawable_mask
                         , screen->bitmask_0_gc
@@ -1643,7 +1643,7 @@ D( x_window, draw )
                               { window->drawable_mask_2
                               }
                             );
-                            // Rysuje narysowane poprzednio na tÅ‚o.
+                            // Rysuje narysowane poprzednio na t³o.
                             xcb_poly_fill_rectangle( display->x_display
                             , window->drawable
                             , screen->drawable_background_gc
@@ -1656,7 +1656,7 @@ D( x_window, draw )
                               }
                             );
                         }
-                        for_each( object_id, window->object, E_mem_Q_tab ) //NDFN zakÅ‚adana kolejnoÅ›Ä‡ od na spodzie do na wierzchu.â€ƒnie wiadomo, czy â€œ_qâ€ jest konieczne.
+                        for_each( object_id, window->object, E_mem_Q_tab ) //NDFN zak³adana kolejnoœæ od na spodzie do na wierzchu. nie wiadomo, czy “_q” jest konieczne.
                         {   xcb_change_gc( display->x_display
                             , screen->object_mask_gc
                             , XCB_GC_FOREGROUND
@@ -1676,12 +1676,12 @@ D( x_window, draw )
                                       }
                                     );
                             }
-                            object->draw( display, screen, window, object ); //NDFN nieprzerysowywanie wszystkich obiektÃ³w dla kaÅ¼dej klatki animacji.
+                            object->draw( display, screen, window, object ); //NDFN nieprzerysowywanie wszystkich obiektów dla ka¿dej klatki animacji.
                         }
-                        // Oblicza maskÄ™ punktÃ³w zmienionych podczas rysowania z obiektÃ³w na tÅ‚o.
+                        // Oblicza maskê punktów zmienionych podczas rysowania z obiektów na t³o.
                         xcb_copy_area( display->x_display
                         , window->drawable_mask
-                        , window->drawable_mask_2 // ByÅ‚o to, co jest narysowane (narysowaÅ‚ poprzednio) jako obiekty.
+                        , window->drawable_mask_2 // By³o to, co jest narysowane (narysowa³ poprzednio) jako obiekty.
                         , screen->bitmask_not_and_gc
                         , 0, 0
                         , 0, 0
@@ -1695,7 +1695,7 @@ D( x_window, draw )
                               { window->drawable_mask_2
                               }
                             );
-                            // Rysuje punkty zmienione na tÅ‚o.
+                            // Rysuje punkty zmienione na t³o.
                             xcb_poly_fill_rectangle( display->x_display
                             , window->drawable
                             , screen->drawable_background_gc
@@ -1743,10 +1743,10 @@ D( x_window, draw )
                               { window->drawable
                               }
                             );
-                        // Rysuje zmienione punkty okna, ktÃ³re pÃ³Åºniej mogÄ… byÄ‡ automatycznie przerysowywane z ustawionej â€œpixmapyâ€ tÅ‚a okna.
+                        // Rysuje zmienione punkty okna, które póŸniej mog¹ byæ automatycznie przerysowywane z ustawionej “pixmapy” t³a okna.
                         xcb_copy_area( display->x_display
                         , window->drawable_mask
-                        , window->drawable_mask_2 // ByÅ‚o to, co zostaÅ‚o narysowane jako tÅ‚o.
+                        , window->drawable_mask_2 // By³o to, co zosta³o narysowane jako t³o.
                         , screen->bitmask_or_gc
                         , 0, 0
                         , 0, 0

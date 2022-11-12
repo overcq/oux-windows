@@ -1,38 +1,38 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   base
 *         memory blocks manager
-* Â©overcq                on â€ŸGentoo Linux 13.0â€ â€œx86_64â€             2015â€’4â€’28 *
+* ©overcq                on "Gentoo Linux 13.0” “x86_64”             2015-4-28 *
 *******************************************************************************/
-/** MenedÅ¼er blokÃ³w pamiÄ™ci alokowanej dynamicznie, ale nie do niepotrzebnego alokowania i zwalniania w pÄ™tlach, przechowujÄ…cy rozmiar pojedynczego elementu bloku tylko do wÅ‚asnej administracji pamiÄ™ciÄ….
-Implementacyjnieâ€“ w â€œE_mem_Q_blkâ€ uchwytami sÄ… adresy elementÃ³w (ponad zmienianymi numerami elementÃ³w), a w â€œE_mem_Q_tabâ€â€“ numery elementÃ³w (ponad zmienianymi adresami).â€ƒCzyli w sensie funkcjonalnym z zewnÄ…trzâ€“ ten pierwszy jest menedÅ¼erem tablic rzeczywistych (ciÄ…gÅ‚ych w pamiÄ™ci), a ten drugiâ€“ zarzÄ…dzanych.
-â‚
-Deterministyczna strategia modyfikacji pamiÄ™ci stosowana w tym menedÅ¼erze i globalnie wewnÄ™trznie w miejscu uÅ¼ycia jego funkcji.
-Struktura osadzenia przepÅ‚ywu wykonania menedÅ¼era:
-âƒ W punkcie wejÅ›cia oraz wyjÅ›cia przepÅ‚ywu wykonania â€¹zadaniaâ€º z funkcji menedÅ¼era stan pamiÄ™ci zarzÄ…dzanej jest integralny.â€ƒFunkcja moÅ¼e zmieniÄ‡ adres tylko tego bloku pamiÄ™ci spoÅ›rÃ³d udostÄ™pnionych przez menedÅ¼era, wzglÄ™dem ktÃ³rego zostaÅ‚a wywoÅ‚ana.
-âƒ W trakcie posiadania przepÅ‚ywu wykonania przez menedÅ¼era moÅ¼e wystÄ…piÄ‡ przerwanie zabierajÄ…ce przepÅ‚yw wykonaniaâ€” w postaci â€œsygnaÅ‚uâ€ â€˜uniksowegoâ€™, ktÃ³rego procedura obsÅ‚ugi moÅ¼e ewentualnie wykonywaÄ‡ dostÄ™p do bloku pamiÄ™ci zarzÄ…dzanego przez tego menedÅ¼era; teksty procedur obsÅ‚ugi sÄ… w â€œmenedÅ¼erze przepÅ‚ywu wykonaniaâ€.
-âƒ Jednak â€œsygnaÅ‚yâ€ â€˜uniksoweâ€™ czytajÄ…ce lub zmieniajÄ…ce konkretne bloki pamiÄ™ci sÄ… blokowane przed przejÄ™ciem przepÅ‚ywu wykonania podczas ich modyfikacji, poniewaÅ¼ te konkretne bloki sÄ… uÅ¼ywane poprzez ktÃ³regoÅ› menedÅ¼era Â·strukturÂ· pamiÄ™ci (menedÅ¼era pamiÄ™ci wyÅ¼szego poziomu), ktÃ³ry nie potrafiÅ‚by wykonaÄ‡ swoich funkcji â€œatomowoâ€ ze wzglÄ™du na zÅ‚oÅ¼onoÅ›Ä‡ danych, wiÄ™c â€œsygnaÅ‚â€ â€˜uniksowyâ€™ nie wystÄ…pi podczas zmiany adresu bloku pamiÄ™ci, z ktÃ³rego korzysta.
-âƒ Jakkolwiek â€œsygnaÅ‚â€ â€˜uniksowyâ€™ â€œSEGVâ€ uÅ¼ywany nie jako bÅ‚Ä…d â€”do automatycznego â€˜doalokowywaniaâ€™ stron pamiÄ™ci â€œstosÃ³wâ€ â€¹zadaÅ„â€º z wczeÅ›niej zarezerwowanego obszaru przestrzeni adresowejâ€” moÅ¼e wystÄ…piÄ‡ kiedykolwiek po przesuniÄ™ciu niÅ¼ej wierzchoÅ‚ka â€œstosuâ€ â€¹zadaniaâ€º w procedurze tego menedÅ¼era przez â€˜kompilatorâ€™, a procedura obsÅ‚ugi tego â€œsygnaÅ‚uâ€ czyta i zmienia dane w tablicy â€¹zadaÅ„â€º.â€ƒWiÄ™c w konkretnej implementacji zmieniania tablicy â€¹zadaÅ„â€º â€œstosâ€ â€¹zadaniaâ€º jest â€˜prealokowanyâ€™ (â€œE_flow_Q_task_I_touch_stackâ€), a dla innego â€œthreadâ€â€“ ustawiany â€¹przeÅ‚Ä…cznikâ€º zabraniajÄ…cy czytania tej tablicy w procedurze obsÅ‚ugi â€œsygnaÅ‚uâ€ â€œSEGVâ€.
-Struktura â€œatomowoÅ›ciâ€ menedÅ¼era:
-âƒ W tekÅ›cie programu menedÅ¼era jest gwarantowane â€˜impliciteâ€™ ze skÅ‚adni jÄ™zyka (tzn. z domyÅ›lnej alokacji zmiennych lokalnych na â€œstosieâ€ Â·przed ich uÅ¼yciemÂ· jako wartoÅ›Ä‡ wyraÅ¼enia przypisywanego), Å¼e wpis w tablicy systemowej menedÅ¼era (adres, rozmiar bloku) zostanie zmieniony â€œatomowoâ€ wzglÄ™dem poszczegÃ³lnego elementu wpisu (adres lub rozmiar), oraz z linii programuâ€“ zawsze tak, by przed i po â€œatomowejâ€ zmianie odczyt caÅ‚ego wpisu byÅ‚ poprawny wzglÄ™dem chwilowo obecnego bloku pamiÄ™ci z zawartoÅ›ciÄ….â€ƒTo umoÅ¼liwia przerwanie przepÅ‚ywu wykonania przez â€œsygnaÅ‚â€ lub â€œwÄ…tekâ€ systemu operacyjnego i poprawny dostÄ™p do pamiÄ™ci udostÄ™pnionej przez menedÅ¼era, ale nie wywoÅ‚anie funkcji menedÅ¼era.â€ƒ(Czy to ma jakieÅ› zastosowanie, gdy funkcje i tak muszÄ… byÄ‡ blokowane?)
-âƒ PomiÄ™dzy wszystkimi tablicami systemowymi menedÅ¼era integralnoÅ›Ä‡ jest zachowywana przez realizacjÄ™ wÅ‚aÅ›ciwej sekwencji zmieniania wpisÃ³w, w ktÃ³rych to sekwencjach blok pamiÄ™ci jest utrzymywany w pierwszej funkcji na nim siÄ™ wykonujÄ…cejâ€” przez utrzymywanie jego wpisu w zmiennych lokalnych, a usuniÄ™tego z tablicy wolnych blokÃ³w, niedostÄ™pnego dla kolejnych funkcji.â€ƒ(KolejnoÅ›Ä‡ zmian â€œatomowychâ€ dla chwilowej poprawnoÅ›ci w trakcie zmiany pojedynczego wpisu nie zostaÅ‚a jeszcze sprawdzona.)â€ƒTo umoÅ¼liwia rekurencyjne wywoÅ‚ywanie uniwersalnych funkcji wewnÄ™trz menedÅ¼era oraz po dodaniu odpowiednich instrukcji synchronizacji â€œmiÄ™dzywÄ…tkowychâ€ umoÅ¼liwi przerywanie przepÅ‚ywu wykonania menedÅ¼era przez system operacyjny â€œwywÅ‚aszczajÄ…cyâ€ dla kolejnego â€œwÄ…tkuâ€ spoÅ›rÃ³d tych (nie synchronizowanych w â€œmenedÅ¼erze przepÅ‚ywu wykonaniaâ€) naÅ‚oÅ¼onych na program w technologii â€Ÿouxâ€ wymaganiami ktÃ³rejÅ› â€˜dokompilowanejâ€™ â€œbibliotekiâ€â€” i wykonanie funkcji menedÅ¼era przez program â€œbibliotecznyâ€ (np. zastÄ…pionej procedury â€œbibliotekiâ€ â€ŸCâ€: â€œmallocâ€, â€œcallocâ€, â€œreallocâ€, â€œfreeâ€).
-âƒ Natomiast kopiowanie zawartoÅ›ci bloku pamiÄ™ci podczas â€˜realokacjiâ€™ obejmujÄ…ce zwalnianie pamiÄ™ci odrazu do systemu operacyjnego lub obszary zachodzÄ…ce musi byÄ‡ realizowane tak, by nie nastÄ…piÅ‚o przerwanie, a w szczegÃ³lnoÅ›ciâ€“ przez â€œSIGSEGVâ€.
-â‚
-MoÅ¼na alokowaÄ‡ zero jednostek pamiÄ™ci: â€˜alokowanyâ€™ jest symboliczny adres bÄ™dÄ…cy maÅ‚Ä… liczbÄ…, traktowany tak samo jak adres rzeczywisty.
-Parametry podawane do funkcji nie mogÄ… oznaczaÄ‡ pustych operacji; jest to wymagane dla niewyjÅ›cia poza integralnoÅ›Ä‡ programu.
-Funkcje podajÄ… â€œ0â€ przy braku moÅ¼liwosci â€˜alokacjiâ€™ nowej pamiÄ™ci, a przy nieznalezieniu wpisu w rejestrze â€˜alokowanychâ€™ blokÃ³w generujÄ… â€¹niepowodzenie zakaÅ„czajÄ…ceâ€º.
-â‚
-ZaleÅ¼nie od zastosowania powiÄ™kszania bloku pamiÄ™ci, w celu niewykonywania niepotrzebnych instrukcji naleÅ¼y wybraÄ‡ pierwszÄ… funkcjÄ™ w kolejnoÅ›ci: â€œaddâ€ (nie zaleÅ¼y, gdzie dodane), [â€œprepend_appendâ€], â€œappendâ€, â€œprependâ€, â€œinsertâ€ (gdy musi byÄ‡ konkretne miejsce).
+/** Mened¿er bloków pamiêci alokowanej dynamicznie, ale nie do niepotrzebnego alokowania i zwalniania w pêtlach, przechowuj¹cy rozmiar pojedynczego elementu bloku tylko do w³asnej administracji pamiêci¹.
+Implementacyjnie– w “E_mem_Q_blk” uchwytami s¹ adresy elementów (ponad zmienianymi numerami elementów), a w “E_mem_Q_tab”– numery elementów (ponad zmienianymi adresami). Czyli w sensie funkcjonalnym z zewn¹trz– ten pierwszy jest mened¿erem tablic rzeczywistych (ci¹g³ych w pamiêci), a ten drugi– zarz¹dzanych.
+?
+Deterministyczna strategia modyfikacji pamiêci stosowana w tym mened¿erze i globalnie wewnêtrznie w miejscu u¿ycia jego funkcji.
+Struktura osadzenia przep³ywu wykonania mened¿era:
+? W punkcie wejœcia oraz wyjœcia przep³ywu wykonania ‹zadania› z funkcji mened¿era stan pamiêci zarz¹dzanej jest integralny. Funkcja mo¿e zmieniæ adres tylko tego bloku pamiêci spoœród udostêpnionych przez mened¿era, wzglêdem którego zosta³a wywo³ana.
+? W trakcie posiadania przep³ywu wykonania przez mened¿era mo¿e wyst¹piæ przerwanie zabieraj¹ce przep³yw wykonania— w postaci “sygna³u” ‘uniksowego’, którego procedura obs³ugi mo¿e ewentualnie wykonywaæ dostêp do bloku pamiêci zarz¹dzanego przez tego mened¿era; teksty procedur obs³ugi s¹ w “mened¿erze przep³ywu wykonania”.
+? Jednak “sygna³y” ‘uniksowe’ czytaj¹ce lub zmieniaj¹ce konkretne bloki pamiêci s¹ blokowane przed przejêciem przep³ywu wykonania podczas ich modyfikacji, poniewa¿ te konkretne bloki s¹ u¿ywane poprzez któregoœ mened¿era ·struktur· pamiêci (mened¿era pamiêci wy¿szego poziomu), który nie potrafi³by wykonaæ swoich funkcji “atomowo” ze wzglêdu na z³o¿onoœæ danych, wiêc “sygna³” ‘uniksowy’ nie wyst¹pi podczas zmiany adresu bloku pamiêci, z którego korzysta.
+? Jakkolwiek “sygna³” ‘uniksowy’ “SEGV” u¿ywany nie jako b³¹d —do automatycznego ‘doalokowywania’ stron pamiêci “stosów” ‹zadañ› z wczeœniej zarezerwowanego obszaru przestrzeni adresowej— mo¿e wyst¹piæ kiedykolwiek po przesuniêciu ni¿ej wierzcho³ka “stosu” ‹zadania› w procedurze tego mened¿era przez ‘kompilator’, a procedura obs³ugi tego “sygna³u” czyta i zmienia dane w tablicy ‹zadañ›. Wiêc w konkretnej implementacji zmieniania tablicy ‹zadañ› “stos” ‹zadania› jest ‘prealokowany’ (“E_flow_Q_task_I_touch_stack”), a dla innego “thread”– ustawiany ‹prze³¹cznik› zabraniaj¹cy czytania tej tablicy w procedurze obs³ugi “sygna³u” “SEGV”.
+Struktura “atomowoœci” mened¿era:
+? W tekœcie programu mened¿era jest gwarantowane ‘implicite’ ze sk³adni jêzyka (tzn. z domyœlnej alokacji zmiennych lokalnych na “stosie” ·przed ich u¿yciem· jako wartoœæ wyra¿enia przypisywanego), ¿e wpis w tablicy systemowej mened¿era (adres, rozmiar bloku) zostanie zmieniony “atomowo” wzglêdem poszczególnego elementu wpisu (adres lub rozmiar), oraz z linii programu– zawsze tak, by przed i po “atomowej” zmianie odczyt ca³ego wpisu by³ poprawny wzglêdem chwilowo obecnego bloku pamiêci z zawartoœci¹. To umo¿liwia przerwanie przep³ywu wykonania przez “sygna³” lub “w¹tek” systemu operacyjnego i poprawny dostêp do pamiêci udostêpnionej przez mened¿era, ale nie wywo³anie funkcji mened¿era. (Czy to ma jakieœ zastosowanie, gdy funkcje i tak musz¹ byæ blokowane?)
+? Pomiêdzy wszystkimi tablicami systemowymi mened¿era integralnoœæ jest zachowywana przez realizacjê w³aœciwej sekwencji zmieniania wpisów, w których to sekwencjach blok pamiêci jest utrzymywany w pierwszej funkcji na nim siê wykonuj¹cej— przez utrzymywanie jego wpisu w zmiennych lokalnych, a usuniêtego z tablicy wolnych bloków, niedostêpnego dla kolejnych funkcji. (Kolejnoœæ zmian “atomowych” dla chwilowej poprawnoœci w trakcie zmiany pojedynczego wpisu nie zosta³a jeszcze sprawdzona.) To umo¿liwia rekurencyjne wywo³ywanie uniwersalnych funkcji wewnêtrz mened¿era oraz po dodaniu odpowiednich instrukcji synchronizacji “miêdzyw¹tkowych” umo¿liwi przerywanie przep³ywu wykonania mened¿era przez system operacyjny “wyw³aszczaj¹cy” dla kolejnego “w¹tku” spoœród tych (nie synchronizowanych w “mened¿erze przep³ywu wykonania”) na³o¿onych na program w technologii "oux” wymaganiami którejœ ‘dokompilowanej’ “biblioteki”— i wykonanie funkcji mened¿era przez program “biblioteczny” (np. zast¹pionej procedury “biblioteki” "C”: “malloc”, “calloc”, “realloc”, “free”).
+? Natomiast kopiowanie zawartoœci bloku pamiêci podczas ‘realokacji’ obejmuj¹ce zwalnianie pamiêci odrazu do systemu operacyjnego lub obszary zachodz¹ce musi byæ realizowane tak, by nie nast¹pi³o przerwanie, a w szczególnoœci– przez “SIGSEGV”.
+?
+Mo¿na alokowaæ zero jednostek pamiêci: ‘alokowany’ jest symboliczny adres bêd¹cy ma³¹ liczb¹, traktowany tak samo jak adres rzeczywisty.
+Parametry podawane do funkcji nie mog¹ oznaczaæ pustych operacji; jest to wymagane dla niewyjœcia poza integralnoœæ programu.
+Funkcje podaj¹ “0” przy braku mo¿liwosci ‘alokacji’ nowej pamiêci, a przy nieznalezieniu wpisu w rejestrze ‘alokowanych’ bloków generuj¹ ‹niepowodzenie zakañczaj¹ce›.
+?
+Zale¿nie od zastosowania powiêkszania bloku pamiêci, w celu niewykonywania niepotrzebnych instrukcji nale¿y wybraæ pierwsz¹ funkcjê w kolejnoœci: “add” (nie zale¿y, gdzie dodane), [“prepend_append”], “append”, “prepend”, “insert” (gdy musi byæ konkretne miejsce).
 */
 //------------------------------------------------------------------------------
 //TODO mapped free
-//TODO SprawdziÄ‡, czy gwarantuje poprawne â€˜alokowanieâ€™ blokÃ³w pamiÄ™ci przekraczajÄ…cych 0.â€ƒNie naleÅ¼y przekraczaÄ‡ 0, poniewaÅ¼ jest ono uÅ¼ywane jako wartoÅ›Ä‡ niepoprawnego adresu w systemie operacyjnym i strona o tym adresie nie jest â€˜alokowanaâ€™, ale ostatnia strona przestrzeni adresowej moÅ¼e byÄ‡ (~0 ma znaczenie tylko dla â€¹identyfikatorÃ³wâ€º, a inne to tylko w systemie operacyjnym).
-//TODO Funkcje â€œmoveâ€ oprÃ³cz obecnych â€œcopyâ€, by moÅ¼na byÅ‚o w nich uÅ¼yÄ‡ â€œremapâ€, jeÅ›li jest dostÄ™pne.
-// Funkcja porzÄ…dkujÄ…ca tablice w dostÄ™pnym nadmiarowo czasie wykonania?â€ƒObecnie nic aktywnie nie porzÄ…dkuje ani tablic systemowych, ani pamiÄ™ci blokÃ³w, a tylko pasywnie podczas wykonywania Å¼Ä…danych funkcji, jeÅ›li coÅ› jest oczywiste w wykonywaniu funkcji.
-// ZaimplementowaÄ‡ â€˜alokacjeâ€™ sfragmentowane (listy blokÃ³w â€˜alokowanegoâ€™) i optymalizacje przy braku pamieci z projektowanego kiedyÅ› menedÅ¼era pamiÄ™ci (â€œmem_mngâ€“ useâ€).
+//TODO Sprawdziæ, czy gwarantuje poprawne ‘alokowanie’ bloków pamiêci przekraczaj¹cych 0. Nie nale¿y przekraczaæ 0, poniewa¿ jest ono u¿ywane jako wartoœæ niepoprawnego adresu w systemie operacyjnym i strona o tym adresie nie jest ‘alokowana’, ale ostatnia strona przestrzeni adresowej mo¿e byæ (~0 ma znaczenie tylko dla ‹identyfikatorów›, a inne to tylko w systemie operacyjnym).
+//TODO Funkcje “move” oprócz obecnych “copy”, by mo¿na by³o w nich u¿yæ “remap”, jeœli jest dostêpne.
+// Funkcja porz¹dkuj¹ca tablice w dostêpnym nadmiarowo czasie wykonania? Obecnie nic aktywnie nie porz¹dkuje ani tablic systemowych, ani pamiêci bloków, a tylko pasywnie podczas wykonywania ¿¹danych funkcji, jeœli coœ jest oczywiste w wykonywaniu funkcji.
+// Zaimplementowaæ ‘alokacje’ sfragmentowane (listy bloków ‘alokowanego’) i optymalizacje przy braku pamieci z projektowanego kiedyœ mened¿era pamiêci (“mem_mng– use”).
 //==============================================================================
     #ifdef C_to_libs_C_replace_c_alloc
         #ifdef C_pthreads
@@ -49,18 +49,18 @@ ZaleÅ¼nie od zastosowania powiÄ™kszania bloku pamiÄ™ci, w celu niewykonywania ni
 //------------------------------------------------------------------------------
 #define E_mem_Q_blk_S_align_to_all  ( 2 * sizeof(N) )
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-struct E_mem_Q_blk_Z_mapped // Obszary stron pamiÄ™ci otrzymane z systemu operacyjnego.
-{ Pc p; // â€œ0â€ tutaj i w â€œlâ€ oznacza pusty wpis; ale wystarczy sprawdziÄ‡ jedno.
+struct E_mem_Q_blk_Z_mapped // Obszary stron pamiêci otrzymane z systemu operacyjnego.
+{ Pc p; // “0” tutaj i w “l” oznacza pusty wpis; ale wystarczy sprawdziæ jedno.
   N l;
 };
-struct E_mem_Q_blk_Z_free // Dla optymalizacji wyszukiwania obszaru nowej â€˜alokacjiâ€™.
-{ Pc p; // â€œ0â€ tutaj i w â€œlâ€ oznacza pusty wpis; ale wystarczy sprawdziÄ‡ jedno.
+struct E_mem_Q_blk_Z_free // Dla optymalizacji wyszukiwania obszaru nowej ‘alokacji’.
+{ Pc p; // “0” tutaj i w “l” oznacza pusty wpis; ale wystarczy sprawdziæ jedno.
   N l;
 };
-struct E_mem_Q_blk_Z_allocated // Dla kontroli poprawnoÅ›ci wydawania i oddawania â€˜alokacjiâ€™.
-{ Pc p; // â€œ0â€ oznacza pusty wpis.
-  N u; // â€˜unitâ€™
-  N n; // W niepustym wpisieâ€” â€œ0â€ oznacza â€›zerowy wpisâ€™.
+struct E_mem_Q_blk_Z_allocated // Dla kontroli poprawnoœci wydawania i oddawania ‘alokacji’.
+{ Pc p; // “0” oznacza pusty wpis.
+  N u; // ‘unit’
+  N n; // W niepustym wpisie— “0” oznacza 'zerowy wpis’.
 };
 //==============================================================================
     #ifdef E_mem_Q_blk_C_debug
@@ -72,7 +72,7 @@ E_mem_Q_blk_T_new_0( P p
     V1p_( p_end = sbrk(0) );
     return (Pc)p < p_end;
 }
-//NDFN Potrzebne jest utworzenie nowej sekwencji testÃ³w â€” kompletnych.
+//NDFN Potrzebne jest utworzenie nowej sekwencji testów — kompletnych.
 _internal
 void
 E_mem_Q_blk_I_assert_on_return( N line
@@ -308,7 +308,7 @@ E_mem_Q_blk_Q_sys_table_mf_I_unite( N table_i
 , P p
 , N l
 ){  N i_found = ~0;
-    for_n( i, E_base_S->E_mem_Q_blk_S_allocated[ table_i ].n ) // Szukanie bloku przylegÅ‚ego od doÅ‚u.
+    for_n( i, E_base_S->E_mem_Q_blk_S_allocated[ table_i ].n ) // Szukanie bloku przyleg³ego od do³u.
     {   Pc *p_ = (P)( E_base_S->E_mem_Q_blk_S_allocated[ table_i ].p + i * E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u + rel_addr_p );
         N *l_ = (P)( E_base_S->E_mem_Q_blk_S_allocated[ table_i ].p + i * E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u + rel_addr_l );
         if( *p_ + *l_ == p )
@@ -318,11 +318,11 @@ E_mem_Q_blk_Q_sys_table_mf_I_unite( N table_i
             break;
         }
     }
-    for_n_( i, E_base_S->E_mem_Q_blk_S_allocated[ table_i ].n ) // Szukanie bloku przylegÅ‚ego od gÃ³ry.
+    for_n_( i, E_base_S->E_mem_Q_blk_S_allocated[ table_i ].n ) // Szukanie bloku przyleg³ego od góry.
     {   Pc *p_ = (P)( E_base_S->E_mem_Q_blk_S_allocated[ table_i ].p + i * E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u + rel_addr_p );
         N *l_ = (P)( E_base_S->E_mem_Q_blk_S_allocated[ table_i ].p + i * E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u + rel_addr_l );
         if( (Pc)p + l == *p_ )
-        {   if( ~i_found ) // ByÅ‚ znaleziony blok przylegÅ‚y od doÅ‚u.
+        {   if( ~i_found ) // By³ znaleziony blok przyleg³y od do³u.
             {   *( Pc * )( E_base_S->E_mem_Q_blk_S_allocated[ table_i ].p + i_found * E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u + rel_addr_l ) += *l_;
                 *p_ = 0;
                 *l_ = 0;
@@ -347,7 +347,7 @@ E_mem_Q_blk_Q_sys_table_mf_P_put( N table_i
     {   if( table_i == E_mem_Q_blk_S_allocated_S_free_id
         && l >= E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u
         )
-        {   if( (Pc)p + l == E_base_S->E_mem_Q_blk_S_allocated[ table_i ].p ) // Nowy blok jest przylegÅ‚y od doÅ‚u do tablicy blokÃ³w.
+        {   if( (Pc)p + l == E_base_S->E_mem_Q_blk_S_allocated[ table_i ].p ) // Nowy blok jest przyleg³y od do³u do tablicy bloków.
             {   E_base_S->E_mem_Q_blk_S_allocated[ table_i ].p -= E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u;
                 E_base_S->E_mem_Q_blk_S_allocated[ table_i ].n++;
                 struct E_mem_Q_blk_Z_free *free_p = (P)E_base_S->E_mem_Q_blk_S_allocated[ table_i ].p;
@@ -355,7 +355,7 @@ E_mem_Q_blk_Q_sys_table_mf_P_put( N table_i
                 free_p[0].p = free_p[0].l ? p : 0;
                 return 0;
             }
-            if( E_base_S->E_mem_Q_blk_S_allocated[ table_i ].p + E_base_S->E_mem_Q_blk_S_allocated[ table_i ].n * E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u == p ) // Nowy blok jest przylegÅ‚y od gÃ³ry do tablicy blokÃ³w.
+            if( E_base_S->E_mem_Q_blk_S_allocated[ table_i ].p + E_base_S->E_mem_Q_blk_S_allocated[ table_i ].n * E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u == p ) // Nowy blok jest przyleg³y od góry do tablicy bloków.
             {   struct E_mem_Q_blk_Z_free *free_p = (P)E_base_S->E_mem_Q_blk_S_allocated[ table_i ].p;
                 free_p[ E_base_S->E_mem_Q_blk_S_allocated[ table_i ].n ].l = l - E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u;
                 free_p[ E_base_S->E_mem_Q_blk_S_allocated[ table_i ].n ].p = free_p[ E_base_S->E_mem_Q_blk_S_allocated[ table_i ].n ].l
@@ -391,7 +391,7 @@ E_mem_Q_blk_Q_sys_table_R_new_id( N table_i
             }
         struct E_mem_Q_blk_Z_free *free_p = (P)E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].p;
         N l_ = E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u;
-        for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od doÅ‚u.
+        for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od do³u.
             if( free_p[ free_i ].p + free_p[ free_i ].l == p_0 )
             {   if( free_p[ free_i ].l >= l_ )
                 {   free_p[ free_i ].l -= l_;
@@ -410,7 +410,7 @@ E_mem_Q_blk_Q_sys_table_R_new_id( N table_i
                 }
                 break;
             }
-        for_n( free_j, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od gÃ³ry.
+        for_n( free_j, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od góry.
             if( p_0 + l_0 == free_p[ free_j ].p )
             {   if( free_p[ free_j ].l >= l_ )
                 {   free_p[ free_j ].l -= l_;
@@ -434,7 +434,7 @@ E_mem_Q_blk_Q_sys_table_R_new_id( N table_i
                 return i;
             }
         struct E_mem_Q_blk_Z_free *free_p = (P)E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].p;
-        for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od doÅ‚u.
+        for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od do³u.
             if( free_p[ free_i ].p + free_p[ free_i ].l == p_0 )
             {   if( free_p[ free_i ].l >= E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u )
                 {   free_p[ free_i ].l -= E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u;
@@ -451,7 +451,7 @@ E_mem_Q_blk_Q_sys_table_R_new_id( N table_i
                 }
                 break;
             }
-        for_n_( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od gÃ³ry.
+        for_n_( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od góry.
             if( p_0 + l_0 == free_p[ free_i ].p )
             {   if( free_p[ free_i ].l >= E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u )
                 {   free_p[ free_i ].l -= E_base_S->E_mem_Q_blk_S_allocated[ table_i ].u;
@@ -493,21 +493,21 @@ E_mem_Q_blk_Q_sys_table_R_new_id( N table_i
     }
     return E_base_S->E_mem_Q_blk_S_allocated[ table_i ].n - 1;
 }
-// Dla tablic systemowych â€œmappedâ€ i â€œfreeâ€ â€˜alokujeâ€™ tyle â€œnâ€, ile Å¼Ä…dane, lub wiÄ™cej.
+// Dla tablic systemowych “mapped” i “free” ‘alokuje’ tyle “n”, ile ¿¹dane, lub wiêcej.
 _internal
 P
 E_mem_Q_blk_Q_table_M_from_free_or_map_0( N allocated_or_table_i
 , N u
 , N n
-, P p // Adres uprzedniej zawartoÅ›ci lub 0, gdy brak.
-, N l // I rozmiar.â€ƒJeÅ›li â€œp == 0â€, to parametr ignorowany.
+, P p // Adres uprzedniej zawartoœci lub 0, gdy brak.
+, N l // I rozmiar. Jeœli “p == 0”, to parametr ignorowany.
 , N l_rel
 , N align
 ){  N l_1 = n * u;
     Pc p_1;
     if(n)
     {   if( allocated_or_table_i == E_mem_Q_blk_S_allocated_S_free_id
-        && p // Uprzedni obszar tablicy staje siÄ™ wolnym blokiem.
+        && p // Uprzedni obszar tablicy staje siê wolnym blokiem.
         )
         {   n++;
             l_1 += u;
@@ -526,14 +526,14 @@ E_mem_Q_blk_Q_table_M_from_free_or_map_0( N allocated_or_table_i
             l_align = u;
         else
             l_align = 1;
-        if( allocated_or_table_i == E_mem_Q_blk_S_allocated_S_free_id ) // Obszar przed wyrÃ³wnanym adresem staje siÄ™ wolnym blokiem.
+        if( allocated_or_table_i == E_mem_Q_blk_S_allocated_S_free_id ) // Obszar przed wyrównanym adresem staje siê wolnym blokiem.
         {   n++;
             l_1 += u;
         }
         N l_ = ~0;
         N i_found;
         struct E_mem_Q_blk_Z_free *free_p = (P)E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].p;
-        for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku na caÅ‚Ä… tablicÄ™.
+        for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku na ca³¹ tablicê.
         {   p_1 = E_simple_Z_p_I_align_up_to_v2( free_p[ free_i ].p, l_align );
             if( free_p[ free_i ].l >= ( p_1 - free_p[ free_i ].p ) + l_1
             && free_p[ free_i ].l < l_
@@ -545,39 +545,39 @@ E_mem_Q_blk_Q_table_M_from_free_or_map_0( N allocated_or_table_i
             }
         }
         if( !~l_ )
-        {   // JeÅ›li Å¼Ä…danie â€˜alokacjiâ€™ tablicy systemowej â€œmappedâ€ lub â€œfreeâ€ przyszÅ‚o z rekurencji, to wtedy Å¼Ä…danie â€˜alokacjiâ€™ takiej tablicy oznacza brak wolnych wpisÃ³w na poprzedniÄ… czekajÄ…cÄ… â€˜alokacjÄ™â€™ ogÃ³lnÄ… lub tablicy â€œallocatedâ€, a za chwilÄ™ bÄ™dÄ… byÄ‡ moÅ¼e potrzebne jeszcze kolejne wpisy na bieÅ¼Ä…cÄ… â€˜alokacjÄ™â€™.â€ƒdlatego naleÅ¼y â€˜alokowaÄ‡â€™ odrazu minimalnÄ… iloÅ›Ä‡ rezerwowych wpisÃ³w (dla jednej tablicy, by nie wymuszaÄ‡ statycznie jednoczesnej â€˜realokacjiâ€™ obu tablic), poniewaÅ¼ w pesymistycznym przypadku ewentualne â€˜doalokowanieâ€™ jednej nadmiarowej strony pamiÄ™ci na nie wykorzystane rezerwowe wpisy mniej kosztuje niÅ¼ drugie kopiowanie tej samej tablicy dla â€˜alokacjiâ€™ kolejnych wpisÃ³w w tej kolejnej rekurencji.
-            if( allocated_or_table_i == E_mem_Q_blk_S_allocated_S_free_id ) // Obszar przed wyrÃ³wnanym adresem nie staje siÄ™ wolnym blokiem.
+        {   // Jeœli ¿¹danie ‘alokacji’ tablicy systemowej “mapped” lub “free” przysz³o z rekurencji, to wtedy ¿¹danie ‘alokacji’ takiej tablicy oznacza brak wolnych wpisów na poprzedni¹ czekaj¹c¹ ‘alokacjê’ ogóln¹ lub tablicy “allocated”, a za chwilê bêd¹ byæ mo¿e potrzebne jeszcze kolejne wpisy na bie¿¹c¹ ‘alokacjê’. dlatego nale¿y ‘alokowaæ’ odrazu minimaln¹ iloœæ rezerwowych wpisów (dla jednej tablicy, by nie wymuszaæ statycznie jednoczesnej ‘realokacji’ obu tablic), poniewa¿ w pesymistycznym przypadku ewentualne ‘doalokowanie’ jednej nadmiarowej strony pamiêci na nie wykorzystane rezerwowe wpisy mniej kosztuje ni¿ drugie kopiowanie tej samej tablicy dla ‘alokacji’ kolejnych wpisów w tej kolejnej rekurencji.
+            if( allocated_or_table_i == E_mem_Q_blk_S_allocated_S_free_id ) // Obszar przed wyrównanym adresem nie staje siê wolnym blokiem.
             {   n--;
                 l_1 -= u;
             }
             Pc src_page, src_page_end;
-            if(p) // BÄ™dzie kopiowanie, a teraz przygotowanie do â€˜remapowaniaâ€™ â€šÅ›rodkaâ€™ zamiast kopiowania.
+            if(p) // Bêdzie kopiowanie, a teraz przygotowanie do ‘remapowania’ ‚œrodka’ zamiast kopiowania.
             {   src_page = E_simple_Z_p_I_align_up_to_v2( (Pc)p, E_base_S->E_mem_S_page_size );
                 src_page_end = E_simple_Z_p_I_align_down_to_v2( (Pc)p + l, E_base_S->E_mem_S_page_size );
-                // Zapewnienie liczby wpisÃ³w w tablicy systemowej wÅ‚aÅ›nie â€˜realokowanejâ€™â€” potrzebnej dla pesymistycznego przypadku niescalenia z juÅ¼ obecnymi nowych blokÃ³w dodawanych w tym wywoÅ‚aniu procedury do takiej tablicyâ€” by nie mogÅ‚o wystÄ…piÄ‡ rekurencyjne, zapÄ™tlajÄ…ce wywoÅ‚anie tej procedury dla tej samej tablicy bez moÅ¼liwoÅ›ci uzyskania nowych wpisÃ³w.
-                if( src_page < src_page_end ) // BÄ™dzie â€˜remapowanieâ€™ wewnÄ™trznych â€œstronâ€ pamiÄ™ci (blokÃ³w o adresach wyrÃ³wnanych do rozmiaru â€œstronyâ€).
-                {   if( allocated_or_table_i == E_mem_Q_blk_S_allocated_S_free_id ) // ZostanÄ… one wziÄ™te z obszaru dostÄ™pnych wolnych blokÃ³w (â€˜przemapowaneâ€™), a kraÅ„cowe pozostaÅ‚oÅ›ci (od obszaru wyrÃ³wnanego do â€œstronâ€ pamiÄ™ci) stanÄ… siÄ™ wolnymi blokami.
-                    {   n--; // Nie bÄ™dzie potrzeba osobno wpisywaÄ‡ uprzedniego rozmiaru tablicy.
+                // Zapewnienie liczby wpisów w tablicy systemowej w³aœnie ‘realokowanej’— potrzebnej dla pesymistycznego przypadku niescalenia z ju¿ obecnymi nowych bloków dodawanych w tym wywo³aniu procedury do takiej tablicy— by nie mog³o wyst¹piæ rekurencyjne, zapêtlaj¹ce wywo³anie tej procedury dla tej samej tablicy bez mo¿liwoœci uzyskania nowych wpisów.
+                if( src_page < src_page_end ) // Bêdzie ‘remapowanie’ wewnêtrznych “stron” pamiêci (bloków o adresach wyrównanych do rozmiaru “strony”).
+                {   if( allocated_or_table_i == E_mem_Q_blk_S_allocated_S_free_id ) // Zostan¹ one wziête z obszaru dostêpnych wolnych bloków (‘przemapowane’), a krañcowe pozosta³oœci (od obszaru wyrównanego do “stron” pamiêci) stan¹ siê wolnymi blokami.
+                    {   n--; // Nie bêdzie potrzeba osobno wpisywaæ uprzedniego rozmiaru tablicy.
                         l_1 -= u;
-                        if( src_page != p ) // BÄ™dzie wolny poczÄ…tkowy fragment w pierwszej â€œstronieâ€ pamiÄ™ci: w ÅºrÃ³dÅ‚owym bloku i nowym.
+                        if( src_page != p ) // Bêdzie wolny pocz¹tkowy fragment w pierwszej “stronie” pamiêci: w Ÿród³owym bloku i nowym.
                         {   n += 2;
                             l_1 += 2 * u;
                         }
-                        if( src_page_end != (Pc)p + l ) // BÄ™dzie wolny koÅ„cowy fragment w ostatniej â€œstronieâ€ pamiÄ™ci: w ÅºrÃ³dÅ‚owym bloku i nowym.
+                        if( src_page_end != (Pc)p + l ) // Bêdzie wolny koñcowy fragment w ostatniej “stronie” pamiêci: w Ÿród³owym bloku i nowym.
                         {   n += 2;
                             l_1 += 2 * u;
                         }
-                    }else if( allocated_or_table_i == E_mem_Q_blk_S_allocated_S_mapped_id ) // ZostanÄ… one wziÄ™te z obszaru â€˜zmapowanychâ€™, a kraÅ„cowe â€œstronyâ€ stanÄ… siÄ™ osobnymi â€˜zmapowanymiâ€™ blokami.
+                    }else if( allocated_or_table_i == E_mem_Q_blk_S_allocated_S_mapped_id ) // Zostan¹ one wziête z obszaru ‘zmapowanych’, a krañcowe “strony” stan¹ siê osobnymi ‘zmapowanymi’ blokami.
                     {   n += 2;
                         l_1 += 2 * u;
                     }
-                }else if( allocated_or_table_i == E_mem_Q_blk_S_allocated_S_mapped_id // Nowy blok, â€˜zmapowanyâ€™ na tablicÄ™ â€˜zmapowanychâ€™â€” musi byÄ‡ wpisany do tablicy.
-                || allocated_or_table_i == E_mem_Q_blk_S_allocated_S_free_id // Fragment pozostaÅ‚y do wyrÃ³wnania do rozmiaru â€œstronâ€ pamiÄ™ci staje siÄ™ wolnym blokiem.
+                }else if( allocated_or_table_i == E_mem_Q_blk_S_allocated_S_mapped_id // Nowy blok, ‘zmapowany’ na tablicê ‘zmapowanych’— musi byæ wpisany do tablicy.
+                || allocated_or_table_i == E_mem_Q_blk_S_allocated_S_free_id // Fragment pozosta³y do wyrównania do rozmiaru “stron” pamiêci staje siê wolnym blokiem.
                 )
                 {   n++;
                     l_1 += u;
                 }
-            }else if( allocated_or_table_i == E_mem_Q_blk_S_allocated_S_free_id ) // Fragment pozostaÅ‚y do wyrÃ³wnania do rozmiaru â€œstronâ€ pamiÄ™ci staje siÄ™ wolnym blokiem.
+            }else if( allocated_or_table_i == E_mem_Q_blk_S_allocated_S_free_id ) // Fragment pozosta³y do wyrównania do rozmiaru “stron” pamiêci staje siê wolnym blokiem.
             {   n++;
                 l_1 += u;
             }
@@ -619,7 +619,7 @@ E_mem_Q_blk_Q_table_M_from_free_or_map_0( N allocated_or_table_i
                 #endif
                 return 0;
                 #ifdef E_mem_Q_blk_C_debug
-            E_mem_Q_blk_P_fill_c( p_1, l_, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+            E_mem_Q_blk_P_fill_c( p_1, l_, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                 #endif
             E_base_S->E_flow_Z_task_stacks_S_n_pages -= l_ / E_base_S->E_mem_S_page_size;
             N failed_tasks = E_flow_Q_task_I_granulation();
@@ -631,7 +631,7 @@ E_mem_Q_blk_Q_table_M_from_free_or_map_0( N allocated_or_table_i
             if(p)
             {   if( !U_R( E_base_S->E_flow_S_mode, Z_task_table_S_can_read ))
                     E_flow_Q_task_I_touch_stack();
-                //TODO PoniÅ¼ej byÄ‡ moÅ¼e zastÄ…piÄ‡ (bez deintegracji) procedurÄ… â€œmoveâ€, ktÃ³ra powstanie.
+                //TODO Poni¿ej byæ mo¿e zast¹piæ (bez deintegracji) procedur¹ “move”, która powstanie.
                 if( src_page < src_page_end )
                 {   dst_page = p_1 + dst_rel;
                     p_ = dst_page - ( src_page - (Pc)p );
@@ -648,7 +648,7 @@ E_mem_Q_blk_Q_table_M_from_free_or_map_0( N allocated_or_table_i
                         , dst_page_end
                         ));
                             #elif defined( __FreeBSD__ ) || defined( __OpenBSD__ )
-                        // Kopiowanie po jednej â€œstronieâ€, by tak wÅ‚aÅ›nie zachodziÅ‚o rzeczywiste â€˜mapowanieâ€™ w sprzÄ™towym trybie â€œmap on writeâ€, gdy pojedyncze â€œstronyâ€ sÄ… teÅ¼ â€˜odmapowywaneâ€™.
+                        // Kopiowanie po jednej “stronie”, by tak w³aœnie zachodzi³o rzeczywiste ‘mapowanie’ w sprzêtowym trybie “map on write”, gdy pojedyncze “strony” s¹ te¿ ‘odmapowywane’.
                         E_mem_Q_blk_I_copy( dst_page_end, src_page_, E_base_S->E_mem_S_page_size );
                         V0_( munmap( src_page_, E_base_S->E_mem_S_page_size ));
                             #else
@@ -658,7 +658,7 @@ E_mem_Q_blk_Q_table_M_from_free_or_map_0( N allocated_or_table_i
                         dst_page_end += E_base_S->E_mem_S_page_size;
                     }
                         #if 0 && defined( __gnu_linux__ )
-#error nie dziaÅ‚a â€˜remapowanieâ€™ caÅ‚ego bloku naraz, a tylko po â€œstronieâ€, jak powyÅ¼ej.
+#error nie dzia³a ‘remapowanie’ ca³ego bloku naraz, a tylko po “stronie”, jak powy¿ej.
                     V1p_( mremap( src_page
                     , src_page_end - src_page
                     , src_page_end - src_page
@@ -675,7 +675,7 @@ E_mem_Q_blk_Q_table_M_from_free_or_map_0( N allocated_or_table_i
             }else
                 E_base_S->E_mem_Q_blk_S_allocated[ allocated_or_table_i ].u = u;
             E_base_S->E_mem_Q_blk_S_allocated[ allocated_or_table_i ].p = p_;
-            //TODO WyeliminowaÄ‡ â€œuniteâ€ tam, gdzie nigdy nie zajdzie.
+            //TODO Wyeliminowaæ “unite” tam, gdzie nigdy nie zajdzie.
             struct E_mem_Q_blk_Z_free free_p_;
             if( allocated_or_table_i == E_mem_Q_blk_S_allocated_S_free_id )
             {   free_p = (P)p_;
@@ -854,7 +854,7 @@ E_mem_Q_blk_Q_table_M_from_free_or_map_0( N allocated_or_table_i
         }
     }else if( !( p_1 = E_mem_Q_blk_R_new_0() ))
         return 0;
-    if( !p ) //NDFN Rozpoznanie niebezpoÅ›rednie, mimo Å¼e jednoznaczne w obecnej implementacji.
+    if( !p ) //NDFN Rozpoznanie niebezpoœrednie, mimo ¿e jednoznaczne w obecnej implementacji.
         E_base_S->E_mem_Q_blk_S_allocated[ allocated_or_table_i ].u = u;
     E_base_S->E_mem_Q_blk_S_allocated[ allocated_or_table_i ].p = p_1;
     if(p)
@@ -873,7 +873,7 @@ E_mem_Q_blk_Q_table_M_from_free_or_map_0( N allocated_or_table_i
                 return 0;
         }
     }
-    E_base_S->E_mem_Q_blk_S_allocated[ allocated_or_table_i ].n = n; // KoÅ„cowe wpisy i tak nie zawieraÅ‚yby danych dla powyÅ¼szego â€œuniteâ€, a â€œE_mem_Q_blk_S_allocated_S_mapped_idâ€ moÅ¼e wystÄ…piÄ‡ tylko w koÅ„cowym wywoÅ‚aniu rekurencyjnym (pojedynczy poziom rekurencji), nie w odzewnÄ™trznym, poczÄ…tkowym wywoÅ‚aniu tej procedury, wiÄ™c powiÄ™kszenie tablicy dopiero tutaj.
+    E_base_S->E_mem_Q_blk_S_allocated[ allocated_or_table_i ].n = n; // Koñcowe wpisy i tak nie zawiera³yby danych dla powy¿szego “unite”, a “E_mem_Q_blk_S_allocated_S_mapped_id” mo¿e wyst¹piæ tylko w koñcowym wywo³aniu rekurencyjnym (pojedynczy poziom rekurencji), nie w odzewnêtrznym, pocz¹tkowym wywo³aniu tej procedury, wiêc powiêkszenie tablicy dopiero tutaj.
     return p_1;
 }
 _internal
@@ -950,7 +950,7 @@ E_mem_Q_blk_M_align_tab(
         return 0;
     }
         #ifdef E_mem_Q_blk_C_debug
-    E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p, E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+    E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p, E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
         #endif
     P p_ = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p;
     E_mem_Q_blk_I_assert_on_return( __LINE__ );
@@ -996,7 +996,7 @@ E_mem_Q_blk_M_replace_tab( P *p
                 return 0;
             }
                 #ifdef E_mem_Q_blk_C_debug
-            E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p, E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+            E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p, E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                 #endif
             P p_ = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p;
             E_mem_Q_blk_I_assert_on_return( __LINE__ );
@@ -1037,7 +1037,7 @@ E_mem_Q_blk_M_split( P p
 }
 N
 E_mem_Q_blk_W( P p
-){  if( U_R( E_base_S->E_flow_S_signal, exit_all )) //NDFN To sprawdzenie raczej umieszczaÄ‡ tylko w funkcjach wysokopoziomowych.
+){  if( U_R( E_base_S->E_flow_S_signal, exit_all )) //NDFN To sprawdzenie raczej umieszczaæ tylko w funkcjach wysokopoziomowych.
         return 0;
     _single_thread_begin;
     for_n( allocated_i, E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_table_allocated_id ].n )
@@ -1065,7 +1065,7 @@ E_mem_Q_blk_I_add_( P p
 , N n
 , N *n_prepended
 , N *n_appended
-){  J_assert(n); // Puste uÅ¼ycie tej procedury.
+){  J_assert(n); // Puste u¿ycie tej procedury.
     for_n( allocated_i, E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_table_allocated_id ].n )
         if( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p == *( P * )p )
         {   Pc p_0 = 0;
@@ -1075,7 +1075,7 @@ E_mem_Q_blk_I_add_( P p
             {   N l_1 = 0;
                 p_0 = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p;
                 struct E_mem_Q_blk_Z_free *free_p = (P)E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].p;
-                for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od doÅ‚u.
+                for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od do³u.
                     if( free_p[ free_i ].p + free_p[ free_i ].l == p_0 )
                     {   if( free_p[ free_i ].l >= E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u )
                         {   l_1 = free_p[ free_i ].l;
@@ -1094,7 +1094,7 @@ E_mem_Q_blk_I_add_( P p
                     E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n += n;
                     *( P * )p = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p -= l_1;
                         #ifdef E_mem_Q_blk_C_debug
-                    E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p, l_1, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+                    E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p, l_1, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                         #endif
                     if( n_prepended )
                         *n_prepended = n;
@@ -1102,7 +1102,7 @@ E_mem_Q_blk_I_add_( P p
                         *n_appended = 0;
                     return E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p + l_1;
                 }
-                for_n( free_j, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od gÃ³ry.
+                for_n( free_j, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od góry.
                     if( p_0 + l_0 == free_p[ free_j ].p )
                     {   if( free_p[ free_j ].l >= l )
                         {   free_p[ free_j ].l -= l;
@@ -1118,8 +1118,8 @@ E_mem_Q_blk_I_add_( P p
                             }
                             E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n += n;
                                 #ifdef E_mem_Q_blk_C_debug
-                            E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p, l_1, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
-                            E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p + l_1 + l_0, l, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+                            E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p, l_1, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
+                            E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p + l_1 + l_0, l, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                                 #endif
                             if( n_prepended )
                                 *n_prepended = l_1 / E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u;
@@ -1129,7 +1129,7 @@ E_mem_Q_blk_I_add_( P p
                         }
                         break;
                     }
-                l += l_1; // Przywraca oryginalnÄ… wartoÅ›Ä‡ sprzed scalenia od doÅ‚u, skoro byÅ‚ blok przylegÅ‚y od doÅ‚u, zabrakÅ‚o do peÅ‚nej liczby od gÃ³ry.
+                l += l_1; // Przywraca oryginaln¹ wartoœæ sprzed scalenia od do³u, skoro by³ blok przyleg³y od do³u, zabrak³o do pe³nej liczby od góry.
             }
             struct E_mem_Q_blk_Z_mapped mapped_p_;
             struct E_mem_Q_blk_Z_free free_p_;
@@ -1149,7 +1149,7 @@ E_mem_Q_blk_I_add_( P p
                 return 0;
             *( P * )p = p_1;
                 #ifdef E_mem_Q_blk_C_debug
-            E_mem_Q_blk_P_fill_c( (Pc)p_1 + l_0, l, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+            E_mem_Q_blk_P_fill_c( (Pc)p_1 + l_0, l, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                 #endif
             if( n_prepended )
                 *n_prepended = 0;
@@ -1164,7 +1164,7 @@ P
 E_mem_Q_blk_I_prepend_append_( P p
 , N n_prepend
 , N n_append
-){  J_assert( n_prepend || n_append ); // Puste uÅ¼ycie tej procedury.
+){  J_assert( n_prepend || n_append ); // Puste u¿ycie tej procedury.
     for_n( allocated_i, E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_table_allocated_id ].n )
         if( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p == *( P * )p )
         {   Pc p_0 = 0;
@@ -1174,7 +1174,7 @@ E_mem_Q_blk_I_prepend_append_( P p
                 N l_1 = 0;
                 p_0 = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p;
                 struct E_mem_Q_blk_Z_free *free_p = (P)E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].p;
-                for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od doÅ‚u.
+                for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od do³u.
                     if( free_p[ free_i ].p + free_p[ free_i ].l == p_0 )
                     {   if( free_p[ free_i ].l >= E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u )
                         {   l_1 = free_p[ free_i ].l;
@@ -1196,8 +1196,8 @@ E_mem_Q_blk_I_prepend_append_( P p
                     E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n += n_prepend;
                     return E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p + l_1;
                 }
-                // Kontynuacja od tej linii: trzeba wybraÄ‡ optymalne przesuniÄ™cie pomiÄ™dzy blokiem poprzedzajÄ…cym a nastÄ™pujÄ…cym, by ewentualnie nie kopiowaÄ‡.
-                for_n( free_j, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od gÃ³ry.
+                // Kontynuacja od tej linii: trzeba wybraæ optymalne przesuniêcie pomiêdzy blokiem poprzedzaj¹cym a nastêpuj¹cym, by ewentualnie nie kopiowaæ.
+                for_n( free_j, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od góry.
                     if( p_0 + l_0 == free_p[ free_j ].p )
                     {   if( free_p[ free_j ].l >= l )
                         {   free_p[ free_j ].l -= l;
@@ -1217,7 +1217,7 @@ E_mem_Q_blk_I_prepend_append_( P p
                         }
                         break;
                     }
-                l += l_1; // Przywraca oryginalnÄ… wartoÅ›Ä‡ sprzed scalenia od doÅ‚u, skoro byÅ‚ blok przylegÅ‚y od doÅ‚u, zabrakÅ‚o do peÅ‚nej liczby od gÃ³ry.
+                l += l_1; // Przywraca oryginaln¹ wartoœæ sprzed scalenia od do³u, skoro by³ blok przyleg³y od do³u, zabrak³o do pe³nej liczby od góry.
             }
             struct E_mem_Q_blk_Z_mapped mapped_p_;
             struct E_mem_Q_blk_Z_free free_p_;
@@ -1245,7 +1245,7 @@ P
 E_mem_Q_blk_I_append_( P p
 , N n
 , N align
-){  J_assert(n); // Puste uÅ¼ycie tej procedury.
+){  J_assert(n); // Puste u¿ycie tej procedury.
     for_n( allocated_i, E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_table_allocated_id ].n )
         if( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p == *( P * )p )
         {   N l = n * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u;
@@ -1255,7 +1255,7 @@ E_mem_Q_blk_I_append_( P p
             {   N l_1 = 0;
                 p_0 = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p;
                 struct E_mem_Q_blk_Z_free *free_p = (P)E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].p;
-                for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od gÃ³ry.
+                for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od góry.
                     if( p_0 + l_0 == free_p[ free_i ].p )
                     {   if( free_p[ free_i ].l >= E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u )
                         {   l_1 = free_p[ free_i ].l;
@@ -1278,12 +1278,12 @@ E_mem_Q_blk_I_append_( P p
                         free_p[ free_i ].p = 0;
                     E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n += n;
                         #ifdef E_mem_Q_blk_C_debug
-                    E_mem_Q_blk_P_fill_c( p_0 + l_0, l_1, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+                    E_mem_Q_blk_P_fill_c( p_0 + l_0, l_1, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                         #endif
                     return E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p + l_0;
                 }
                 if( ~align )
-                {   for_n( free_j, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od doÅ‚u.
+                {   for_n( free_j, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od do³u.
                     {   if( free_p[ free_j ].p + free_p[ free_j ].l == p_0 )
                         {   Pc p_align = E_simple_Z_p_I_align_up_to_v2( free_p[ free_j ].p, align );
                             if( free_p[ free_j ].l >= ( p_align - free_p[ free_j ].p ) + l )
@@ -1307,7 +1307,7 @@ E_mem_Q_blk_I_append_( P p
                                     E_flow_Q_task_I_touch_stack();
                                 E_mem_Q_blk_I_copy( p_align, p_0, l_0 );
                                     #ifdef E_mem_Q_blk_C_debug
-                                E_mem_Q_blk_P_fill_c( p_align + l_0, l + l_1, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+                                E_mem_Q_blk_P_fill_c( p_align + l_0, l + l_1, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                                     #endif
                                 E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n += n;
                                 *( P * )p = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p = p_align;
@@ -1317,7 +1317,7 @@ E_mem_Q_blk_I_append_( P p
                         }
                     }
                 }else
-                {   for_n( free_j, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od doÅ‚u.
+                {   for_n( free_j, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od do³u.
                         if( free_p[ free_j ].p + free_p[ free_j ].l == p_0 )
                         {   if( free_p[ free_j ].l >= l )
                             {   if( free_p[ free_j ].l == l )
@@ -1336,7 +1336,7 @@ E_mem_Q_blk_I_append_( P p
                                 E_mem_Q_blk_I_copy( p_1, p_0, l_0 );
                                 E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n += n;
                                     #ifdef E_mem_Q_blk_C_debug
-                                E_mem_Q_blk_P_fill_c( p_1 + l_0, l + l_1, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+                                E_mem_Q_blk_P_fill_c( p_1 + l_0, l + l_1, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                                     #endif
                                 *( P * )p = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p = p_1;
                                 return E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p + l_0;
@@ -1344,7 +1344,7 @@ E_mem_Q_blk_I_append_( P p
                             break;
                         }
                 }
-                l += l_1; // Przywraca oryginalnÄ… wartoÅ›Ä‡ sprzed scalenia od doÅ‚u, skoro byÅ‚ blok przylegÅ‚y od doÅ‚u, a zabrakÅ‚o do peÅ‚nej liczby od gÃ³ry.
+                l += l_1; // Przywraca oryginaln¹ wartoœæ sprzed scalenia od do³u, skoro by³ blok przyleg³y od do³u, a zabrak³o do pe³nej liczby od góry.
             }
             struct E_mem_Q_blk_Z_mapped mapped_p_;
             struct E_mem_Q_blk_Z_free free_p_;
@@ -1364,7 +1364,7 @@ E_mem_Q_blk_I_append_( P p
                 return 0;
             *( P * )p = p_1;
                 #ifdef E_mem_Q_blk_C_debug
-            E_mem_Q_blk_P_fill_c( (Pc)p_1 + l_0, l, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+            E_mem_Q_blk_P_fill_c( (Pc)p_1 + l_0, l, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                 #endif
             return (Pc)p_1 + l_0;
         }
@@ -1374,7 +1374,7 @@ _internal
 P
 E_mem_Q_blk_I_prepend_( P p
 , N n
-){  J_assert(n); // Puste uÅ¼ycie tej procedury.
+){  J_assert(n); // Puste u¿ycie tej procedury.
     for_n( allocated_i, E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_table_allocated_id ].n )
         if( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p == *( P * )p )
         {   N l = n * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u;
@@ -1384,7 +1384,7 @@ E_mem_Q_blk_I_prepend_( P p
             {   N l_1 = 0;
                 p_0 = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p;
                 struct E_mem_Q_blk_Z_free *free_p = (P)E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].p;
-                for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od doÅ‚u.
+                for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od do³u.
                     if( free_p[ free_i ].p + free_p[ free_i ].l == p_0 )
                     {   if( free_p[ free_i ].l >= E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u )
                         {   l_1 = free_p[ free_i ].l;
@@ -1403,11 +1403,11 @@ E_mem_Q_blk_I_prepend_( P p
                     E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n += n;
                     *( P * )p = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p -= l_1;
                         #ifdef E_mem_Q_blk_C_debug
-                    E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p, l_1, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+                    E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p, l_1, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                         #endif
                     return p_0;
                 }
-                for_n( free_j, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od gÃ³ry.
+                for_n( free_j, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od góry.
                     if( p_0 + l_0 == free_p[ free_j ].p )
                     {   if( free_p[ free_j ].l >= l )
                         {   free_p[ free_j ].l -= l;
@@ -1427,13 +1427,13 @@ E_mem_Q_blk_I_prepend_( P p
                             if( l_1 )
                                 *( P * )p = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p -= l_1;
                                 #ifdef E_mem_Q_blk_C_debug
-                            E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p, l_1, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+                            E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p, l_1, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                                 #endif
                             return p_0 + l;
                         }
                         break;
                     }
-                l += l_1; // Przywraca oryginalnÄ… wartoÅ›Ä‡ sprzed scalenia od doÅ‚u, skoro byÅ‚ blok przylegÅ‚y od doÅ‚u, a zabrakÅ‚o do peÅ‚nej liczby od gÃ³ry.
+                l += l_1; // Przywraca oryginaln¹ wartoœæ sprzed scalenia od do³u, skoro by³ blok przyleg³y od do³u, a zabrak³o do pe³nej liczby od góry.
             }
             struct E_mem_Q_blk_Z_mapped mapped_p_;
             struct E_mem_Q_blk_Z_free free_p_;
@@ -1452,7 +1452,7 @@ E_mem_Q_blk_I_prepend_( P p
             if( !p_1 )
                 return 0;
                 #ifdef E_mem_Q_blk_C_debug
-            E_mem_Q_blk_P_fill_c( p_1, l, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+            E_mem_Q_blk_P_fill_c( p_1, l, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                 #endif
             *( P * )p = p_1;
             return E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p + l;
@@ -1475,7 +1475,7 @@ E_mem_Q_blk_I_insert_( P p
                 N l_1 = 0;
                 p_0 = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p;
                 struct E_mem_Q_blk_Z_free *free_p = (P)E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].p;
-                for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od doÅ‚u.
+                for_n( free_i, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od do³u.
                     if( free_p[ free_i ].p + free_p[ free_i ].l == p_0 )
                     {   if( free_p[ free_i ].l >= E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u )
                         {   l_1 = free_p[ free_i ].l;
@@ -1500,11 +1500,11 @@ E_mem_Q_blk_I_insert_( P p
                     , i * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u
                     );
                         #ifdef E_mem_Q_blk_C_debug
-                    E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p + i * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u, l_1, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+                    E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p + i * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u, l_1, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                         #endif
                     return E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p + i * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u;
                 }
-                for_n( free_j, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przylegÅ‚ego od gÃ³ry.
+                for_n( free_j, E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_free_id ].n ) // Szukanie wolnego bloku przyleg³ego od góry.
                     if( p_0 + l_0 == free_p[ free_j ].p )
                     {   if( free_p[ free_j ].l >= l )
                         {   free_p[ free_j ].l -= l;
@@ -1531,7 +1531,7 @@ E_mem_Q_blk_I_insert_( P p
                             , l_0 - i * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u
                             );
                                 #ifdef E_mem_Q_blk_C_debug
-                            E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p + i * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u, l_1 + l, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+                            E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p + i * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u, l_1 + l, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                                 #endif
                             return E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p + i * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u;
                         }
@@ -1554,14 +1554,14 @@ E_mem_Q_blk_I_insert_( P p
             );
             if( !p_1 )
                 return 0;
-            //TODO ZrobiÄ‡ w â€œE_mem_Q_blk_Q_table_M_from_free_or_mapâ€ parametr przesuniecia dla â€˜splitâ€™ i kopiowania tam odrazu?
+            //TODO Zrobiæ w “E_mem_Q_blk_Q_table_M_from_free_or_map” parametr przesuniecia dla ‘split’ i kopiowania tam odrazu?
             if( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n )
                 E_mem_Q_blk_I_copy_rev( (Pc)p_1 + ( i + n ) * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u
                 , (Pc)p_1 + i * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u
                 , l_0 - i * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u
-                ); // â€œE_flow_Q_task_I_touch_stackâ€ byÅ‚o wykonane w â€œE_mem_Q_blk_Q_table_M_from_free_or_mapâ€.
+                ); // “E_flow_Q_task_I_touch_stack” by³o wykonane w “E_mem_Q_blk_Q_table_M_from_free_or_map”.
                 #ifdef E_mem_Q_blk_C_debug
-            E_mem_Q_blk_P_fill_c( (Pc)p_1 + i * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u, n * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+            E_mem_Q_blk_P_fill_c( (Pc)p_1 + i * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u, n * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
                 #endif
             *( P * )p = p_1;
             return (Pc)p_1 + i * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u;
@@ -1579,7 +1579,7 @@ E_mem_Q_blk_I_remove_( P p
         {   J_assert( i + n <= E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n );
             N l = n * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u;
             N l_0 = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u;
-            if( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n == n ) // Usuwany caÅ‚y blok.
+            if( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n == n ) // Usuwany ca³y blok.
             {   struct E_mem_Q_blk_Z_free free_p_;
                 if( !~E_mem_Q_blk_Q_sys_table_mf_P_put( E_mem_Q_blk_S_allocated_S_free_id, (Pc)&free_p_.p - (Pc)&free_p_, (Pc)&free_p_.l - (Pc)&free_p_
                 , *( P * )p
@@ -1589,7 +1589,7 @@ E_mem_Q_blk_I_remove_( P p
                 E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n = 0;
                 E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p = E_mem_Q_blk_R_new_0();
                 *( P * )p = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p;
-            }else if( i + n == E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n ) // Usuwane na koÅ„cu bloku.
+            }else if( i + n == E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n ) // Usuwane na koñcu bloku.
             {   struct E_mem_Q_blk_Z_free free_p_;
                 if( !~E_mem_Q_blk_Q_sys_table_mf_P_put( E_mem_Q_blk_S_allocated_S_free_id, (Pc)&free_p_.p - (Pc)&free_p_, (Pc)&free_p_.l - (Pc)&free_p_
                 , *( Pc * )p + l_0 - l
@@ -1597,7 +1597,7 @@ E_mem_Q_blk_I_remove_( P p
                 ))
                     return 0;
                 E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n -= n;
-            }else if( !i ) // Usuwane na poczÄ…tku bloku.
+            }else if( !i ) // Usuwane na pocz¹tku bloku.
             {   P p_ = *( P * )p;
                 struct E_mem_Q_blk_Z_free free_p_;
                 if( !~E_mem_Q_blk_Q_sys_table_mf_P_put( E_mem_Q_blk_S_allocated_S_free_id, (Pc)&free_p_.p - (Pc)&free_p_, (Pc)&free_p_.l - (Pc)&free_p_
@@ -1607,7 +1607,7 @@ E_mem_Q_blk_I_remove_( P p
                     return 0;
                 E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n -= n;
                 *( P * )p = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p += l;
-            }else // Usuwane w Å›rodku bloku.
+            }else // Usuwane w œrodku bloku.
             {   Pc p_0 = *( Pc * )p + ( i + n ) * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u;
                 if( !U_R( E_base_S->E_flow_S_mode, Z_task_table_S_can_read ))
                     E_flow_Q_task_I_touch_stack();
@@ -1630,9 +1630,9 @@ E_mem_Q_blk_I_remove_( P p
 //------------------------------------------------------------------------------
 // Resize useing a boundary without memory move if possible.
 // Gdy wynik jest niezerowy, to:
-// â€¢ jeÅ¼eli â€œ*n_appendedâ€, to w wyniku jest adres nowego bloku przylegÅ‚ego od gÃ³ry.
-// â€¢ jeÅ¼eli â€œ!*n_appendedâ€, ã€ƒ adres podanego bloku (przed ktÃ³rym doÅ‚Ä…czono blok przylegÅ‚y od doÅ‚u).
-// Te wartoÅ›ci nie sÄ… uÅ¼ywane i mogÄ… zostaÄ‡ zmienione.
+// • je¿eli “*n_appended”, to w wyniku jest adres nowego bloku przyleg³ego od góry.
+// • je¿eli “!*n_appended”, ? adres podanego bloku (przed którym do³¹czono blok przyleg³y od do³u).
+// Te wartoœci nie s¹ u¿ywane i mog¹ zostaæ zmienione.
 P
 E_mem_Q_blk_I_add( P p
 , N n
@@ -1648,7 +1648,7 @@ E_mem_Q_blk_I_add( P p
     return p_;
 }
 // Resize useing boundaries without memory move if possible.
-//NDFN Funkcja nie dokoÅ„czona.
+//NDFN Funkcja nie dokoñczona.
 P
 E_mem_Q_blk_I_prepend_append( P p
 , N n_prepend
@@ -1663,7 +1663,7 @@ E_mem_Q_blk_I_prepend_append( P p
     return p_;
 }
 // Resize useing high boundary without memory move if possible.
-// W wyniku podaje adres doÅ‚Ä…czonego bloku.
+// W wyniku podaje adres do³¹czonego bloku.
 P
 E_mem_Q_blk_I_append( P p
 , N n
@@ -1706,7 +1706,7 @@ E_mem_Q_blk_I_insert( P p
     return p_;
 }
 // Remove without memory move.
-// W wyniku podaje nowy adres bloku (jak w â€œ*( P * )pâ€).
+// W wyniku podaje nowy adres bloku (jak w “*( P * )p”).
 P
 E_mem_Q_blk_I_remove( P p
 , N i
@@ -1785,7 +1785,7 @@ E_mem_Q_blk_M_tab_calloc(
         return 0;
     }
         #ifdef E_mem_Q_blk_C_debug
-    E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p, E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+    E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p, E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].n * E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].u, 0xa5 ); //TODO Procedura usuwaj¹ca zerowanie nowej pamiêci na czas usuwania zmiennych globalnych i testów.
         #endif
     P p_ = E_base_S->E_mem_Q_blk_S_allocated[ allocated_i ].p;
     E_mem_Q_blk_I_assert_on_return( __LINE__ );
@@ -1865,7 +1865,7 @@ realloc( P p
 void
 free( P p
 ){  Dh_();
-    if( !p ) // Funkcja zerowego adresu, taka jak w oryginalnym â€œfreeâ€.
+    if( !p ) // Funkcja zerowego adresu, taka jak w oryginalnym “free”.
         return;
     _single_thread_begin;
     for_n( allocated_i, E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_table_allocated_id ].n )

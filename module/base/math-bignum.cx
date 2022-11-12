@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   base
 *         math big numbers
-* Â©overcq                on â€ŸGentoo Linux 17.1â€ â€œx86_64â€            2020â€’10â€’24 M
+* ©overcq                on "Gentoo Linux 17.1” “x86_64”            2020-10-24 M
 *******************************************************************************/
 struct E_math_Z_bignum
 { N *digits;
@@ -729,7 +729,7 @@ E_math_Q_bignum_I_multiply(
     }
     return 0;
 }
-// Parametry tej procedury muszÄ… byÄ‡ rÃ³Å¼nymi obiektami.
+// Parametry tej procedury musz¹ byæ ró¿nymi obiektami.
 N
 E_math_Q_bignum_I_divide_modulo_min_prec(
   struct E_math_Z_bignum *num_0
@@ -1221,7 +1221,7 @@ E_math_Q_bignum_I_divide_modulo_min_prec(
                                 }
                             }
                         }
-                }else //if( n_0 < n_1 ) // OczywistoÅ›Ä‡ z integralnoÅ›ci algorytmu.
+                }else //if( n_0 < n_1 ) // Oczywistoœæ z integralnoœci algorytmu.
                 {   if( k_0-- )
                     {   n_0 <<= 1;
                         n_0 |= ( num_0->digits[ e_0 ] >> k_0 ) & 1;
@@ -1445,7 +1445,7 @@ E_math_Q_bignum_I_divide_modulo_min_prec(
                     else
                         n_0 = 0;
                 }
-                if( n_0 ) // Czy zostaÅ‚o coÅ› z nadmiaru sÅ‚owa reszty z dzielenia?
+                if( n_0 ) // Czy zosta³o coœ z nadmiaru s³owa reszty z dzielenia?
                 {   if( !E_mem_Q_blk_I_prepend( &num_mod->digits, 1 ))
                     {   E_math_Q_bignum_W( num_mod );
                         E_math_Q_bignum_W( num_div );
@@ -1937,7 +1937,7 @@ E_math_Q_bignum_I_power_n( struct E_math_Z_bignum *num
 N
 E_math_Q_bignum_I_factorial( struct E_math_Z_bignum *num
 )
-{   J_assert( num->exponent >= 0 ); // liczba caÅ‚kowita
+{   J_assert( num->exponent >= 0 ); // liczba ca³kowita
     J_assert( !E_math_Q_bignum_R_sign(num) ); // liczba nieujemna
     J_assert( num->exponent || num->digits[0] ); // != 0
     struct E_math_Z_bignum *num_ = E_math_Q_bignum_M_copy(num);

@@ -1,10 +1,10 @@
 ################################################################################
 #   ___   publicplace
-#  Â¦OUXÂ¦  â€ŸGNUâ€ â€œmakeâ€
-#  Â¦/C+Â¦  component
-#   ---   â€ŸXorgâ€ â€”low â€˜cpuâ€™
+#  ¦OUX¦  "GNU” “make”
+#  ¦/C+¦  component
+#   ---   "Xorg” —low ‘cpu’
 #         module makefile
-# Â©overcq                on â€ŸGentoo Linux 13.0â€ â€œx86_64â€             2015â€’4â€’28 #
+# ©overcq                on "Gentoo Linux 13.0” “x86_64”             2015-4-28 #
 ################################################################################
 S_packages := x11 xcb xcb-xkb
     ifeq (Linux,$(H_make_S_os))
@@ -15,7 +15,7 @@ S_headers := X11/keysym.h xcb/xcb.h xcb/xcb_event.h xcb/xcb_icccm.h xcb/xproto.h
     ifeq (Linux,$(H_make_S_os))
 S_headers += xkbcommon/xkbcommon-x11.h
     endif
-#â€œC_xcb_shapeâ€ do uÅ¼ycia tylko z wÅ‚asnymi oknami, pozwalajÄ…cymi â€˜serverowiâ€™ â€ŸXâ€ odÅ›wieÅ¼aÄ‡ bez migotania, poniewaÅ¼ z ustawionej â€œpixmapyâ€ tÅ‚a.
+#“C_xcb_shape” do u¿ycia tylko z w³asnymi oknami, pozwalaj¹cymi ‘serverowi’ "X” odœwie¿aæ bez migotania, poniewa¿ z ustawionej “pixmapy” t³a.
     ifeq (,)
 S_packages += xcb-shape
 S_headers += xcb/shape.h

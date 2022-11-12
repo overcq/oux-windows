@@ -1,38 +1,38 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   base
 *         memory tables
-* Â©overcq                on â€ŸGentoo Linux 13.0â€ â€œx86_64â€             2015â€’4â€’28 *
+* ©overcq                on "Gentoo Linux 13.0” “x86_64”             2015-4-28 *
 *******************************************************************************/
-// MenedÅ¼er tablic danych obiektÃ³w tworzonych, niekolejkowanych, indeksowanych w pamiÄ™ci operacyjnej.
+// Mened¿er tablic danych obiektów tworzonych, niekolejkowanych, indeksowanych w pamiêci operacyjnej.
 //------------------------------------------------------------------------------
-// W szczegÃ³lnoÅ›ci ã€ƒ obiektÃ³w wykonywania programÃ³w.
+// W szczególnoœci ? obiektów wykonywania programów.
 // Dane:
-// â€¢ staÅ‚ego rozmiaru (np. struktura w jÄ™zyku â€œCâ€).
-// â€¢ zawsze w pamiÄ™ci operacyjnej.
-// â€¢ z szybkim dostÄ™pem przez identyfikator.
-// â€¢ ze statycznymi â€˜iteratoramiâ€™ â€›dla kaÅ¼degoâ€™.
-// â€¢ z aktualizowanymi â€˜iteratoramiâ€™ â€›dla kaÅ¼degoâ€™ (ktÃ³re powinny byÄ‡ wyliczane bez oczekiwania na â€¹raporcieâ€º, by â€¹zadanieâ€º oddawaÅ‚o nieuÅ¼ywanÄ… pamiÄ™Ä‡ operacyjnÄ…, ale nie muszÄ…).
+// • sta³ego rozmiaru (np. struktura w jêzyku “C”).
+// • zawsze w pamiêci operacyjnej.
+// • z szybkim dostêpem przez identyfikator.
+// • ze statycznymi ‘iteratorami’ 'dla ka¿dego’.
+// • z aktualizowanymi ‘iteratorami’ 'dla ka¿dego’ (które powinny byæ wyliczane bez oczekiwania na ‹raporcie›, by ‹zadanie› oddawa³o nieu¿ywan¹ pamiêæ operacyjn¹, ale nie musz¹).
 //------------------------------------------------------------------------------
-// Transakcje â€œsegv_beginâ€/â€œsegv_endâ€ â€”ograniczone w zawartym bloku do ustawienia wartoÅ›ci elementu tablicyâ€” sÅ‚uÅ¼Ä… do wyjÄ…tkowego wykonania funkcji na tablicy (â€œE_flow_Q_task_Sâ€) tylko czytanej w procedurze obsÅ‚ugi â€œsygnaÅ‚uâ€ â€˜uniksowegoâ€™ â€œSEGVâ€.
+// Transakcje “segv_begin”/“segv_end” —ograniczone w zawartym bloku do ustawienia wartoœci elementu tablicy— s³u¿¹ do wyj¹tkowego wykonania funkcji na tablicy (“E_flow_Q_task_S”) tylko czytanej w procedurze obs³ugi “sygna³u” ‘uniksowego’ “SEGV”.
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//TODO UsunÄ…Ä‡ â€œGVâ€, gdy â€˜alokacjaâ€™ moÅ¼e siÄ™ nie udaÄ‡, a powrÃ³ciÄ‡ z funkcji.
-// Ze wzglÄ™du na powstajÄ…ce juÅ¼ tablice wielowymiarowe wydawanie wskaÅºnika do â€œstruct E_mem_Q_tab_Zâ€ zostanie zmienione na wydawanie identyfikatora (do zmiennej globalnej tablic tego â€¹menedÅ¼eraâ€º).
-// Dodatkowe â€˜iteratoryâ€™ statyczne uwzglÄ™dniajÄ…ce zwalnianie elementÃ³w kolekcji moÅ¼liwe do zrobienia, ale potrzebujÄ… bardziej wymagajÄ…cego sprawdzania warunkÃ³w.
+//TODO Usun¹æ “GV”, gdy ‘alokacja’ mo¿e siê nie udaæ, a powróciæ z funkcji.
+// Ze wzglêdu na powstaj¹ce ju¿ tablice wielowymiarowe wydawanie wskaŸnika do “struct E_mem_Q_tab_Z” zostanie zmienione na wydawanie identyfikatora (do zmiennej globalnej tablic tego ‹mened¿era›).
+// Dodatkowe ‘iteratory’ statyczne uwzglêdniaj¹ce zwalnianie elementów kolekcji mo¿liwe do zrobienia, ale potrzebuj¹ bardziej wymagaj¹cego sprawdzania warunków.
 //==============================================================================
 struct E_mem_Q_tab_Z
-{ Pc *index; // Tablica mapowania indeksÃ³w do adresÃ³w w â€œdataâ€.
-  Pc data; // Dane ciÄ…gÅ‚e.
+{ Pc *index; // Tablica mapowania indeksów do adresów w “data”.
+  Pc data; // Dane ci¹g³e.
   N u; // Rozmiar elementu tablicy.
   struct E_mem_Q_tab_Z *iterator;
   I index_n;
   I data_n;
 };
 struct E_mem_Q_tab_S_iterator_Z
-{ I *index; // Dowolna sekwencja â€¹identyfikatorÃ³wâ€º (indeksÃ³w) danych, ale bez powtÃ³rzeÅ„.
+{ I *index; // Dowolna sekwencja ‹identyfikatorów› (indeksów) danych, ale bez powtórzeñ.
   I n;
 };
 //==============================================================================
@@ -176,52 +176,6 @@ E_mem_Q_tab_I_add_i( struct E_mem_Q_tab_Z *tab_
     }
     return id;
 }
-_internal
-I
-E_mem_Q_tab_I_segv_add_begin( struct E_mem_Q_tab_Z *tab_
-, P id_data
-){  for_i( id, tab_->index_n )
-        if( !tab_->index[id] )
-            break;
-    Pc data = tab_->data;
-    N n_prepended;
-    E_flow_Q_task_I_touch_stack(); // PoniewaÅ¼ brak â€œatomowoÅ›ciâ€ zmieniania â€œtab_->indexâ€ z â€œtab_->dataâ€.
-    _tasks_table_begin;
-    if( !E_mem_Q_blk_I_add( &tab_->data, 1, &n_prepended, 0 ))
-    {   _tasks_table_end;
-        return ~0;
-    }
-    tab_->data_n++;
-    if( tab_->data != data )
-    {   for_i( i, id )
-            tab_->index[i] += tab_->data + ( n_prepended ? tab_->u : 0 ) - data;
-        if( i != tab_->index_n )
-            while( ++i != tab_->index_n )
-                if( tab_->index[i] )
-                    tab_->index[i] += tab_->data + ( n_prepended ? tab_->u : 0 ) - data;
-    }
-    *(Pp)id_data = tab_->data + ( n_prepended ? 0 : id * tab_->u );
-    if( id == tab_->index_n )
-        if( !E_mem_Q_blk_I_append( &tab_->index, 1 ))
-        {   if( !E_mem_Q_blk_I_remove( &tab_->data, n_prepended ? 0 : tab_->data_n - 1, 1 ))
-            {   GV_(NA);
-            }
-            _tasks_table_end;
-            return ~0;
-        }
-    _tasks_table_end;
-    return id;
-}
-_internal
-I
-E_mem_Q_tab_I_segv_add_end( struct E_mem_Q_tab_Z *tab_
-, I id
-, P id_data
-){  tab_->index[id] = id_data;
-    if( id == tab_->index_n )
-        tab_->index_n++;
-    return id;
-}
 N
 E_mem_Q_tab_I_remove( struct E_mem_Q_tab_Z *tab_
 , I id
@@ -273,7 +227,7 @@ E_mem_Q_tab_I_remove( struct E_mem_Q_tab_Z *tab_
 }
 #if 0
 N
-E_mem_Q_tab_I_copy( //NDFN kolejnoÅ›Ä‡ do odwrÃ³cenia.
+E_mem_Q_tab_I_copy( //NDFN kolejnoœæ do odwrócenia.
   struct E_mem_Q_tab_Z *tab_src
 , I src_id
 , struct E_mem_Q_tab_Z *tab_dest
@@ -292,11 +246,11 @@ E_mem_Q_tab_I_move(
 }
 #endif
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// Iteratory statyczne. Gdy wiadomo, Å¼e nie nastÄ…pi przeÅ‚Ä…czenie â€¹zadaniaâ€º, poniewaÅ¼ wyliczenie wartoÅ›ci musi byÄ‡ wykonane w jednym â€¹atomieâ€º, i nie nastÄ…pi zmiana kolekcji.
+// Iteratory statyczne. Gdy wiadomo, ¿e nie nast¹pi prze³¹czenie ‹zadania›, poniewa¿ wyliczenie wartoœci musi byæ wykonane w jednym ‹atomie›, i nie nast¹pi zmiana kolekcji.
 I
 E_mem_Q_tab_Z_iter_R_next( struct E_mem_Q_tab_Z *tab_
 , I id
-, I out_id // Pomijanyâ€” i od nastÄ™pnego do poprzedniego elementu.
+, I out_id // Pomijany— i od nastêpnego do poprzedniego elementu.
 ){  J_assert( !~id || E_mem_Q_tab_T( tab_, id ));
     if( (In)id + 1 > (In)out_id )
     {   while( ++id != tab_->index_n )
@@ -373,7 +327,7 @@ E_mem_Q_tab_Q_iter_M( struct E_mem_Q_tab_Z *tab_
     }
     return iterator_id;
 }
-// Do zwalniania â€˜iteratoraâ€™ tylko wtedy, gdy nie zakoÅ„czy siÄ™ wartoÅ›ciÄ… â€œemptyâ€ (czyli gdy pÄ™tla zostanie przerwana).
+// Do zwalniania ‘iteratora’ tylko wtedy, gdy nie zakoñczy siê wartoœci¹ “empty” (czyli gdy pêtla zostanie przerwana).
 void
 E_mem_Q_tab_Q_iter_W( struct E_mem_Q_tab_Z *tab_
 , I iterator_id
@@ -384,7 +338,7 @@ E_mem_Q_tab_Q_iter_W( struct E_mem_Q_tab_Z *tab_
     else
         W_tab_( tab_->iterator );
 }
-    #if 0 //brak koncepcji pÄ™tli usuwajÄ…cych.
+    #if 0 //brak koncepcji pêtli usuwaj¹cych.
 I
 E_mem_Q_tab_Q_iter_R_shift( struct E_mem_Q_tab_Z *tab_
 , I iterator_id

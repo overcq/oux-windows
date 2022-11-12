@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   base
 *         shared memory pages
-* Â©overcq                on â€ŸGentoo Linux 13.0â€ â€œx86_64â€              2015â€’7â€’2 *
+* ©overcq                on "Gentoo Linux 13.0” “x86_64”              2015-7-2 *
 *******************************************************************************/
 int
 E_mem_Q_shared_M_key( key_t key

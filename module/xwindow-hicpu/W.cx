@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
-*   ---   â€ŸX windowâ€ â€”high â€˜cpuâ€™
-*         wyrzucanie â€¹moduÅ‚uâ€º przy zakoÅ„czeniu programu
-* Â©overcq                on â€ŸGentoo Linux 17.0â€ â€œx86_64â€             2018â€’12â€’7 T
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
+*   ---   "X window” —high ‘cpu’
+*         wyrzucanie ‹modu³u› przy zakoñczeniu programu
+* ©overcq                on "Gentoo Linux 17.0” “x86_64”             2018-12-7 T
 *******************************************************************************/
 void
 E_x_W( void

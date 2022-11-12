@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   base
 *         text syntax
-* Â©overcq                on â€ŸGentoo Linux 17.1â€ â€œx86_64â€             2020â€’5â€’15 Q
+* ©overcq                on "Gentoo Linux 17.1” “x86_64”             2020-5-15 Q
 *******************************************************************************/
 #define E_text_syntax_S_line_space          " \t"
 #define E_text_syntax_S_space               E_text_syntax_S_line_space "\n"
@@ -55,8 +55,8 @@ struct E_text_syntax_Z_state
 { N entities_i;
   N entity_i;
   B in_space;
-  B in_space_one_more; // SÅ‚uÅ¼y do oznaczania, Å¼e sprawdzane jest space.uid na koÅ„cu w trybie repeat.
-  B once_matched; // SÅ‚uÅ¼y do oznaczania, Å¼e zaszÅ‚o conajmniej jedno w trybie repeat.
+  B in_space_one_more; // S³u¿y do oznaczania, ¿e sprawdzane jest space.uid na koñcu w trybie repeat.
+  B once_matched; // S³u¿y do oznaczania, ¿e zasz³o conajmniej jedno w trybie repeat.
   Pc s;
 };
 //==============================================================================
@@ -220,7 +220,7 @@ _internal
 B
 E_text_syntax_T_name( Pc s
 ){  Pc s_start = s;
-    U u, u_prev; // Procedura nadrzÄ™dna zapewnia, Å¼e zawsze bÄ™dzie poprawny tekst UTF-8 i â€œiswalphaâ€ pierwszego znaku.
+    U u, u_prev; // Procedura nadrzêdna zapewnia, ¿e zawsze bêdzie poprawny tekst UTF-8 i “iswalpha” pierwszego znaku.
     while( *s_start )
     {   Pc s_end = E_text_Z_su_R_u( s_start, &u );
         if(( !iswalnum(u)
@@ -391,7 +391,7 @@ E_text_syntax_M( I file
             goto End;
         }
         s_start = E_text_Z_su_R_u_rev( s_end, &u );
-        while( s_start == s ) // Brak odstÄ™pÃ³w na poczÄ…tku linii, to linia deklaracji.
+        while( s_start == s ) // Brak odstêpów na pocz¹tku linii, to linia deklaracji.
         {   W(s);
             if( u == '/' )
             {   if( syntax->entities[ syntax->entities_n - 1 ].space.s )
@@ -1299,7 +1299,7 @@ Bi_no:          {   if( state[ *state_n - 1 ].in_space )
                 s[l] = '\0';
                 N n = 0;
                 B re;
-                while( n != entity->re_n //NDFN Spekulacja dÅ‚ugoÅ›ci dopasowania.
+                while( n != entity->re_n //NDFN Spekulacja d³ugoœci dopasowania.
                 && ( re = regexec( &entity->data.re, s, 0, 0, 0 ))
                 )
                 {   ret = E_mem_Q_file_R_u( file, &u );
@@ -1559,7 +1559,7 @@ Re_no:          {   if( state[ *state_n - 1 ].in_space )
                 s[l] = '\0';
                 N n = 0;
                 B re;
-                while( n != entity->re_n //NDFN Spekulacja dÅ‚ugoÅ›ci dopasowania.
+                while( n != entity->re_n //NDFN Spekulacja d³ugoœci dopasowania.
                 && ( re = regexec( &entity->data.re, s, 0, 0, 0 ))
                 )
                 {   ret = E_mem_Q_file_R_u( file, &u );

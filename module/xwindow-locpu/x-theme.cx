@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
-*   ---   â€ŸX windowâ€ â€”low â€˜cpuâ€™
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
+*   ---   "X window” —low ‘cpu’
 *         theme manager
-* Â©overcq                on â€ŸGentoo Linux 17.0â€ â€œx86_64â€             2018â€’12â€’7 S
+* ©overcq                on "Gentoo Linux 17.0” “x86_64”             2018-12-7 S
 *******************************************************************************/
 struct E_x_Q_theme_Z
 { N32 window_bg, object_bg, volatile_window_bg;

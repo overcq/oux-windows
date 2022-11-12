@@ -5,8 +5,11 @@
 *.res
 *.c
 *.h
+*.a
+*.def
 *.layout
 Makefile.win
 !0.h
 !/make-oux/*.c
+!/module/*/dllmain.c
 /pcre2

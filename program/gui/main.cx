@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   laboratory
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  â€˜guiâ€™ sample
-*   ---   â€ŸX windowâ€
+*  ¦OUX¦  C+
+*  ¦/C+¦  ‘gui’ sample
+*   ---   "X window”
 *         entry and raw labels
-* Â©overcq                on â€ŸGentoo Linux 13.0â€ â€œx86_64â€              2015â€’1â€’6 *
+* ©overcq                on "Gentoo Linux 13.0” “x86_64”              2015-1-6 *
 *******************************************************************************/
 N E_main_Q_timer_S_hour;
 N E_main_Q_timer_S_minute;
@@ -40,7 +40,7 @@ main(
     I out = 0;
 #endif
     E_io_Q_stream_out_P( out
-    , "\n\"OUX 2\" test sample (c)2017â€2022 overcq"
+    , "\n\"OUX 2\" test sample (c)2017-2022 overcq"
     , 0
     );
     I_B();
@@ -88,9 +88,9 @@ Skip:
 End_3:;
     //goto End;
 
-    E_data_Q_layout_I_add( E_data_Q_field_S_text, "Text input Ä…Ä™", 5 );
+    E_data_Q_layout_I_add( E_data_Q_field_S_text, "Text input ¹ê", 5 );
     for_n( i, 42 )
-    {   E_data_Q_layout_I_add( E_data_Q_field_S_text, "Second text input Ä…Ä™", 100 );
+    {   E_data_Q_layout_I_add( E_data_Q_field_S_text, "Second text input ¹ê", 100 );
         struct E_data_Q_field_Z *input = E_mem_Q_tab_R( E_data_Q_layout_S, 1 + i );
         input->select_n = 50;
         Mt_( input->select, input->select_n );
@@ -101,7 +101,7 @@ End_3:;
             E_text_Z_s_P_s0_copy_0( input->select[i] + l, ". select select select select select select select select select select select select select select select select select select select select select select select select select select select select select select select" );
         }
     }
-    E_data_Q_layout_I_add( E_data_Q_field_S_text, "44. text input Ä…Ä™", 100 );
+    E_data_Q_layout_I_add( E_data_Q_field_S_text, "44. text input ¹ê", 100 );
     E_ncurses_I_lay();
 
     X_M( x_window, close_window );
@@ -319,7 +319,7 @@ E_main_I_draw_Z_angle_line(
         E_x_Q_object_I_draw_Z_lines_(points);
     }
 }
-//NDFN konkretne stany wyglÄ…du obiektÃ³w majÄ…ce konkretne znaczenia.
+//NDFN konkretne stany wygl¹du obiektów maj¹ce konkretne znaczenia.
 void
 E_main_Q_timer_I_draw(
   struct E_x_Q_display_Z *display
@@ -335,7 +335,7 @@ E_main_Q_timer_I_draw(
       , object->height - 1
       })
     );
-    E_x_Q_object_I_draw_Z_font_Z_s_( 1, 1, 0, 0, "AÄ„BCÄ†DEÄ˜FGHIJKLÅMNÅƒOÃ“PQRSÅšTUVWXYZÅ¹Å»\naÄ…bcÄ‡deÄ™fghijklÅ‚mnÅ„oÃ³pqrsÅ›tuvwxyzÅºÅ¼\n0123456789\n!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\nâ€²âˆ’Â¡â€½Â²âªÂ³â„–âŸâ€’â„Ã·Â°ã€ƒâ‡¢Ã—â‘â‚â€“â€”â‰ˆÂ±âƒâ€•â€£â€¢Â®â„ Â©â„¢Âµâ›ââœââ…âŒ©â†âŒªâ€‰Â¦â€Õšâ€›â€Ÿâ€šâ€â€˜â€œâ€™â€ââ‹âœ“Â·â€¦â€¹Â«â€ºÂ»â€ƒÂ¿â‚¬Â¢" );
+    E_x_Q_object_I_draw_Z_font_Z_s_( 1, 1, 0, 0, "A¥BCÆDEÊFGHIJKL£MNÑOÓPQRSŒTUVWXYZ¯\na¹bcædeêfghijkl³mnñoópqrsœtuvwxyzŸ¿\n0123456789\n!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\n´–!?2?3No -/÷°??×??–—?±?-?•®SM©™µ?????<?> ¦-?'"‚„‘“’”???·…‹«›» ?€c" );
     E_x_Q_object_I_draw_P_color_( E_x_Z_color_M( 0, 0, 0x9f ));
     E_main_I_draw_Z_angle_line_(
       E_main_Q_timer_S_hour

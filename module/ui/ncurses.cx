@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  ¬¶OUX¬¶  C+
-*  ¬¶/C+¬¶  component
+*  ¶OUX¶  C+
+*  ¶/C+¶  component
 *   ---   user interface
 *         ncurses frontend
-* ¬©overcq                on ‚ÄüGentoo Linux 17.1‚Äù ‚Äúx86_64‚Äù             2022‚Äí6‚Äí10 Q
+* ©overcq                on "Gentoo Linux 17.1î ìx86_64î             2022-6-10 Q
 *******************************************************************************/
 struct E_ncurses_Q_field_Z
 { int x, y;
@@ -50,7 +50,7 @@ E_ncurses_I_lay( void
                     }
                 }else
                 {   y--; // Wycofanie nowej linii.
-                    x++; // Odstƒôp przed nastƒôpnƒÖ etykietƒÖ.
+                    x++; // OdstÍp przed nastÍpnπ etykietπ.
                     if( y >= E_ncurses_S_scroll_y
                     && getcury(stdscr) <= max_y
                     )
@@ -87,7 +87,7 @@ E_ncurses_I_lay( void
                 }
                 x++;
             }
-            x++; // Odstƒôp pomiƒôdzy etykietƒÖ a polem.
+            x++; // OdstÍp pomiÍdzy etykietπ a polem.
             if( y >= E_ncurses_S_scroll_y
             && getcury(stdscr) <= max_y
             && x >= E_ncurses_S_scroll_x
@@ -118,7 +118,7 @@ E_ncurses_I_lay( void
                 if( E_data_Q_layout_S_focus_x < width )
                 {   focus_x += E_data_Q_layout_S_focus_x;
                     if( l > width )
-                        width--; // Miejsce na strza≈Çkƒô na ko≈Ñcu.
+                        width--; // Miejsce na strza≥kÍ na koÒcu.
                 }else
                 {   if( y >= E_ncurses_S_scroll_y
                     && getcury(stdscr) <= max_y
@@ -129,11 +129,11 @@ E_ncurses_I_lay( void
                         cur_x++;
                     }
                     x++;
-                    width--; // Miejsce na strza≈Çkƒô na poczƒÖtku.
+                    width--; // Miejsce na strza≥kÍ na poczπtku.
                     if( l > width
                     && E_data_Q_layout_S_focus_x < l - width
                     )
-                        width--; // Miejsce na strza≈Çkƒô na ko≈Ñcu.
+                        width--; // Miejsce na strza≥kÍ na koÒcu.
                     N after = l - E_data_Q_layout_S_focus_x;
                     if( after > width )
                         after = width;
@@ -173,9 +173,9 @@ E_ncurses_I_lay( void
                     cur_x++;
                 }
                 x++;
-                width--; // Miejsce na strza≈Çkƒô na poczƒÖtku.
+                width--; // Miejsce na strza≥kÍ na poczπtku.
                 if( l > width )
-                    width--; // Miejsce na strza≈Çkƒô na ko≈Ñcu.
+                    width--; // Miejsce na strza≥kÍ na koÒcu.
             }
             N i;
             for( i = 0; *s && i != width; i++ )
@@ -431,10 +431,10 @@ E_ncurses_I_tab_focus( void
 B
 E_ncurses_I_sigsuspend( sigset_t *sigset
 ){  sigset_t old_sigset;
-    _sigprocmask( SIG_SETMASK, sigset, &old_sigset ); //NDFN dop√≥ki jest tak zrobione, ≈ºe odblokowanie ‚Äúsygna≈Ç√≥w‚Äù jest wcze≈õniej ni≈º zablokowanie na ‚Äúread‚Äù, to mogƒÖ wystƒôpowaƒá przypadki zablokowania oczekujƒÖcego na ‚Äúread‚Äù mimo ‚Äúsygna≈Çu‚Äù (ustawiajƒÖcego ‚Äúwake‚Äù) obs≈Çu≈ºonego i danych czekajƒÖcych na przetworzenie w ‚Äπzadaniach‚Ä∫, a gdy nie jest ustawione ‚ÄúE_flow_Q_system_unblock_report_S_setitimer_I‚Äù, to oczywi≈õcie‚Äì nieodblokowania po ustawionym czasie ‚Äîdo czasu ‚Äπsystemowego raportu odblokowujƒÖcego‚Ä∫ lub nietrafienia kt√≥rego≈õ interpretowanego (ustawiajƒÖcego ‚Äúwake‚Äù) ‚Äúsygna≈Çu‚Äù w obszar programu pomiƒôdzy tym ‚Äúsigprocmask‚Äù a ‚Äúread‚Äù w ‚ÄúE_flow_Q_system_unblock_report_S_sigsuspend_I‚Äù.
+    _sigprocmask( SIG_SETMASK, sigset, &old_sigset ); //NDFN dopÛki jest tak zrobione, øe odblokowanie ìsygna≥Ûwî jest wczeúniej niø zablokowanie na ìreadî, to mogπ wystÍpowaÊ przypadki zablokowania oczekujπcego na ìreadî mimo ìsygna≥uî (ustawiajπcego ìwakeî) obs≥uøonego i danych czekajπcych na przetworzenie w ãzadaniachõ, a gdy nie jest ustawione ìE_flow_Q_system_unblock_report_S_setitimer_Iî, to oczywiúcieñ nieodblokowania po ustawionym czasie ódo czasu ãsystemowego raportu odblokowujπcegoõ lub nietrafienia ktÛregoú interpretowanego (ustawiajπcego ìwakeî) ìsygna≥uî w obszar programu pomiÍdzy tym ìsigprocmaskî a ìreadî w ìE_flow_Q_system_unblock_report_S_sigsuspend_Iî.
     E_ncurses_I_getch_S_ret = get_wch( &E_ncurses_I_getch_S_c );
     _sigprocmask( SIG_SETMASK, &old_sigset, 0 );
-    return E_ncurses_I_getch_S_ret != ERR; // Naci≈õniƒôto klawisz.
+    return E_ncurses_I_getch_S_ret != ERR; // NaciúniÍto klawisz.
 }
 void
 E_ncurses_I_setitimer( Z_clock_time *tv
@@ -475,20 +475,20 @@ D( ncurses, getch )
                                 E_ncurses_I_lay();
                             }
                             break;
-                      case KEY_A1: // ‚ÄúKEY_HOME‚Äù na klawiaturze numerycznej.
+                      case KEY_A1: // ìKEY_HOMEî na klawiaturze numerycznej.
                             if( E_ncurses_S_scroll_max_x )
                             {   E_ncurses_S_scroll_x = 0;
                                 E_ncurses_I_lay();
                             }
                             break;
-                      case KEY_C1: // ‚ÄúKEY_END‚Äù na klawiaturze numerycznej.
+                      case KEY_C1: // ìKEY_ENDî na klawiaturze numerycznej.
                             if( E_ncurses_S_scroll_max_x )
                             {   E_ncurses_S_scroll_x = E_ncurses_S_scroll_max_x - ( getmaxx(stdscr) - 1 );
                                 E_ncurses_I_lay();
                             }
                             break;
                       case KEY_NPAGE:
-                      case KEY_C3: // ‚ÄúKEY_NPAGE‚Äù na klawiaturze numerycznej.
+                      case KEY_C3: // ìKEY_NPAGEî na klawiaturze numerycznej.
                             if( E_ncurses_S_scroll_max_x )
                             {   if( E_ncurses_S_scroll_max_x - E_ncurses_S_scroll_x > 2 * ( getmaxx(stdscr) - 1 ))
                                     E_ncurses_S_scroll_x += getmaxx(stdscr) - 1;
@@ -498,7 +498,7 @@ D( ncurses, getch )
                             }
                             break;
                       case KEY_PPAGE:
-                      case KEY_A3: // ‚ÄúKEY_PPAGE‚Äù na klawiaturze numerycznej.
+                      case KEY_A3: // ìKEY_PPAGEî na klawiaturze numerycznej.
                             if( E_ncurses_S_scroll_max_x )
                             {   if( E_ncurses_S_scroll_x > getmaxx(stdscr) - 1 )
                                     E_ncurses_S_scroll_x -= getmaxx(stdscr) - 1;
@@ -775,7 +775,7 @@ D( ncurses, getch )
                             }
                         }
                         break;
-                  case KEY_A1: // ‚ÄúKEY_HOME‚Äù na klawiaturze numerycznej.
+                  case KEY_A1: // ìKEY_HOMEî na klawiaturze numerycznej.
                         if( E_ncurses_S_scroll_max_y )
                         {   E_ncurses_S_scroll_y = 0;
                             E_ncurses_I_lay();
@@ -797,14 +797,14 @@ D( ncurses, getch )
                             }
                         }
                         break;
-                  case KEY_C1: // ‚ÄúKEY_END‚Äù na klawiaturze numerycznej.
+                  case KEY_C1: // ìKEY_ENDî na klawiaturze numerycznej.
                         if( E_ncurses_S_scroll_max_y )
                         {   E_ncurses_S_scroll_y = E_ncurses_S_scroll_max_y - ( getmaxy(stdscr) - 1 );
                             E_ncurses_I_lay();
                         }
                         break;
                   case KEY_NPAGE:
-                  case KEY_C3: // ‚ÄúKEY_NPAGE‚Äù na klawiaturze numerycznej.
+                  case KEY_C3: // ìKEY_NPAGEî na klawiaturze numerycznej.
                         if( E_ncurses_S_scroll_max_y )
                         {   if( E_ncurses_S_scroll_max_y - E_ncurses_S_scroll_y > 2 * ( getmaxy(stdscr) - 1 ))
                                 E_ncurses_S_scroll_y += getmaxy(stdscr) - 1;
@@ -814,7 +814,7 @@ D( ncurses, getch )
                         }
                         break;
                   case KEY_PPAGE:
-                  case KEY_A3: // ‚ÄúKEY_PPAGE‚Äù na klawiaturze numerycznej.
+                  case KEY_A3: // ìKEY_PPAGEî na klawiaturze numerycznej.
                         if( E_ncurses_S_scroll_max_y )
                         {   if( E_ncurses_S_scroll_y > getmaxy(stdscr) - 1 )
                                 E_ncurses_S_scroll_y -= getmaxy(stdscr) - 1;
@@ -869,7 +869,7 @@ Enter:                  if( ~E_data_Q_layout_S_focus_select )
                         break;
                   case 19: // Ctrl+s
                         break;
-                  case 27: // ‚Äúmeta‚Äù key
+                  case 27: // ìmetaî key
                         E_ncurses_I_getch_S_meta_key = yes;
                         break;
                   default:

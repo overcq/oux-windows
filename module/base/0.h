@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   base
 *         global defines
-* Â©overcq                on â€ŸGentoo Linux 13.0â€ â€œx86_64â€              2015â€’7â€’6 *
+* ©overcq                on "Gentoo Linux 13.0” “x86_64”              2015-7-6 *
 *******************************************************************************/
 extern I _X_var( flow, call_req );
 extern I _X_var( io, stream_write );
@@ -104,7 +104,7 @@ typedef struct timespec Z_clock_time;
   : ( !strcmp( J_s(CMP), ">" ) || !strcmp( J_s(CMP), ">=" ) ? (a)->tv_sec > (b)->tv_sec || ( (a)->tv_sec == (b)->tv_sec && (a)->Z_clock_time_minor_field CMP (b)->Z_clock_time_minor_field ) \
   : ( _unreachable, no ) \
   )))))
-// Czy przepeÅ‚nienie z dodawania dwÃ³ch â€œZ_clock_time_minor_fieldâ€ zmieÅ›ci siÄ™ w rzeczywistym typie danych tej zmiennej w â€œstruct timevalâ€ lub â€œstruct timespecâ€.
+// Czy przepe³nienie z dodawania dwóch “Z_clock_time_minor_field” zmieœci siê w rzeczywistym typie danych tej zmiennej w “struct timeval” lub “struct timespec”.
     #if LONG_MAX >= 2 * Z_clock_time_minor_field_S_max
 #define _timeradd(a,b,res) \
   {   *(res) = ( Z_clock_time ) \

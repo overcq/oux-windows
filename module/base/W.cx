@@ -1,13 +1,13 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   base
-*         wyrzucanie â€¹moduÅ‚uâ€º przy zakoÅ„czeniu programu
-* Â©overcq                on â€ŸGentoo Linux 13.0â€ â€œx86_64â€             2016â€’2â€’28 M
+*         wyrzucanie ‹modu³u› przy zakoñczeniu programu
+* ©overcq                on "Gentoo Linux 13.0” “x86_64”             2016-2-28 M
 *******************************************************************************/
-//DFN globalnie: usuniÄ™cie â€¹moduÅ‚uâ€º ([â€¦]â€œ_Wâ€) moÅ¼e byÄ‡ wykonane w programie tylko raz.
+//DFN globalnie: usuniêcie ‹modu³u› ([…]“_W”) mo¿e byæ wykonane w programie tylko raz.
 //==============================================================================
     #ifdef C_middle_code
 _internal
@@ -84,7 +84,7 @@ void
 E_mem_W_blk( void
 ){  Vr_( pthread_mutex_destroy( &E_base_S->E_mem_Q_blk_S_threads_sync_mutex ));
     struct E_mem_Q_blk_Z_mapped *mapped_p = (P)E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_mapped_id ].p, *mapped_p_end = mapped_p + E_base_S->E_mem_Q_blk_S_allocated[ E_mem_Q_blk_S_allocated_S_mapped_id ].n, *mapped_p_self;
-    // â€˜Odmapowanieâ€™ pamiÄ™ci â€œmenedÅ¼era pamiÄ™ciâ€.
+    // ‘Odmapowanie’ pamiêci “mened¿era pamiêci”.
     while( (Pc)mapped_p < mapped_p->p
     || (Pc)mapped_p >= mapped_p->p + mapped_p->l
     )
@@ -104,8 +104,8 @@ E_mem_W_blk( void
     }
 }
     #endif
-//TODO Procedura do uÅ‚oÅ¼enia.
-//DED JeÅ›li program zapisany w technologii OUX miaÅ‚by byÄ‡ dopisany na poczÄ…tku â€œmainâ€ innego programu w jÄ™zyku â€ŸCâ€ lub â€˜skompilowanegoâ€™â€” to wtedy usuwa swoje zasoby i prÃ³buje przywrÃ³ciÄ‡ stan procesu do domyÅ›lnego.â€ƒDopisanie programu nie na poczÄ…tku teÅ¼ byÅ‚oby moÅ¼liwe po uzupeÅ‚nieniu o zapisywanie stanu do przywrÃ³cenia (zamiast domyÅ›lnego), ale mogÅ‚oby byÄ‡ ryzykowne, jeÅ›li program zmieniany uÅ¼ywaÅ‚by jakichkolwiek stanÃ³w ulotnych wzglÄ™dem czasu wykonania; tak jak ten uÅ¼ywa.â€ƒPozostaÅ‚o do zrobienia w caÅ‚oÅ›ci przywracanie stanu zastanego, a nie domyÅ›lnego.
+//TODO Procedura do u³o¿enia.
+//DED Jeœli program zapisany w technologii OUX mia³by byæ dopisany na pocz¹tku “main” innego programu w jêzyku "C” lub ‘skompilowanego’— to wtedy usuwa swoje zasoby i próbuje przywróciæ stan procesu do domyœlnego. Dopisanie programu nie na pocz¹tku te¿ by³oby mo¿liwe po uzupe³nieniu o zapisywanie stanu do przywrócenia (zamiast domyœlnego), ale mog³oby byæ ryzykowne, jeœli program zmieniany u¿ywa³by jakichkolwiek stanów ulotnych wzglêdem czasu wykonania; tak jak ten u¿ywa. Pozosta³o do zrobienia w ca³oœci przywracanie stanu zastanego, a nie domyœlnego.
 void
 E_base_W( void
 ){  V0( close( E_net_cli_S_poll_pipe[0] )){}
@@ -117,14 +117,14 @@ E_base_W( void
     W( E_net_cli_S_poll_fd );
         #endif
     D_W( mem, file_save );
-    D_W( flow, call_srv ); // Przedostatnie â€¹zadanieâ€º.
-    // DopÃ³ki wypisywanie â€œGâ€[â€¦] jest do tego samego â€œstrumieniaâ€ jak â€œGâ€[â€¦]â€œ_â€, to jeÅ›li â€¹raporty liniiâ€º sÄ… wÅ‚Ä…czone, to znak nowej linii jest dorzucany synchronicznie, na koÅ„cu tej procedury usuwania â€¹moduÅ‚uâ€º.
+    D_W( flow, call_srv ); // Przedostatnie ‹zadanie›.
+    // Dopóki wypisywanie “G”[…] jest do tego samego “strumienia” jak “G”[…]“_”, to jeœli ‹raporty linii› s¹ w³¹czone, to znak nowej linii jest dorzucany synchronicznie, na koñcu tej procedury usuwania ‹modu³u›.
         //#ifdef C_line_report
     //E_io_Q_stream_out_P_c( 0, '\n' );
         //#endif
     struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, 0 );
     task->run_state = E_flow_Z_run_state_S_ready;
-    I_B(); // MoÅ¼e przeÅ‚Ä…czyÄ‡ do ostatniego â€¹zadaniaâ€º.
+    I_B(); // Mo¿e prze³¹czyæ do ostatniego ‹zadania›.
         #ifdef E_flow_Q_process_call_C_alt
     W( E_base_S->E_flow_Q_process_call_S_service_path_guid );
         #endif
@@ -199,7 +199,7 @@ E_base_W( void
             #endif
     }
     _sigprocmask( SIG_SETMASK, &E_base_S->E_flow_Z_saved_initial_S_blocked_signals, 0 );
-    E_mem_W_blk(); //DFN PamiÄ™Ä‡ alokowana dynamicznie (â€˜zmapowanaâ€™ przez tego â€¹menedÅ¼eraâ€º) nie potrzebuje byÄ‡ poszczegÃ³lnie zwalniana.
+    E_mem_W_blk(); //DFN Pamiêæ alokowana dynamicznie (‘zmapowana’ przez tego ‹mened¿era›) nie potrzebuje byæ poszczególnie zwalniana.
         #endif
     feclearexcept( FE_ALL_EXCEPT );
 }

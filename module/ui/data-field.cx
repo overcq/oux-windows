@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   user interface
 *         data fields
-* Â©overcq                on â€ŸGentoo Linux 17.1â€ â€œx86_64â€             2022â€’5â€’28 R
+* ©overcq                on "Gentoo Linux 17.1” “x86_64”             2022-5-28 R
 *******************************************************************************/
 enum E_data_Q_field_Z_type
 { E_data_Q_field_S_text
@@ -19,15 +19,15 @@ struct E_data_Q_field_Z
 { Pc label;
   N width;
   Pc s;
-  N s_i; // Pozycja bajtowa bieÅ¼Ä…cego znaku.
+  N s_i; // Pozycja bajtowa bie¿¹cego znaku.
   Pc *select;
   N select_n;
   enum E_data_Q_field_Z_type type;
   union
   { struct
-    { Pc regex; // WyraÅ¼enie regularne obejmowane podczas ustawiania w â€œ^(?:â€ i â€œ)$â€.
+    { Pc regex; // Wyra¿enie regularne obejmowane podczas ustawiania w “^(?:” i “)$”.
       regex_t regex_comp;
-    }text; // Dla â€œE_data_Q_field_S_textâ€.
+    }text; // Dla “E_data_Q_field_S_text”.
     struct
     { unsigned slider           :1;
       unsigned signed_          :1;
@@ -44,17 +44,17 @@ struct E_data_Q_field_Z
         }floating_point;
       }value;
       N8 base;
-    }number; // Dla â€œE_data_Q_field_S_numberâ€.
+    }number; // Dla “E_data_Q_field_S_number”.
     struct
     { unsigned slider           :1;
       struct E_math_Z_bignum *min, *max, *step;
       N min_prec;
       N8 base;
-    }bignum; // Dla â€œE_data_Q_field_S_bignumâ€.
+    }bignum; // Dla “E_data_Q_field_S_bignum”.
     struct
     { unsigned slider           :1;
       struct E_datetime_Z min, max, step;
-    }datetime; // Dla â€œE_data_Q_field_S_datetimeâ€.
+    }datetime; // Dla “E_data_Q_field_S_datetime”.
   }conf;
 };
 //==============================================================================

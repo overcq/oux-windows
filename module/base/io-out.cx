@@ -1,20 +1,20 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  ¬¶OUX¬¶  C+
-*  ¬¶/C+¬¶  component
+*  ¶OUX¶  C+
+*  ¶/C+¶  component
 *   ---   base
-*         low‚Äêlevel stream driver
-* ¬©overcq                on ‚ÄüGentoo Linux 13.0‚Äù ‚Äúx86_64‚Äù              2015‚Äí7‚Äí2 *
+*         low-level stream driver
+* ©overcq                on "Gentoo Linux 13.0î ìx86_64î              2015-7-2 *
 *******************************************************************************/
-// Implementacja ‚Äústream‚Äù ‚Äúout‚Äù ‚Äúterminala‚Äù i ‚Äúpipe‚Äù, z przygotowaniem na resztƒô nie wymagajƒÖcƒÖ ‚Äúwritev‚Äù.
-/* Przy ‚Äústream‚Äù ‚Äúout‚Äù.
-‚Äúterminal‚Äù (‚Äústderr == 2‚Äù): ‚ÄüOpenBSD‚Äù nie wysy≈Ça ‚ÄúSIGIO‚Äù, ‚ÄüLinux‚Äù wysy≈Ça.
-‚Äúpipe‚Äù (‚Äú2>&1|‚Äù): ‚ÄüOpenBSD‚Äù‚Äì nieobs≈Çugiwane ‚ÄúF_SETOWN‚Äù, ‚ÄüLinux‚Äù wysy≈Ça.
+// Implementacja ìstreamî ìoutî ìterminalaî i ìpipeî, z przygotowaniem na resztÍ nie wymagajπcπ ìwritevî.
+/* Przy ìstreamî ìoutî.
+ìterminalî (ìstderr == 2î): "OpenBSDî nie wysy≥a ìSIGIOî, "Linuxî wysy≥a.
+ìpipeî (ì2>&1|î): "OpenBSDîñ nieobs≥ugiwane ìF_SETOWNî, "Linuxî wysy≥a.
 */
-//NDFN Dla ‚Äúpipe‚Äù i ‚ÄúO_ASYNC‚Äù: przy zmianach ‚Äúgotowo≈õci‚Äù ‚Äústrumienia‚Äù blokuje wypisywanie na zewnƒôtrznym ko≈Ñcu do czasu zako≈Ñczenia programu.‚ÄÉPrzypuszczalnie dzieje siƒô to wtedy, gdy mimo braku ‚Äúgotowo≈õci‚Äù ‚Äústrumienia‚Äù jest co≈õ wypisywanie (np. komunikaty b≈Çƒôd√≥w).
-//DFN W systemie operacyjnym ‚Äúflagi‚Äù sƒÖ w≈ÇƒÖczane przez jeden ‚Äúdeskryptor‚Äù dla wszystkich na danym ‚Äúterminalu‚Äù, np. ‚Äústandardowe‚Äù wej≈õcia/wyj≈õcia.
-// ‚ÄúE_io_Q_stream_out_C_sig‚Äù tymczasowo oznacza, ≈ºe ‚ÄúSIGIO‚Äù jest wog√≥le u≈ºywany (bo teraz jest obs≈Çuga tylko ‚Äústream‚Äù ¬∑‚Äúout‚Äù¬∑ korzystajƒÖcego z ‚ÄúSIGIO‚Äù).
+//NDFN Dla ìpipeî i ìO_ASYNCî: przy zmianach ìgotowoúciî ìstrumieniaî blokuje wypisywanie na zewnÍtrznym koÒcu do czasu zakoÒczenia programu. Przypuszczalnie dzieje siÍ to wtedy, gdy mimo braku ìgotowoúciî ìstrumieniaî jest coú wypisywanie (np. komunikaty b≥ÍdÛw).
+//DFN W systemie operacyjnym ìflagiî sπ w≥πczane przez jeden ìdeskryptorî dla wszystkich na danym ìterminaluî, np. ìstandardoweî wejúcia/wyjúcia.
+// ìE_io_Q_stream_out_C_sigî tymczasowo oznacza, øe ìSIGIOî jest wogÛle uøywany (bo teraz jest obs≥uga tylko ìstreamî ∑ìoutî∑ korzystajπcego z ìSIGIOî).
 //==============================================================================
 //#define E_io_Q_stream_out_S_async_max_single_write    1994
 //==============================================================================
@@ -42,7 +42,7 @@ E_io_Q_stream_out_M_fd( int fd
     V0( fcntl( fd, F_SETSIG, SIGIO ))
         return ~0;
                 #endif
-                #if defined( __gnu_linux__ ) && defined( C_pthreads ) && 0 //‚ÄüLinux‚Äù w wersji ‚Äú2.6‚Äù do ‚Äú2.6.11‚Äù, z ‚Äúntpl‚Äù.
+                #if defined( __gnu_linux__ ) && defined( C_pthreads ) && 0 //"Linuxî w wersji ì2.6î do ì2.6.11î, z ìntplî.
     V0( fcntl( fd, F_SETOWN, gettid() ))
                 #else
     V0( fcntl( fd, F_SETOWN, E_base_S->E_flow_S_exe_pid ))
@@ -54,7 +54,7 @@ E_io_Q_stream_out_M_fd( int fd
         return ~0;
     Pc tty, s;
     if( stat.st_mode & S_IFIFO )
-    {   Vp_( s = ctermid(0) ); //NDFN brak informacji, co bƒôdzie, gdy brak ‚Äúterminala‚Äù.
+    {   Vp_( s = ctermid(0) ); //NDFN brak informacji, co bÍdzie, gdy brak ìterminalaî.
     }else
     {   Vp_((( s = ttyname(fd) ) || ( _errno == ENOTTY && ( s = "" )), s ));
     }
@@ -263,9 +263,9 @@ E_io_Q_stream_out_W_( I id
         #if defined( E_io_C_aio ) || defined( E_io_C_sig_has_fd )
     U_F( stream->state, closing );
     U_L( stream->state, io_ready );
-    Yi_M( io, aiocb_w_before_rem ); //NDFN Niedocelowe zastosowanie ‚Äπimpulsatora‚Ä∫, tutaj wymagajƒÖce tworzenia i usuwania przy ka≈ºdym u≈ºyciu‚Äî potrzebuje byƒá rozwiƒÖzane projektowo przez utworzenie czego≈õ w rodzaju ‚å©op√≥≈∫nienia‚å™, kt√≥re korzysta≈Çoby z wpisu bez unikalnej nazwy na ca≈Çy program.
+    Yi_M( io, aiocb_w_before_rem ); //NDFN Niedocelowe zastosowanie ãimpulsatoraõ, tutaj wymagajπce tworzenia i usuwania przy kaødym uøyciuó potrzebuje byÊ rozwiπzane projektowo przez utworzenie czegoú w rodzaju <opÛünienia>, ktÛre korzysta≥oby z wpisu bez unikalnej nazwy na ca≥y program.
     Yi_F( io, aiocb_w_before_rem, E_io_Q_stream_out_S_delay );
-    Yi_B( io, aiocb_w_before_rem ) //NDFN Obecnie nie mo≈ºe wystƒÖpiƒá druga instrukcja prze≈ÇƒÖczenia, je≈õli sygnalizowane jest wyj≈õcie: nie przeanalizowane.
+    Yi_B( io, aiocb_w_before_rem ) //NDFN Obecnie nie moøe wystπpiÊ druga instrukcja prze≥πczenia, jeúli sygnalizowane jest wyjúcie: nie przeanalizowane.
         return;
     Yi_W( io, aiocb_w_before_rem );
     stream = E_mem_Q_tab_R( E_base_S->E_io_Q_stream_out_S, id );
@@ -371,7 +371,7 @@ E_io_Q_stream_out_W_( I id
         #endif
 }
 //------------------------------------------------------------------------------
-//NDFN w przysz≈Ço≈õci opr√≥cz statycznych tekst√≥w ‚Äús‚Äù (jak jest poni≈ºej) bƒôdƒÖ dla przenoszenia danych wycinane obszary pamiƒôci z ‚ÄúE_mem_Q_blk‚Äù i przenoszone funkcjƒÖ ‚Äúmove‚Äù (‚Äústronami‚Äù pamiƒôci).
+//NDFN w przysz≥oúci oprÛcz statycznych tekstÛw ìsî (jak jest poniøej) bÍdπ dla przenoszenia danych wycinane obszary pamiÍci z ìE_mem_Q_blkî i przenoszone funkcjπ ìmoveî (ìstronamiî pamiÍci).
 B
 E_io_Q_stream_out_P( I id
 , Pc s
@@ -470,7 +470,7 @@ D( io, stream_write )
                     {   if( errno_ != EAGAIN
                         && errno_ != EWOULDBLOCK
                         )
-                        {   GV_(NDFN); V(); //NDFN Ma byƒá ‚Äπzdarzenie‚Ä∫.
+                        {   GV_(NDFN); V(); //NDFN Ma byÊ ãzdarzenieõ.
                         }
                     }
                     N l;
@@ -487,7 +487,7 @@ D( io, stream_write )
                     }
                 }
                 V0( aio_write( stream->aiocb ))
-                {   GV_(NDFN); V(); //NDFN Ma byƒá ‚Äπzdarzenie‚Ä∫.
+                {   GV_(NDFN); V(); //NDFN Ma byÊ ãzdarzenieõ.
                 }
             }
                 #else
@@ -499,7 +499,7 @@ D( io, stream_write )
                         continue;
                     J_swap( P, stream->aiocb->aio_buf, stream->data );
                 }else if( stream->data_l )
-                {   //NDFN Tu musi byƒá ‚Äúmove‚Äù; a wtedy nie bƒôdzie potrzebna obs≈Çuga braku pamiƒôci.
+                {   //NDFN Tu musi byÊ ìmoveî; a wtedy nie bÍdzie potrzebna obs≥uga braku pamiÍci.
                     P p = E_mem_Q_blk_I_append( &stream->aiocb->aio_buf, stream->data_l );
                     if( !p )
                         continue;
@@ -516,13 +516,13 @@ D( io, stream_write )
                     )
                     {
                             #ifndef E_io_Q_stream_out_C_sig
-                        //NDFN RozwiƒÖzanie tymczasowe: sprawdzanie po ka≈ºdym obiegu ‚Äúschedulera‚Äù, czy mo≈ºna pisaƒá.
+                        //NDFN Rozwiπzanie tymczasowe: sprawdzanie po kaødym obiegu ìscheduleraî, czy moøna pisaÊ.
                         U_F( E_base_S->E_flow_S_signal, io_ready );
                         U_F( E_base_S->E_flow_S_signal, wake );
                             #endif
                         continue;
                     }
-                    GV_(NDFN); V(); //NDFN Ma byƒá ‚Äπzdarzenie‚Ä∫.
+                    GV_(NDFN); V(); //NDFN Ma byÊ ãzdarzenieõ.
                 }
                 if(l)
                 {   stream->aiocb->aio_nbytes -= l;

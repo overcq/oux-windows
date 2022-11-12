@@ -1,13 +1,13 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   base
 *         flow line reports
-* Â©overcq                on â€ŸGentoo Linux 13.0â€ â€œx86_64â€              2016â€’1â€’7 *
+* ©overcq                on "Gentoo Linux 13.0” “x86_64”              2016-1-7 *
 *******************************************************************************/
-// Gdy â€¹raporty liniiâ€º sÄ… wÅ‚Ä…czone, zarezerwowany jest â€˜uidâ€™ â€œstrumieniaâ€ â€œE_ioâ€: â€œ0â€.
+// Gdy ‹raporty linii› s¹ w³¹czone, zarezerwowany jest ‘uid’ “strumienia” “E_io”: “0”.
 //==============================================================================
     #ifdef C_line_report
 _internal

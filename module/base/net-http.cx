@@ -1,11 +1,11 @@
 //-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
-*  Â¦OUXÂ¦  C+
-*  Â¦/C+Â¦  component
+*  ¦OUX¦  C+
+*  ¦/C+¦  component
 *   ---   base
 *         network HTTP/1.1
-* Â©overcq                on â€ŸGentoo Linux 17.1â€ â€œx86_64â€            2021â€’11â€’13 a
+* ©overcq                on "Gentoo Linux 17.1” “x86_64”            2021-11-13 a
 *******************************************************************************/
 struct E_net_http_Z_connect
 { int connect_sock;
