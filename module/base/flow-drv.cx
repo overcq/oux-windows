@@ -95,6 +95,8 @@ E_flow_Q_task_I_granulation( void
     N ret = 0;
     for_each_out( 0, task_id_, E_base_S->E_flow_Q_task_S, E_mem_Q_tab )
     {   struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, task_id_ );
+        if( U_R( task->type, system_unblock_report ))
+            continue;
         if( granulation_u < E_base_S->E_mem_S_page_size )
         {   ret--;
             continue;
@@ -141,6 +143,8 @@ E_flow_Q_task_M( I *uid
     }
     for_each_out( 0, task_id_, E_base_S->E_flow_Q_task_S, E_mem_Q_tab )
     {   struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, task_id_ );
+        if( U_R( task->type, system_unblock_report ))
+            continue;
         if( task->stack_size > granulation_u )
             if( task->stack + task->stack_size - granulation_u <= task->touched_stack )
             {   N subtract = task->stack_size - granulation_u - E_base_S->E_mem_S_page_size;
@@ -177,17 +181,8 @@ E_flow_Q_task_M( I *uid
         exe_stack = stack + stack_size;
         touched_size = E_base_S->E_mem_S_page_size;
         touched_stack = exe_stack - touched_size;
-        V0( VirtualProtect( touched_stack
-        , touched_size
-        , PAGE_GUARD
-        ))
-        {   V_( VirtualFree( stack, 0, MEM_RELEASE ));
-            if( thread_proc_arg )
-                W( thread_proc_arg );
-            return ~0;
-        }
     }
-    I task_id = E_mem_Q_tab_I_segv_add_begin( E_base_S->E_flow_Q_task_S );
+    I task_id = E_mem_Q_tab_I_add( E_base_S->E_flow_Q_task_S );
     struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, task_id );
     task->stack = stack;
     task->touched_stack = touched_stack;
@@ -201,9 +196,7 @@ E_flow_Q_task_M( I *uid
     {   task->thread_proc_arg = thread_proc_arg;
         HANDLE thread_flow_mutex;
         V( thread_flow_mutex = CreateMutex( 0, FALSE, 0 ))
-        {   _tasks_table_begin;
-            E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
-            _tasks_table_end;
+        {   E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
             V_( VirtualFree( stack, 0, MEM_RELEASE ));
             if( thread_proc_arg )
                 W( thread_proc_arg );
@@ -212,9 +205,7 @@ E_flow_Q_task_M( I *uid
         B *M_( thread_switch_back );
         if( !thread_switch_back )
         {   V_( CloseHandle( thread_flow_mutex ));
-            _tasks_table_begin;
             E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
-            _tasks_table_end;
             V_( VirtualFree( stack, 0, MEM_RELEASE ));
             if( thread_proc_arg )
                 W( thread_proc_arg );
@@ -230,34 +221,31 @@ E_flow_Q_task_M( I *uid
         {   E_base_S->E_flow_Q_task_S_current = task_id_;
             W( thread_switch_back );
             V_( CloseHandle( thread_flow_mutex ));
-            _tasks_table_begin;
             E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
-            _tasks_table_end;
             V_( VirtualFree( stack, 0, MEM_RELEASE ));
             if( thread_proc_arg )
                 W( thread_proc_arg );
             return ~0;
         }
-        O{  V_( SwitchToThread() );
-            V_( WaitForSingleObject( thread_flow_mutex ));
+        O{  SwitchToThread();
+            V_( WaitForSingleObject( thread_flow_mutex, INFINITE ) == WAIT_OBJECT_0 );
             if( *thread_switch_back )
                 break;
             Vr_( ReleaseMutex( thread_flow_mutex ));
         }
         task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, task_id );
         if( task->run_state != E_flow_Z_run_state_S_ready )
-        {   E_base_S->E_flow_Q_task_S_current = task_id_;
+        {   task->run_state = E_flow_Z_run_state_S_stopping_by_task;
             Vr_( ReleaseMutex( thread_flow_mutex ));
-            O{  V_( SwitchToThread() );
+            O{  SwitchToThread();
                 N exit_code;
                 V_( GetExitCodeThread( thread_flow_mutex, &exit_code ));
                 if( exit_code != STILL_ACTIVE )
                     break;
             }
+            E_base_S->E_flow_Q_task_S_current = task_id_;
             V_( CloseHandle( thread_flow_mutex ));
-            _tasks_table_begin;
             E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
-            _tasks_table_end;
             V_( VirtualFree( stack, 0, MEM_RELEASE ));
             if( thread_proc_arg )
                 W( thread_proc_arg );
@@ -336,14 +324,13 @@ E_flow_Q_task_M_thread( I *uid
 _internal
 P
 E_flow_Q_task_in_thread_I_thread_proc( P arg
-){  Dh_();
-    struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
-    WaitForSingleObject( task->thread_flow_mutex );
+){  struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
+    V_( WaitForSingleObject( task->thread_flow_mutex, INFINITE ) == WAIT_OBJECT_0 );
     void (*proc)(P);
     proc = arg;
     proc( task->thread_proc_arg );
     task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
-    ReleaseMutex( task->thread_flow_mutex );
+    V_( ReleaseMutex( task->thread_flow_mutex ));
     return 0;
 }
 // ‹Zadanie› wykonuje to przed rozpoczêciêm swojej pêtli; w instrukcji “I_D”.
@@ -356,8 +343,8 @@ E_flow_Q_task_I_begin( void
         *thread_switch_back = yes;
         HANDLE thread_flow_mutex = task->thread_flow_mutex;
         V_( ReleaseMutex( thread_flow_mutex ));
-        O{  V0_( SwitchToThread() );
-            WaitForSingleObject( thread_flow_mutex );
+        O{  SwitchToThread();
+            V_( WaitForSingleObject( thread_flow_mutex, INFINITE ) == WAIT_OBJECT_0 );
             if( !*thread_switch_back )
                 break;
             V_( ReleaseMutex( thread_flow_mutex ));
@@ -377,11 +364,11 @@ E_flow_Q_task_W( I *uid
     if( U_R( task->type, system_unblock_report ))
     {   if( *task->thread_switch_back )
             task->thread_unblock_proc( task->thread_proc_arg );
-        E_base_S->switch_back_try = no;
         HANDLE thread = task->thread;
         E_base_S->E_flow_Q_task_S_current = id;
-        V_( ReleaseMutex( task->thread_flow_mutex ));
-        O{  V_( SwitchToThread() );
+        HANDLE thread_flow_mutex = task->thread_flow_mutex;
+        V_( ReleaseMutex( thread_flow_mutex ));
+        O{  SwitchToThread();
             N exit_code;
             V_( GetExitCodeThread( thread_flow_mutex, &exit_code ));
             if( exit_code != STILL_ACTIVE )
@@ -431,7 +418,7 @@ E_flow_Q_task_I_touch_stack( void
         return;
     N pages = 4; //CONF
     if( !pages )
-    {   GV_(NDFN); V();
+    {   GV_(NDFN); _V();
     }
     volatile Pc sp;
     __asm__ volatile (
@@ -523,34 +510,32 @@ E_flow_Q_report_I_clear( I id
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 I
 E_flow_Q_timer_M( N period
-){  Z_clock_time tv;
-    _gettime( &tv );
+){  if( (S)period < 0 )
+    {   GV_(NA); _V();
+    }
+    N t = GetTickCount();
     I timer_id = E_mem_Q_tab_I_add( E_base_S->E_flow_Q_timer_S );
     struct E_flow_Q_timer_Z *timer = E_mem_Q_tab_R( E_base_S->E_flow_Q_timer_S, timer_id );
-    timer->period.tv_sec = period / 1000000;
-    timer->period.Z_clock_time_minor_field = period % 1000000;
-        #ifdef E_flow_drv_C_clock_monotonic
-    timer->period.Z_clock_time_minor_field *= 1000;
-        #endif
+    timer->period = period;
     timer->lost_count = 0;
     timer->uid = ~0;
     timer->task_to = E_base_S->E_flow_Q_task_S_current;
     if( E_mem_Q_tab_R_n( E_base_S->E_flow_Q_timer_S ) != 1 )
     {   for_each_out( timer_id, timer_id_, E_base_S->E_flow_Q_timer_S, E_mem_Q_tab )
         {   struct E_flow_Q_timer_Z *timer_ = E_mem_Q_tab_R( E_base_S->E_flow_Q_timer_S, timer_id_ );
-            if( _timerisset( &timer_->period ) // Jest co najmniej jeden ‹cykler›.
-            || _timerisset( &timer_->left ) // Jest co najmniej jeden wzbudzony ‹impulsator›.
+            if( timer_->period // Jest co najmniej jeden ‹cykler›.
+            || timer_->left // Jest co najmniej jeden wzbudzony ‹impulsator›.
             )
-            {   _timeradd( &tv, &timer->period, &tv );
-                if( _timercmp( &tv, <, &E_base_S->E_flow_Q_timer_S_next_real_time ))
-                    E_base_S->E_flow_Q_timer_S_next_real_time = tv;
-                _timersub( &tv, &E_base_S->E_flow_Q_timer_S_last_real_time, &timer->left );
+            {   t += timer->period;
+                if( (S)( E_base_S->E_flow_Q_timer_S_next_real_time - t ) > 0 )
+                    E_base_S->E_flow_Q_timer_S_next_real_time = t;
+                timer->left = t - E_base_S->E_flow_Q_timer_S_last_real_time;
                 return timer_id;
             }
         }
     }
-    E_base_S->E_flow_Q_timer_S_last_real_time = tv;
-    _timeradd( &tv, &timer->period, &E_base_S->E_flow_Q_timer_S_next_real_time );
+    E_base_S->E_flow_Q_timer_S_last_real_time = t;
+    E_base_S->E_flow_Q_timer_S_next_real_time = t + timer->period;
     timer->left = timer->period;
     return timer_id;
 }
@@ -559,12 +544,12 @@ E_flow_Q_timer_W( I id
 ){  E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_timer_S, id );
     for_each( timer_id, E_base_S->E_flow_Q_timer_S, E_mem_Q_tab )
     {   struct E_flow_Q_timer_Z *timer = E_mem_Q_tab_R( E_base_S->E_flow_Q_timer_S, timer_id );
-        if( _timerisset( &timer->period )
-        || _timerisset( &timer->left )
+        if( timer->period
+        || timer->left
         )
             return;
     }
-    _timerover( &E_base_S->E_flow_Q_timer_S_next_real_time );
+    E_base_S->E_flow_Q_timer_S_next_real_time = ~0;
 }
 //------------------------------------------------------------------------------
 B
@@ -592,8 +577,8 @@ E_flow_Q_impulser_M( N uid
     if( !~timer_id )
     {   timer_id = E_mem_Q_tab_I_add( E_base_S->E_flow_Q_timer_S );
         timer = E_mem_Q_tab_R( E_base_S->E_flow_Q_timer_S, timer_id );
-        _timerclear( &timer->left );
-        _timerclear( &timer->period );
+        timer->left = 0;
+        timer->period = 0;
         timer->uid = uid;
     }
     timer->task_to = E_base_S->E_flow_Q_task_S_current;
@@ -610,8 +595,8 @@ E_flow_Q_impulser_M_srv( N uid
     if( !~timer_id )
     {   timer_id = E_mem_Q_tab_I_add( E_base_S->E_flow_Q_timer_S );
         timer = E_mem_Q_tab_R( E_base_S->E_flow_Q_timer_S, timer_id );
-        _timerclear( &timer->left );
-        _timerclear( &timer->period );
+        timer->left = 0;
+        timer->period = 0;
         timer->uid = uid;
     }
     return timer_id;
@@ -620,30 +605,28 @@ E_flow_Q_impulser_M_srv( N uid
 void
 E_flow_Q_impulser_I_activate( I id
 , N time
-){  Z_clock_time tv;
-    _gettime( &tv );
+){  if( (S)time < 0 )
+    {   GV_(NA); _V();
+    }
+    N t = GetTickCount();
     struct E_flow_Q_timer_Z *timer = E_mem_Q_tab_R( E_base_S->E_flow_Q_timer_S, id );
-    timer->left.tv_sec = time / 1000000;
-    timer->left.Z_clock_time_minor_field = time % 1000000;
-        #ifdef E_flow_drv_C_clock_monotonic
-    timer->left.Z_clock_time_minor_field *= 1000;
-        #endif
+    timer->left = time;
     if( E_mem_Q_tab_R_n( E_base_S->E_flow_Q_timer_S ) != 1 )
     {   for_each_out( id, timer_id_, E_base_S->E_flow_Q_timer_S, E_mem_Q_tab )
         {   struct E_flow_Q_timer_Z *timer_ = E_mem_Q_tab_R( E_base_S->E_flow_Q_timer_S, timer_id_ );
-            if( _timerisset( &timer_->period )
-            || _timerisset( &timer_->left )
+            if( timer_->period
+            || timer_->left
             )
-            {   _timeradd( &tv, &timer->left, &tv );
-                if( _timercmp( &tv, <, &E_base_S->E_flow_Q_timer_S_next_real_time ))
-                    E_base_S->E_flow_Q_timer_S_next_real_time = tv;
-                _timersub( &tv, &E_base_S->E_flow_Q_timer_S_last_real_time, &timer->left );
+            {   t += timer->left;
+                if( (S)( E_base_S->E_flow_Q_timer_S_next_real_time - t ) > 0 )
+                    E_base_S->E_flow_Q_timer_S_next_real_time = t;
+                timer->left = t - E_base_S->E_flow_Q_timer_S_last_real_time;
                 return;
             }
         }
     }
-    E_base_S->E_flow_Q_timer_S_last_real_time = tv;
-    _timeradd( &tv, &timer->left, &E_base_S->E_flow_Q_timer_S_next_real_time );
+    E_base_S->E_flow_Q_timer_S_last_real_time = t;
+    E_base_S->E_flow_Q_timer_S_next_real_time = t + timer->left;
 }
 void
 E_flow_Q_impulser_I_deactivate( I id
@@ -653,12 +636,12 @@ E_flow_Q_impulser_I_deactivate( I id
     _timerclear( &timer->left );
     for_each_out( id, timer_id_, E_base_S->E_flow_Q_timer_S, E_mem_Q_tab )
     {   struct E_flow_Q_timer_Z *timer_ = E_mem_Q_tab_R( E_base_S->E_flow_Q_timer_S, timer_id_ );
-        if( _timerisset( &timer_->period )
-        || _timerisset( &timer_->left )
+        if( timer_->period
+        || timer_->left
         )
             return;
     }
-    _timerover( &E_base_S->E_flow_Q_timer_S_next_real_time );
+    E_base_S->E_flow_Q_timer_S_next_real_time = ~0;
 }
 //------------------------------------------------------------------------------
 //NDFN Dodaæ “lost_count”?
@@ -672,7 +655,7 @@ E_flow_Q_impulser_I_wait( I id
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void
 E_flow_Q_thread_system_unblock_report_M( void ( *thread_unblock_proc )(P)
-, pthread_mutex_t **thread_flow_mutex
+, HANDLE *thread_flow_mutex
 , B **thread_switch_back
 ){  struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
     task->thread_unblock_proc = thread_unblock_proc;
@@ -681,24 +664,16 @@ E_flow_Q_thread_system_unblock_report_M( void ( *thread_unblock_proc )(P)
 }
 void
 E_flow_Q_thread_system_unblock_report_I_before_block(
-  pthread_mutex_t *thread_flow_mutex
+  HANDLE thread_flow_mutex
 ){  E_flow_Q_task_I_touch_stack();
-    Vr_( pthread_sigmask( SIG_BLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply, 0 ));
-    Vr_( pthread_mutex_unlock( thread_flow_mutex ));
+    V_( ReleaseMutex( thread_flow_mutex ));
 }
 B
 E_flow_Q_thread_system_unblock_report_I_after_block(
-  pthread_mutex_t *thread_flow_mutex
+  HANDLE thread_flow_mutex
 ){  struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, 0 );
-    while( E_base_S->switch_back_try )
-    {   V0_( sched_yield() );
-    }
-    while( E_base_S->switch_back_suspend )
-    {   Vr_( pthread_kill( task->thread, SIGALRM ));
-        V0_( sched_yield() );
-    }
-    Vr_( pthread_mutex_lock( thread_flow_mutex ));
-    Vr_( pthread_sigmask( SIG_UNBLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply, 0 ));
+    V_( SetEvent( E_base_S->E_flow_S_resume ));
+    V_( WaitForSingleObject( thread_flow_mutex, INFINITE ) == WAIT_OBJECT_0 );
     task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
     return task->run_state == E_flow_Z_run_state_S_stopping_by_task;
 }
@@ -733,61 +708,52 @@ Loop:
             }
             return yes;
         }
-        if( U_E( E_base_S->E_flow_S_signal, call_req ))
+/*        if( U_E( E_base_S->E_flow_S_signal, call_req ))
             X_F( flow, call_req );
         if( U_E( E_base_S->E_flow_S_signal, io_ready ))
-            X_F( io, stream_write );
-        Z_clock_time next_real_time;
-        _timerover( &next_real_time );
-        Z_clock_time tv;
-        _gettime( &tv );
+            X_F( io, stream_write );*/
+        N next_real_time = ~0;
+        N t = GetTickCount();
         for_each( call_id, E_base_S->E_flow_Q_process_call_cli_S, E_mem_Q_tab )
         {   struct E_flow_Q_process_call_cli_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_cli_S, call_id );
             if( !U_R( call->state, active ))
                 continue;
             struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, call->task_id );
-            if( _timercmp( &tv, <, &task->run_state_time ))
-            {   if( _timercmp( &task->run_state_time, <, &next_real_time ))
+            if( (S)( task->run_state_time - t ) > 0 )
+            {   if( (S)( next_real_time - task->run_state_time ) > 0 )
                     next_real_time = task->run_state_time;
             }else if( U_R( call->state, ping ))
             {   task->run_state = E_flow_Z_run_state_S_ready;
                 U_L( call->state, active );
             }else
             {   U_F( call->state, ping );
-                if( kill( call->process_id, SIGVTALRM ))
+/*                if( kill( call->process_id, SIGVTALRM ))
                 {   task->run_state = E_flow_Z_run_state_S_ready;
                     U_L( call->state, active );
                 }else
-                {   _timeradd( &tv, &E_base_S->E_flow_Q_process_call_S_ping_period, &task->run_state_time );
-                    if( _timercmp( &task->run_state_time, <, &next_real_time ))
+                {   task->run_state_time = t + E_base_S->E_flow_Q_process_call_S_ping_period;
+                    if( (S)( next_real_time - task->run_state_time ) > 0 )
                         next_real_time = task->run_state_time;
-                }
+                }*/
             }
         }
-        if( U_E( E_base_S->E_flow_S_signal, time ) // Na pewno poni¿sza linia, bo przychodzi z obudzenia po up³ywie tego czasu.
-        || !_timercmp( &tv, <, &E_base_S->E_flow_Q_timer_S_next_real_time ) // Jeœli nie przychodzi z obudzenia, a z wywo³ania w którymœ ‹zadaniu›, to trzeba sprawdziæ najbli¿szy czas ‹cyklerów>.
-        ) // Czy trzeba uaktualniæ kolejne czasy ‹cyklerów›.
-        {   Z_clock_time elapsed_time;
-            _timersub( &tv, &E_base_S->E_flow_Q_timer_S_last_real_time, &elapsed_time );
+        if( (S)( t - E_base_S->E_flow_Q_timer_S_next_real_time ) >= 0 ) // Czy trzeba uaktualniæ kolejne czasy ‹cyklerów›.
+        {   N elapsed_time = t - E_base_S->E_flow_Q_timer_S_last_real_time;
             //NDFN Uzupe³niæ o jakieœ przewidywanie ‘overhead’ na podstawie poprzedniego, by wyeliminowaæ mo¿liwoœæ powtarzania pêtli w pesymistycznym przypadku dla ka¿dego ‹cyklera›? Ale obliczaæ ten czas tylko wtedy, je¿eli ten fragment nie bêdzie móg³ byæ wyw³aszczony z wykonywania w czasie rzeczywistym (wszystkie przerwania wy³¹czone).
             O{  B some_timer_is_active = no, some_timer_has_deactivated = no;
                 B some_task_got_ready = no;
-                Z_clock_time suspend_time;
-                _timerover( &suspend_time );
+                N suspend_time = ~0;
                 for_each( timer_id, E_base_S->E_flow_Q_timer_S, E_mem_Q_tab )
                 {   struct E_flow_Q_timer_Z *timer = E_mem_Q_tab_R( E_base_S->E_flow_Q_timer_S, timer_id );
-                    if( _timerisset( &timer->period )) // ‹cykler›.
-                    {   if( !_timercmp( &elapsed_time, <, &timer->left )) // ‹cykler› wykona³ obieg— ‹zadanie› do wznowienia.
-                        {   Z_clock_time overlate_time;
-                            _timersub( &elapsed_time, &timer->left, &overlate_time );
-                            if( !_timercmp( &overlate_time, <, &timer->period )) // ‹cykler› wykona³ wiêcej ni¿ jeden obieg.
-                            {   do
-                                {   timer->lost_count++;
-                                    _timersub( &overlate_time, &timer->period, &overlate_time );
-                                }while( !_timercmp( &overlate_time, <, &timer->period ));
-                                GV_(NA); Gd( timer->lost_count ); Gd( timer->period.tv_sec ); Gd( timer->period.Z_clock_time_minor_field ); Gd( overlate_time.tv_sec ); Gd( overlate_time.Z_clock_time_minor_field ); // lost time.
+                    if( timer->period ) // ‹cykler›.
+                    {   if( (S)( elapsed_time - timer->left ) >= 0 ) // ‹cykler› wykona³ obieg— ‹zadanie› do wznowienia.
+                        {   N overlate_time = elapsed_time - timer->left;
+                            if( (S)( overlate_time - timer->period ) >= 0 ) // ‹cykler› wykona³ wiêcej ni¿ jeden obieg.
+                            {   timer->lost_count += overlate_time / timer->period;
+                                overlate_time %= timer->period;
+                                GV_(NA); Gd( timer->lost_count ); Gd( timer->period ); Gd( overlate_time ); // lost time.
                             }
-                            _timersub( &timer->period, &overlate_time, &timer->left );
+                            timer->left = timer->period - overlate_time;
                             struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, timer->task_to );
                             if( task->run_state == E_flow_Z_run_state_S_waiting_for_timer
                             && task->run_state_object == timer_id
@@ -797,25 +763,25 @@ Loop:
                             }else
                                 timer->lost_count++;
                         }else
-                            _timersub( &timer->left, &elapsed_time, &timer->left );
-                        if( _timercmp( &timer->left, <, &suspend_time ))
+                            timer->left= timer->left - elapsed_time;
+                        if( (S)( suspend_time - timer->left ) > 0 )
                         {   suspend_time = timer->left;
                             some_timer_is_active = yes;
                         }
-                    }else if( _timerisset( &timer->left )) // Aktywowany ‹impulsator›.
-                    {   if( !_timercmp( &elapsed_time, <, &timer->left ))
-                        {   _timerclear( &timer->left );
+                    }else if( timer->left ) // Aktywowany ‹impulsator›.
+                    {   if( (S)( elapsed_time - timer->left ) >= 0 )
+                        {   timer->left = 0;
                             struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, timer->task_to );
                             if( task->run_state == E_flow_Z_run_state_S_waiting_for_timer
                             && task->run_state_object == timer_id
                             )
                             {   task->run_state = E_flow_Z_run_state_S_ready;
                                 some_task_got_ready = yes;
-                            } // Narazie– jeœli nie mo¿e wznowiæ ‹zadania›, to gubi impuls.
+                            } // Na razie – jeœli nie mo¿e wznowiæ ‹zadania›, to gubi impuls.
                             some_timer_has_deactivated = yes;
                         }else
-                        {   _timersub( &timer->left, &elapsed_time, &timer->left );
-                            if( _timercmp( &timer->left, <, &suspend_time ))
+                        {   timer->left -= elapsed_time;
+                            if( (S)( suspend_time - timer->left ) > 0 )
                             {   suspend_time = timer->left;
                                 some_timer_is_active = yes;
                             }
@@ -824,20 +790,19 @@ Loop:
                 }
                 if( some_timer_has_deactivated
                 && !some_timer_is_active
-                ){  _timerover( &E_base_S->E_flow_Q_timer_S_next_real_time );
+                ){  E_base_S->E_flow_Q_timer_S_next_real_time = ~0;
                     break;
                 }
-                Z_clock_time tv_2;
-                _gettime( &tv_2 );
-                _timersub( &tv_2, &tv, &elapsed_time );
-                if( _timercmp( &elapsed_time, <, &suspend_time ) // Czy przeliczanie czasów ‹cyklerów› trwa³o krócej ni¿ obliczony czas oczekiwania do pierwszego budz¹cego ‹zadanie›?
+                N t_2 = GetTickCount();
+                elapsed_time = t_2 - t;
+                if( (S)( suspend_time - elapsed_time ) > 0 // Czy przeliczanie czasów ‹cyklerów› trwa³o krócej ni¿ obliczony czas oczekiwania do pierwszego budz¹cego ‹zadanie›?
                 || !some_task_got_ready
-                ){  E_base_S->E_flow_Q_timer_S_last_real_time = tv;
-                    _timeradd( &tv, &suspend_time, &E_base_S->E_flow_Q_timer_S_next_real_time ); //NDFN Rozwa¿yæ przepe³nienie licznika czasu rzeczywistego.
+                ){  E_base_S->E_flow_Q_timer_S_last_real_time = t;
+                    E_base_S->E_flow_Q_timer_S_next_real_time = t + suspend_time;
                     break;
                 }
-                tv = tv_2;
-                GV_(NA); Gd( suspend_time.tv_sec ); Gd( suspend_time.Z_clock_time_minor_field ); Gd( elapsed_time.tv_sec ); Gd( elapsed_time.Z_clock_time_minor_field ); // Timer schedule loop overhead.
+                t = t_2;
+                GV_(NA); Gd( suspend_time ); Gd( elapsed_time ); // Timer schedule loop overhead.
             }
         }
         for_each_out( E_base_S->E_flow_Q_task_S_current, task_id, E_base_S->E_flow_Q_task_S, E_mem_Q_tab )
@@ -846,20 +811,16 @@ Loop:
             {   B *thread_switch_back = task->thread_switch_back;
                 if( !*thread_switch_back )
                 {   E_base_S->E_flow_Q_task_S_current = task_id;
-                    pthread_mutex_t *thread_flow_mutex = task->thread_flow_mutex;
-                    Vr_( pthread_sigmask( SIG_BLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply, 0 ));
-                    Vr_( pthread_mutex_unlock( thread_flow_mutex ));
-                    O{  V0_( sched_yield() );
-                        Vr_( pthread_mutex_lock( thread_flow_mutex ));
-                        E_base_S->switch_back_try = yes;
+                    HANDLE thread_flow_mutex = task->thread_flow_mutex;
+                    V_( ReleaseMutex( thread_flow_mutex ));
+                    O{  SwitchToThread();
+                        V_( WaitForSingleObject( thread_flow_mutex, INFINITE ) == WAIT_OBJECT_0 );
                         if( *thread_switch_back )
                             break;
-                        E_base_S->switch_back_try = no;
-                        Vr_( pthread_mutex_unlock( thread_flow_mutex ));
+                        V_( ReleaseMutex( thread_flow_mutex ));
                     }
-                    Vr_( pthread_sigmask( SIG_UNBLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply, 0 ));
-                    V0_( sched_yield() ); // ¯eby daæ szansê na wykonanie siê “w¹tku” ‹zadania›, z którego prze³¹czono spowrotem— od “Xh_B_” do rzeczywistej procedury systemowej, na której siê blokuje.
-                    U_L( E_base_S->E_flow_S_signal, time ); // “kill” z “Xh_B” jest niepotrzebne, wiêc ‘resetuje’ stan, by nie potrzeba by³o póŸniej wykonaæ ponownej pêtli “schedule” ze wzglêdu na stan “wake”.
+                    SwitchToThread(); // ¯eby daæ szansê na wykonanie siê “w¹tku” ‹zadania›, z którego prze³¹czono z powrotem — od “Xh_B_” do rzeczywistej procedury systemowej, na której siê blokuje.
+                    ResetEvent( E_base_S->E_flow_S_resume ); // “SetEvent” z “Xh_B” jest niepotrzebne, wiêc ‘resetuje’ stan, by nie potrzeba by³o póŸniej wykonaæ ponownej pêtli “schedule” ze wzglêdu na stan “wake”.
                     goto Loop; // Wywo³uje “E_flow_Q_task_I_schedule” w sposób wewnêtrzny, gdy nie mo¿na u¿yæ funkcjonalnoœci “E_flow_Q_task_I_switch”, ale przy pierwszej koniecznoœci prze³¹czenia standardowego bêdzie prze³¹cza³ w trybie ·pominiêcia nie ob³ugiwanych systemowych danych zatrzymywania przep³ywu wykonania z tablicy ‹zadañ›· (pominiêcia ‹zadañ›) przekazanych kolejnych typu “w¹tkowanych” ‹systemowych raportów odblokowuj¹cych› z “cyklicznej kolejki”— na rzecz zwyk³ego ‹zadania› (“schedule_task_id”), które wywo³a³o “schedule”.
                 }
             }else
@@ -881,20 +842,16 @@ Loop:
         if( U_R( task->type, system_unblock_report ))
         {   B *thread_switch_back = task->thread_switch_back;
             if( !*thread_switch_back )
-            {   pthread_mutex_t *thread_flow_mutex = task->thread_flow_mutex;
-                Vr_( pthread_sigmask( SIG_BLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply, 0 ));
-                Vr_( pthread_mutex_unlock( thread_flow_mutex ));
-                O{  V0_( sched_yield() );
-                    Vr_( pthread_mutex_lock( thread_flow_mutex ));
-                    E_base_S->switch_back_try = yes;
+            {   HANDLE thread_flow_mutex = task->thread_flow_mutex;
+                V_( ReleaseMutex( thread_flow_mutex ));
+                O{  SwitchToThread();
+                    V_( WaitForSingleObject( thread_flow_mutex, INFINITE ) == WAIT_OBJECT_0 );
                     if( *thread_switch_back )
                         break;
-                    E_base_S->switch_back_try = no;
-                    Vr_( pthread_mutex_unlock( thread_flow_mutex ));
+                    V_( ReleaseMutex( thread_flow_mutex ));
                 }
-                Vr_( pthread_sigmask( SIG_UNBLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply, 0 ));
-                V0_( sched_yield() );
-                U_L( E_base_S->E_flow_S_signal, time );
+                SwitchToThread();
+                V_( ResetEvent( E_base_S->E_flow_S_resume ));
                 continue;
             }
         }else
@@ -903,47 +860,19 @@ Loop:
                     E_base_S->E_flow_Q_task_S_current = schedule_task_id;
                 return task->run_state == E_flow_Z_run_state_S_stopping_by_task;
             }
-        if( U_R( E_base_S->E_flow_S_signal, exit )
-        || U_R( E_base_S->E_flow_S_signal, time )
-        || U_R( E_base_S->E_flow_S_signal, call_req )
-        || U_R( E_base_S->E_flow_S_signal, io_ready )
-        )
+        if( U_R( E_base_S->E_flow_S_signal, exit ))
             continue;
-        if( _timercmp( &E_base_S->E_flow_Q_timer_S_next_real_time, <, &next_real_time ))
+        if( (S)( next_real_time - E_base_S->E_flow_Q_timer_S_next_real_time ) > 0 )
             next_real_time = E_base_S->E_flow_Q_timer_S_next_real_time;
-        B U_has_suspend_time = !_timerisover( &next_real_time );
+        B U_has_suspend_time = ~next_real_time;
         if( U_has_suspend_time )
-            _gettime( &tv );
-        if( !U_has_suspend_time
-        || _timercmp( &tv, <, &next_real_time )
-        ){  if( U_has_suspend_time )
-            {   _timersub( &next_real_time, &tv, &tv );
-                _setttimer( &tv );
-            }
-            if( !U_R( E_base_S->E_flow_S_signal, exit )
-            && !U_R( E_base_S->E_flow_S_signal, time )
-            && !U_R( E_base_S->E_flow_S_signal, call_req )
-            && !U_R( E_base_S->E_flow_S_signal, io_ready )
-            )
-                U_E( E_base_S->E_flow_S_signal, wake );
-                while( !U_R( E_base_S->E_flow_S_signal, wake ))
-                {
-                        #ifdef E_flow_C_thread_system_unblock_reports
-                    E_base_S->switch_back_suspend = yes;
-                    E_base_S->switch_back_try = no;
-                        #endif
-                    Vp_(( sigsuspend( &E_base_S->E_flow_Z_sigset_S_empty ), !_errno || _errno == EINTR ));
-                        #ifdef E_flow_C_thread_system_unblock_reports
-                    E_base_S->switch_back_suspend = no;
-                        #endif
-                }
-            if( U_has_suspend_time
-            && !U_R( E_base_S->E_flow_S_signal, time )
-            ){  Z_clock_time tv_;
-                _timerclear( &tv_ );
-                _setttimer( &tv_ );
-            }
-        }
+            t = GetTickCount();
+        if(( !U_has_suspend_time
+          || (S)( next_real_time - t ) > 0
+          )
+        && !U_R( E_base_S->E_flow_S_signal, exit )
+        )
+            MsgWaitForMultipleObjectsEx( 1, &E_base_S->E_flow_S_resume, FALSE, U_has_suspend_time ? next_real_time - t : INFINITE, QS_ALLEVENTS );
     }
 }
 // Prze³¹czenie do ‹zadania› przez prze³¹czenie wskaŸnika “stosu” wykonania.
@@ -951,12 +880,7 @@ __attribute__ ((__noinline__,__returns_twice__,__hot__))
 _internal
 void
 E_flow_Q_task_I_switch( I task_to_id
-){
-//CONF Jest ‘fpu’?
-        #if 1
-    feclearexcept( FE_ALL_EXCEPT );
-        #endif
-    struct E_flow_Q_task_Z *task_from = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
+){  struct E_flow_Q_task_Z *task_from = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
     struct E_flow_Q_task_Z *task_to = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, task_to_id );
     E_base_S->E_flow_Q_task_S_current = task_to_id;
     __asm__ volatile (
@@ -1009,173 +933,97 @@ E_flow_Q_task_I_switch( I task_to_id
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 _internal
-void
-E_flow_Z_signal_V_segv( int uid
-, siginfo_t *siginfo
-, P context
-){  Dh_();
-    int errno_ = _errno;
-    if( E_base_S->E_flow_Q_task_S_current
-        #ifdef C_pthreads
-    && U_R( E_base_S->E_flow_S_mode, Z_task_table_S_can_read )
-        #endif
+WINAPI long
+E_flow_I_exception_handler( EXCEPTION_POINTERS *ex
+){  if( ex->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION
+    && E_base_S->E_flow_Q_task_S_current
     ){  struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
-        if( (Pc)siginfo->si_addr < task->touched_stack )
-            if( (Pc)siginfo->si_addr >= task->stack + E_base_S->E_mem_S_page_size )
-            {   Pc new_base = E_simple_Z_p_I_align_down_to_v2( siginfo->si_addr, E_base_S->E_mem_S_page_size );
-                V0_( mprotect( new_base
+        if( ex->ExceptionRecord->ExceptionInformation[1] < task->touched_stack )
+        {   if( ex->ExceptionRecord->ExceptionInformation[1] >= task->stack + E_base_S->E_mem_S_page_size )
+            {   Pc new_base = E_simple_Z_p_I_align_down_to_v2( ex->ExceptionRecord->ExceptionInformation[1], E_base_S->E_mem_S_page_size );
+                V_( VirtualAlloc( new_base
                 , task->touched_stack - new_base
-                , PROT_READ | PROT_WRITE
+                , MEM_COMMIT
+                , PAGE_READWRITE
                 ));
                 task->touched_stack = new_base;
-                _errno = errno_;
-                return;
-            }else if( (Pc)siginfo->si_addr >= task->stack )
+                return EXCEPTION_CONTINUE_EXECUTION;
+            }
+            if( ex->ExceptionRecord->ExceptionInformation[1] >= task->stack )
             {   GV_(NA); // Late instrumentation error: task stack too small.
             }
+        }
     }
-    GV_(NDFN); Gd( siginfo->si_code ); Gh( siginfo->si_addr ); // Other fault.
-    struct sigaction sa =
-    { .sa_handler = SIG_DFL
-    , .sa_flags = 0
-    };
-    V0_( sigaction( SIGSEGV, &sa, 0 ));
-    _errno = errno_;
+    GV_(NDFN); Gd( ex->ExceptionRecord->ExceptionCode ); Gh( ex->ExceptionRecord->ExceptionAddress ); // Other fault.
+    return EXCEPTION_CONTINUE_SEARCH;
 }
 //------------------------------------------------------------------------------
 _internal
 void
 E_flow_Z_signal_V_process_call_ping( int uid
-, siginfo_t *siginfo
-, P data
-){  Dh_();
-    if( siginfo->si_code != SI_USER )
-        return;
-    int errno_ = _errno;
-    V0( kill( siginfo->si_pid, SIGPROF )){}
-    _errno = errno_;
+){  //V0( kill( siginfo->si_pid, SIGPROF )){}
 }
 _internal
 void
 E_flow_Z_signal_V_process_call_pong( int uid
-, siginfo_t *siginfo
-, P data
-){  Dh_();
-    if( siginfo->si_code != SI_USER )
-        return;
-    int errno_ = _errno;
-    for_each( call_id, E_base_S->E_flow_Q_process_call_cli_S, E_mem_Q_tab )
+){  for_each( call_id, E_base_S->E_flow_Q_process_call_cli_S, E_mem_Q_tab )
     {   struct E_flow_Q_process_call_cli_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_cli_S, call_id );
-        if( call->process_id == siginfo->si_pid )
+//        if( call->process_id == siginfo->si_pid )
         {   U_L( call->state, ping );
-            U_F( E_base_S->E_flow_S_signal, wake );
             break;
         }
     }
-    _errno = errno_;
 }
 _internal
 void
 E_flow_Z_signal_V_process_call_req( int uid
-, siginfo_t *siginfo
-, P data
-){  Dh_();
-        #ifndef E_flow_Q_process_call_C_alt
-    if( siginfo->si_code != SI_QUEUE )
-        #else
-    if( siginfo->si_code != SI_USER )
-        #endif
-        return;
-    int errno_ = _errno;
-    for_each( call_id, E_base_S->E_flow_Q_process_call_srv_S, E_mem_Q_tab )
+){  for_each( call_id, E_base_S->E_flow_Q_process_call_srv_S, E_mem_Q_tab )
     {   struct E_flow_Q_process_call_srv_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_srv_S, call_id );
-        if( call->process_id == siginfo->si_pid )
-        {   GV_(NXP); Gd( siginfo->si_pid ); // Duplicate process call request.
-            _errno = errno_;
+//        if( call->process_id == siginfo->si_pid )
+//        {   GV_(NXP); Gd( siginfo->si_pid ); // Duplicate process call request.
             return;
-        }
+//        }
     }
     P shm;
-        #ifndef E_flow_Q_process_call_C_alt
-    if( !~(N)( shm = E_mem_Q_shared_Q_blk_M( siginfo->si_value.sival_int )))
-        #else
-    N l = E_text_Z_n_N_s_G( siginfo->si_pid, sizeof( siginfo->si_pid ), 10 );
-    C s[ 6 + l + 1 ];
-    E_text_Z_s_P_s0_copy( s, "/proc/" );
-    E_text_Z_n_N_s( &s[0] + 6 + l, siginfo->si_pid, sizeof( siginfo->si_pid ), 10 );
-    *( &s[0] + 6 + l ) = '\0';
-    key_t key;
-    V1( key = ftok( s, E_flow_Q_process_call_S_ftok_id ))
-    {   _errno = errno_;
+//    if( !~(N)( shm = E_mem_Q_shared_Q_blk_M( siginfo->si_value.sival_int )))
         return;
-    }
-    int shm_id;
-    if( !~( shm_id = E_mem_Q_shared_R(key))
-    || !~(N)( shm = E_mem_Q_shared_Q_blk_M( shm_id ))
-    )
-        #endif
-    {   _errno = errno_;
-        return;
-    }
     call_id = E_mem_Q_tab_I_add( E_base_S->E_flow_Q_process_call_srv_S );
     struct E_flow_Q_process_call_srv_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_srv_S, call_id );
-    call->process_id = siginfo->si_pid;
+//    call->process_id = siginfo->si_pid;
     call->shm = shm;
-    U_F( E_base_S->E_flow_S_signal, call_req );
-    U_F( E_base_S->E_flow_S_signal, wake );
-    _errno = errno_;
 }
 _internal
 void
 E_flow_Z_signal_V_process_call_reply( int uid
-, siginfo_t *siginfo
-, P data
-){  Dh_();
-        #ifndef E_flow_Q_process_call_C_alt
-    if( siginfo->si_code != SI_QUEUE )
-        #else
-    if( siginfo->si_code != SI_USER )
-        #endif
-        return;
-    int errno_ = _errno;
-    for_each( call_id, E_base_S->E_flow_Q_process_call_cli_S, E_mem_Q_tab )
+){  for_each( call_id, E_base_S->E_flow_Q_process_call_cli_S, E_mem_Q_tab )
     {   struct E_flow_Q_process_call_cli_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_cli_S, call_id );
-        if( call->process_id == siginfo->si_pid )
+//        if( call->process_id == siginfo->si_pid )
         {   U_L( call->state, active );
             U_L( call->state, ping );
             struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, call->task_id );
             task->run_state = E_flow_Z_run_state_S_ready;
-            U_F( E_base_S->E_flow_S_signal, wake );
-            _errno = errno_;
             return;
         }
     }
-    GV_(NXP); Gd( siginfo->si_pid ); // Call reply from a unrequested process.
-    _errno = errno_;
+//    GV_(NXP); Gd( siginfo->si_pid ); // Call reply from a unrequested process.
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 I
 E_flow_Q_process_call_M( N l
 , P *data
 ){  N shm_id;
-        #ifndef E_flow_Q_process_call_C_alt
     if( !~( shm_id = E_mem_Q_shared_M(l)))
-        #else
-    if( !~( shm_id = E_mem_Q_shared_M_key( E_base_S->E_flow_Q_process_call_S_shm_key, l )))
-        #endif
         return ~0;
     P shm;
     if( !~(N)( shm = E_mem_Q_shared_Q_blk_M( shm_id )))
     {   E_mem_Q_shared_W( shm_id );
         return ~0;
     }
-    _sigprocmask( SIG_BLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply_pong, 0 );
     I call_id = E_mem_Q_tab_I_add( E_base_S->E_flow_Q_process_call_cli_S );
     struct E_flow_Q_process_call_cli_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_cli_S, call_id );
     U_L( call->state, active );
     call->shm_id = shm_id;
     call->shm = shm;
-    _sigprocmask( SIG_UNBLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply_pong, 0 );
     *data = shm;
     return call_id;
 }
@@ -1184,14 +1032,12 @@ E_flow_Q_process_call_W( I id
 ){  struct E_flow_Q_process_call_cli_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_cli_S, id );
     E_mem_Q_shared_Q_blk_W( call->shm );
     E_mem_Q_shared_W( call->shm_id );
-    _sigprocmask( SIG_BLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply_pong, 0 );
     E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_process_call_cli_S, id );
-    _sigprocmask( SIG_UNBLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_reply_pong, 0 );
 }
 //------------------------------------------------------------------------------
 B
 E_flow_Q_process_call_I( I id
-, pid_t process_id
+, N process_id
 , B *successful
 ){  J_assert( process_id > 0 );
     struct E_flow_Q_process_call_cli_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_cli_S, id );
@@ -1199,16 +1045,11 @@ E_flow_Q_process_call_I( I id
     call->process_id = process_id;
     struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
     task->run_state = E_flow_Z_run_state_S_waiting_for_call_reply;
-    _gettime( &task->run_state_time );
-    _timeradd( &task->run_state_time, &E_base_S->E_flow_Q_process_call_S_ping_period, &task->run_state_time );
-        #ifndef E_flow_Q_process_call_C_alt
-    union sigval sv;
-    sv.sival_int = call->shm_id;
+    task->run_state_time = GetTickCount() + E_base_S->E_flow_Q_process_call_S_ping_period;
+//    union sigval sv;
+//    sv.sival_int = call->shm_id;
     U_F( call->state, active );
-    V0( sigqueue( process_id, SIGUSR1, sv ))
-        #else
-    V0( kill( process_id, SIGUSR1 ))
-        #endif
+//    V0( sigqueue( process_id, SIGUSR1, sv ))
     {   U_L( call->state, active );
         *successful = no;
         return no;
@@ -1224,19 +1065,12 @@ D( flow, call_srv )
     I_D
     {   X_B( flow, call_req, 0 )
             break;
-        _sigprocmask( SIG_BLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_req, 0 );
         for_each_pop( call_id, E_base_S->E_flow_Q_process_call_srv_S, E_mem_Q_tab )
         {   struct E_flow_Q_process_call_srv_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_srv_S, call_id );
             E_flow_Q_process_call_I_func( call->shm );
             E_mem_Q_shared_Q_blk_W( call->shm );
-                #ifndef E_flow_Q_process_call_C_alt
-            union sigval sv;
-            V0( sigqueue( call->process_id, SIGUSR2, sv )){}
-                #else
-            V0( kill( call->process_id, SIGUSR2 )){}
-                #endif
+//            V0( kill( call->process_id, SIGUSR2 )){}
         }
-        _sigprocmask( SIG_UNBLOCK, &E_base_S->E_flow_Z_sigset_S_process_call_req, 0 );
     }
     X_W( flow, call_req );
 }

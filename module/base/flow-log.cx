@@ -26,51 +26,48 @@ _internal
 void
 E_flow_Z_line_report_I_write_Z_s( Pc s
 , N l
-){  O{  _errno = 0;
-        N l_ = write( STDERR_FILENO, s, l );
-        if( ~l_ )
+){  O{  N l_;
+        if( WriteFile( E_base_S->E_flow_S_stderr, s, l, &l_, 0 ))
         {   s += l_;
             if( !( l -= l_ ))
                 break;
-        }else if( _errno != EINTR )
+        }else
             break;
     }
 }
 _internal
 void
 E_flow_Z_line_report_I_write_Z_c( C c
-){  O{  _errno = 0;
-        N l = write( STDERR_FILENO, &c, 1 );
-        if( ~l )
-            break;
-        if( _errno != EINTR )
+){  char s[1] = { c };
+    O{  N l_;
+        if( WriteFile( E_base_S->E_flow_S_stderr, &s[0], 1, &l_, 0 ))
+        {   if( l_ )
+                break;
+        }else
             break;
     }
 }
 //------------------------------------------------------------------------------
 void
-E_flow_Z_line_report_Z_date_I_sync( struct timeval *tv
-){  struct tm *tm;
-    Vp( tm = gmtime( &tv->tv_sec ))
-        return;
-    N l = 16 + 6 + 1;
+E_flow_Z_line_report_Z_date_I_sync( SYSTEMTIME *st
+){  N l = 16 + 6 + 1;
     C s[l];
     s[ l - 1 ] = '\0';
-    Pc s_ = E_text_Z_n_N_s( &s[ l - 1 ], tv->tv_usec, sizeof( tv->tv_usec ), 10 );
+    Pc s_ = E_text_Z_n_N_s( &s[ l - 1 ], st->wMilliseconds, sizeof( st->wMilliseconds ), 10 );
     E_text_Z_s_P_c_fill( &s[16], s_, '0' );
     s[15] = '.';
-    s_ = E_text_Z_n_N_s( &s[15], tm->tm_sec, sizeof( tm->tm_sec ), 10 );
+    s_ = E_text_Z_n_N_s( &s[15], st->wSecond, sizeof( st->wSecond ), 10 );
     E_text_Z_s_P_c_fill( &s[13], s_, '0' );
-    s_ = E_text_Z_n_N_s( &s[13], tm->tm_min, sizeof( tm->tm_min ), 10 );
+    s_ = E_text_Z_n_N_s( &s[13], st->wMinute, sizeof( st->wMinute ), 10 );
     E_text_Z_s_P_c_fill( &s[11], s_, '0' );
-    s_ = E_text_Z_n_N_s( &s[11], tm->tm_hour, sizeof( tm->tm_hour ), 10 );
+    s_ = E_text_Z_n_N_s( &s[11], st->wHour, sizeof( st->wHour ), 10 );
     E_text_Z_s_P_c_fill( &s[9], s_, '0' );
     s[8] = 'T';
-    s_ = E_text_Z_n_N_s( &s[8], tm->tm_mday, sizeof( tm->tm_mday ), 10 );
+    s_ = E_text_Z_n_N_s( &s[8], st->wDay, sizeof( st->wDay ), 10 );
     E_text_Z_s_P_c_fill( &s[6], s_, '0' );
-    s_ = E_text_Z_n_N_s( &s[6], tm->tm_mon + 1, sizeof( tm->tm_mon ), 10 );
+    s_ = E_text_Z_n_N_s( &s[6], st->wMonth, sizeof( st->wMonth ), 10 );
     E_text_Z_s_P_c_fill( &s[4], s_, '0' );
-    E_text_Z_n_N_s( &s[4], tm->tm_year + 1900, sizeof( tm->tm_year ), 10 );
+    E_text_Z_n_N_s( &s[4], st->wYear, sizeof( st->wYear ), 10 );
     E_flow_Z_line_report_I_write_Z_s( s, l - 1 );
 }
 void
@@ -82,28 +79,25 @@ E_flow_Z_line_report_Z_s_I_sync( Pc s
     E_flow_Z_line_report_I_write_Z_s( s, l );
 }
 void
-E_flow_Z_line_report_Z_date_I( struct timeval *tv
-){  struct tm *tm;
-    Vp( tm = gmtime( &tv->tv_sec ))
-        return;
-    N l = 16 + 6 + 1;
+E_flow_Z_line_report_Z_date_I( SYSTEMTIME *st
+){  N l = 16 + 6 + 1;
     C s[l];
     s[ l - 1 ] = '\0';
-    Pc s_ = E_text_Z_n_N_s( &s[ l - 1 ], tv->tv_usec, sizeof( tv->tv_usec ), 10 );
+    Pc s_ = E_text_Z_n_N_s( &s[ l - 1 ], st->wMilliseconds, sizeof( st->wMilliseconds ), 10 );
     E_text_Z_s_P_c_fill( &s[16], s_, '0' );
     s[15] = '.';
-    s_ = E_text_Z_n_N_s( &s[15], tm->tm_sec, sizeof( tm->tm_sec ), 10 );
+    s_ = E_text_Z_n_N_s( &s[15], st->wSecond, sizeof( st->wSecond ), 10 );
     E_text_Z_s_P_c_fill( &s[13], s_, '0' );
-    s_ = E_text_Z_n_N_s( &s[13], tm->tm_min, sizeof( tm->tm_min ), 10 );
+    s_ = E_text_Z_n_N_s( &s[13], st->wMinute, sizeof( st->wMinute ), 10 );
     E_text_Z_s_P_c_fill( &s[11], s_, '0' );
-    s_ = E_text_Z_n_N_s( &s[11], tm->tm_hour, sizeof( tm->tm_hour ), 10 );
+    s_ = E_text_Z_n_N_s( &s[11], st->wHour, sizeof( st->wHour ), 10 );
     E_text_Z_s_P_c_fill( &s[9], s_, '0' );
     s[8] = 'T';
-    s_ = E_text_Z_n_N_s( &s[8], tm->tm_mday, sizeof( tm->tm_mday ), 10 );
+    s_ = E_text_Z_n_N_s( &s[8], st->wDay, sizeof( st->wDay ), 10 );
     E_text_Z_s_P_c_fill( &s[6], s_, '0' );
-    s_ = E_text_Z_n_N_s( &s[6], tm->tm_mon + 1, sizeof( tm->tm_mon ), 10 );
+    s_ = E_text_Z_n_N_s( &s[6], st->wMonth, sizeof( st->wMonth ), 10 );
     E_text_Z_s_P_c_fill( &s[4], s_, '0' );
-    E_text_Z_n_N_s( &s[4], tm->tm_year + 1900, sizeof( tm->tm_year ), 10 );
+    E_text_Z_n_N_s( &s[4], st->wYear, sizeof( st->wYear ), 10 );
     E_io_Q_stream_out_P( 0, s, l - 1 );
 }
 void
@@ -196,22 +190,17 @@ void
 E_flow_Z_line_report_Z_line_I_sync( Pc file
 , N line
 , Pc s
-){  struct timeval tv;
-    B U_F( b, tv );
-    V1( gettimeofday( &tv, 0 ))
-        U_L( b, tv );
+){  SYSTEMTIME st;
+    GetSystemTime( &st );
     file = E_flow_Z_line_report_N_source_filename(file);
     E_flow_Z_line_report_I_write_Z_c( '\n' );
-    if( U_R( b, tv ))
-        E_flow_Z_line_report_Z_date_I_sync( &tv );
+    E_flow_Z_line_report_Z_date_I_sync( &st );
     E_flow_Z_line_report_Z_s_I_sync( E_base_S->E_flow_S_exe_name, 0 );
     E_flow_Z_line_report_Z_n_I_sync( E_base_S->E_flow_S_exe_pid, sizeof( E_base_S->E_flow_S_exe_pid ), 10 );
     E_flow_Z_line_report_Z_s_I_sync( file, 0 );
     E_flow_Z_line_report_Z_n_I_sync( line, sizeof(line), 10 );
-    if( U_R( E_base_S->E_flow_S_mode, Z_task_table_S_can_read ))
-    {   struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
-        E_flow_Z_line_report_Z_s_I_sync( task->proc_name, 0 );
-    }
+    struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
+    E_flow_Z_line_report_Z_s_I_sync( task->proc_name, 0 );
     E_flow_Z_line_report_Z_n_I_sync( E_base_S->E_flow_Q_task_S_current, sizeof( E_base_S->E_flow_Q_task_S_current ), 10 );
     if(s)
         E_flow_Z_line_report_Z_s_I_sync( s, 0 );
@@ -220,14 +209,11 @@ void
 E_flow_Z_line_report_Z_line_I( Pc file
 , N line
 , Pc s
-){  struct timeval tv;
-    B U_F( b, tv );
-    V1( gettimeofday( &tv, 0 ))
-        U_L( b, tv );
+){  SYSTEMTIME st;
+    GetSystemTime( &st );
     file = E_flow_Z_line_report_N_source_filename(file);
     E_io_Q_stream_out_P_c( 0, '\n' );
-    if( U_R( b, tv ))
-        E_flow_Z_line_report_Z_date_I( &tv );
+    E_flow_Z_line_report_Z_date_I( &st );
     E_flow_Z_line_report_Z_s_I( E_base_S->E_flow_S_exe_name, 0 );
     E_flow_Z_line_report_Z_n_I( E_base_S->E_flow_S_exe_pid, sizeof( E_base_S->E_flow_S_exe_pid ), 10 );
     E_flow_Z_line_report_Z_s_I( file, 0 );
@@ -241,17 +227,21 @@ E_flow_Z_line_report_Z_line_I( Pc file
 void
 E_flow_Z_line_report_Z_line_I_error( Pc file
 , N line
-){  int errno_ = _errno;
+){  N e = GetLastError();
     file = E_flow_Z_line_report_N_source_filename(file);
     E_flow_Z_line_report_Z_line_I_sync( file, line, "NA" );
-    E_flow_Z_line_report_Z_text_n_I_sync( "errno", errno_, sizeof( errno_ ), 10 );
-    E_flow_Z_line_report_Z_s_I_sync( strerror( errno_ ), 0 );
+    E_flow_Z_line_report_Z_text_n_I_sync( "error", e, sizeof(e), 10 );
+    char *s;
+    if( FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_IGNORE_INSERTS | FORMAT_MESSAGE_FROM_SYSTEM, 0, e, MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), (LPTSTR)&s, 0, 0 ))
+    {   E_flow_Z_line_report_Z_s_I_sync( s, 0 );
+        LocalFree(s);
+    }
 }
     #endif
 //==============================================================================
 void
 E_flow_Z_stat_I_stat( void
-){  int fd = open( "/etc/machine-id", O_RDONLY );
+){  /*int fd = open( "/etc/machine-id", O_RDONLY );
     if( ~fd )
     {   C buf[33];
         N l = read( fd, &buf[0], sizeof(buf) );
@@ -356,6 +346,6 @@ E_flow_Z_stat_I_stat( void
 Cont:   ai_1 = ai_1->ai_next;
     }while( ai_1 );
     SSL_CTX_free( ssl_ctx );
-    freeaddrinfo(ai);
+    freeaddrinfo(ai);*/
 }
 /******************************************************************************/

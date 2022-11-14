@@ -116,7 +116,7 @@ E_mem_Q_tab_I_add( struct E_mem_Q_tab_Z *tab_
             if(iterator)
             {   I *p = E_mem_Q_blk_I_append( &iterator->index, 1 );
                 if( !p )
-                {   GV_(NA); V();
+                {   GV_(NA); _V();
                 }
                 *p = id;
                 iterator->n++;
@@ -167,7 +167,7 @@ E_mem_Q_tab_I_add_i( struct E_mem_Q_tab_Z *tab_
             if(iterator)
             {   I *p = E_mem_Q_blk_I_append( &iterator->index, 1 );
                 if( !p )
-                {   GV_(NA); V();
+                {   GV_(NA); _V();
                 }
                 *p = id;
                 iterator->n++;
