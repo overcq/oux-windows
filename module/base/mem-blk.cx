@@ -55,9 +55,7 @@ struct E_mem_Q_blk_Z_allocated // Dla kontroli poprawnoœci wydawania i oddawania
 _internal
 B
 E_mem_Q_blk_T_new_0( P p
-){  Pc p_end;
-    V1p_( p_end = sbrk(0) );
-    return (Pc)p < p_end;
+){  return (Pc)p < 64 * 1024;
 }
 //NDFN Potrzebne jest utworzenie nowej sekwencji testów — kompletnych.
 _internal
@@ -817,8 +815,7 @@ _internal
 __attribute__ ((__malloc__))
 P
 E_mem_Q_blk_R_new_0( void
-){  Pc p_end;
-    V1p_( p_end = sbrk(0) );
+){  Pc p_end = 64 * 1024;
     Pc p = (P)1;
     B exists;
     O{  exists = no;

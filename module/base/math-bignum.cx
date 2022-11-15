@@ -485,55 +485,60 @@ E_math_Q_bignum_I_add(
 ){  B sign = E_math_Q_bignum_R_sign( num_0 );
     if( !~E_math_Q_bignum_I_add_subtract_begin( num_0, num_1 ))
         return ~0;
-    __asm__ goto (
+    B go_to_next;
+    __asm__ (
     #if defined( __i386__ )
-    "\n" "mov       (%1),%%eax"
-    "\n" "add       %%eax,(%0)"
+    "\n" "mov       (%2),%%eax"
+    "\n" "add       %%eax,(%1)"
     "\n" "seto      %%al"
-    "\n 1:decl      %2"
+    "\n 1:decl      %3"
     "\n" "jz        3f"
-    "\n" "decl      %3"
+    "\n" "decl      %4"
     "\n" "jz        2f"
-    "\n" "lea       (%0,%4),%0"
-    "\n" "lea       (%1,%4),%1"
-    "\n" "mov       (%1),%%eax"
-    "\n" "adc       %%eax,(%0)"
+    "\n" "lea       (%1,%5),%1"
+    "\n" "lea       (%2,%5),%2"
+    "\n" "mov       (%2),%%eax"
+    "\n" "adc       %%eax,(%1)"
     "\n" "seto      %%al"
     "\n" "jmp       1b"
-    "\n 2:jnc       %l[Next]"
-    "\n" "lea       (%0,%4),%0"
-    "\n" "adcl      $0,(%0)"
+    "\n 2:setnc     %0"
+    "\n" "jnc       4f"
+    "\n" "lea       (%1,%5),%1"
+    "\n" "adcl      $0,(%1)"
     "\n" "seto      %%al"
-    "\n" "decl      %2"
+    "\n" "decl      %3"
     "\n" "jnz       2b"
     "\n 3:test      %%al,%%al"
-    "\n" "jz        %l[Next]"
+    "\n" "setz      %0"
+    "\n 4:"
     #elif defined( __x86_64__ )
-    "\n" "mov       (%1),%%rax"
-    "\n" "add       %%rax,(%0)"
+    "\n" "mov       (%2),%%rax"
+    "\n" "add       %%rax,(%1)"
     "\n" "seto      %%al"
-    "\n 1:decq      %2"
+    "\n 1:decq      %3"
     "\n" "jz        3f"
-    "\n" "decq      %3"
+    "\n" "decq      %4"
     "\n" "jz        2f"
-    "\n" "lea       (%0,%4),%0"
-    "\n" "lea       (%1,%4),%1"
-    "\n" "mov       (%1),%%rax"
-    "\n" "adc       %%rax,(%0)"
+    "\n" "lea       (%1,%5),%1"
+    "\n" "lea       (%2,%5),%2"
+    "\n" "mov       (%2),%%rax"
+    "\n" "adc       %%rax,(%1)"
     "\n" "seto      %%al"
     "\n" "jmp       1b"
-    "\n 2:jnc       %l[Next]"
-    "\n" "lea       (%0,%4),%0"
-    "\n" "adcq      $0,(%0)"
+    "\n 2:setnc     %0"
+    "\n" "jnc       4f"
+    "\n" "lea       (%1,%5),%1"
+    "\n" "adcq      $0,(%1)"
     "\n" "seto      %%al"
     "\n" "decq      %2"
     "\n" "jnz       2b"
     "\n 3:test      %%al,%%al"
-    "\n" "jz        %l[Next]"
+    "\n" "setz      %0"
+    "\n 4:"
     #else
 #error not implemented
     #endif
-    :
+    : "=r" ( go_to_next )
     : "r" ( num_0->digits )
     , "r" ( num_1->digits )
     , "rm" ( num_0->digits_n )
@@ -545,8 +550,9 @@ E_math_Q_bignum_I_add(
     #elif defined( __x86_64__ )
     , "rax"
     #endif
-    : Next
     );
+    if( go_to_next )
+        goto Next;
     N *p = E_mem_Q_blk_I_append( &num_0->digits, 1 );
     if( !p )
         return ~0;
@@ -564,47 +570,52 @@ E_math_Q_bignum_I_subtract(
 ){  B sign = E_math_Q_bignum_R_sign( num_0 );
     if( !~E_math_Q_bignum_I_add_subtract_begin( num_0, num_1 ))
         return ~0;
-    __asm__ goto (
+    B go_to_next;
+    __asm__ (
     #if defined( __i386__ )
-    "\n" "mov       (%1),%%eax"
-    "\n" "sub       %%eax,(%0)"
-    "\n 1:decl      %3"
+    "\n" "mov       (%2),%%eax"
+    "\n" "sub       %%eax,(%1)"
+    "\n 1:decl      %4"
     "\n" "jz        3f"
-    "\n" "decl      %2"
-    "\n" "jz        2f"
-    "\n" "lea       (%0,%4),%0"
-    "\n" "lea       (%1,%4),%1"
-    "\n" "mov       (%1),%%eax"
-    "\n" "sbb       %%eax,(%0)"
-    "\n" "jmp       1b"
-    "\n 2:lea       (%0,%4),%0"
-    "\n" "sbbl      $0,(%0)"
-    "\n" "jnc       %l[Next]"
     "\n" "decl      %3"
-    "\n" "jnz       2b"
-    "\n 3:jnc       %l[Next]"
-    #elif defined( __x86_64__ )
-    "\n" "mov       (%1),%%rax"
-    "\n" "sub       %%rax,(%0)"
-    "\n 1:decq      %3"
-    "\n" "jz        3f"
-    "\n" "decq      %2"
     "\n" "jz        2f"
-    "\n" "lea       (%0,%4),%0"
-    "\n" "lea       (%1,%4),%1"
-    "\n" "mov       (%1),%%rax"
-    "\n" "sbb       %%rax,(%0)"
+    "\n" "lea       (%1,%5),%1"
+    "\n" "lea       (%2,%5),%2"
+    "\n" "mov       (%2),%%eax"
+    "\n" "sbb       %%eax,(%1)"
     "\n" "jmp       1b"
-    "\n 2:lea       (%0,%4),%0"
-    "\n" "sbbq      $0,(%0)"
-    "\n" "jnc       %l[Next]"
-    "\n" "decq      %3"
+    "\n 2:lea       (%1,%5),%1"
+    "\n" "sbbl      $0,(%1)"
+    "\n" "setnc     %0"
+    "\n" "jnc       4f"
+    "\n" "decl      %4"
     "\n" "jnz       2b"
-    "\n 3:jnc       %l[Next]"
+    "\n 3:setnc     %0"
+    "\n 4:"
+    #elif defined( __x86_64__ )
+    "\n" "mov       (%2),%%rax"
+    "\n" "sub       %%rax,(%1)"
+    "\n 1:decq      %4"
+    "\n" "jz        3f"
+    "\n" "decq      %3"
+    "\n" "jz        2f"
+    "\n" "lea       (%1,%5),%1"
+    "\n" "lea       (%2,%5),%2"
+    "\n" "mov       (%2),%%rax"
+    "\n" "sbb       %%rax,(%1)"
+    "\n" "jmp       1b"
+    "\n 2:lea       (%1,%5),%1"
+    "\n" "sbbq      $0,(%1)"
+    "\n" "setnc     %0"
+    "\n" "jnc       4f"
+    "\n" "decq      %4"
+    "\n" "jnz       2b"
+    "\n 3:setnc     %0"
+    "\n 4:"
     #else
 #error not implemented
     #endif
-    :
+    : "=r" ( go_to_next )
     : "r" ( num_0->digits )
     , "r" ( num_1->digits )
     , "rm" ( num_1->digits_n )
@@ -616,8 +627,9 @@ E_math_Q_bignum_I_subtract(
     #elif defined( __x86_64__ )
     , "rax"
     #endif
-    : Next
     );
+    if( go_to_next )
+        goto Next;
     if( sign
     && !E_math_Q_bignum_R_sign( num_0 )
     )

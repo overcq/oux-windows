@@ -105,14 +105,14 @@ E_flow_Q_task_I_granulation( void
             if( task->stack + task->stack_size - granulation_u <= task->touched_stack )
             {   N subtract = task->stack_size - granulation_u - E_base_S->E_mem_S_page_size;
                 if(subtract)
-                {   V0_( munmap( task->stack, subtract ));
+                {   V_( VirtualFree( task->stack, subtract, MEM_RELEASE ));
                     task->stack += subtract;
                     task->stack_size -= subtract;
                 }
             }else
             {   N subtract = task->touched_stack - E_base_S->E_mem_S_page_size - task->stack;
                 if(subtract)
-                {   V0_( munmap( task->stack, subtract ));
+                {   V_( VirtualFree( task->stack, subtract, MEM_RELEASE ));
                     task->stack += subtract;
                     task->stack_size -= subtract;
                 }
@@ -157,7 +157,7 @@ E_flow_Q_task_M( I *uid
             {   GV_(NDFN); // Late instrumentation error: task stack larger than granulation unit.
                 N subtract = task->touched_stack - E_base_S->E_mem_S_page_size - task->stack;
                 if(subtract)
-                {   V_( virtualFree( task->stack, subtract, MEM_RELEASE ));
+                {   V_( VirtualFree( task->stack, subtract, MEM_RELEASE ));
                     task->stack += subtract;
                     task->stack_size -= subtract;
                 }
@@ -231,12 +231,12 @@ E_flow_Q_task_M( I *uid
             V_( WaitForSingleObject( thread_flow_mutex, INFINITE ) == WAIT_OBJECT_0 );
             if( *thread_switch_back )
                 break;
-            Vr_( ReleaseMutex( thread_flow_mutex ));
+            V_( ReleaseMutex( thread_flow_mutex ));
         }
         task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, task_id );
         if( task->run_state != E_flow_Z_run_state_S_ready )
         {   task->run_state = E_flow_Z_run_state_S_stopping_by_task;
-            Vr_( ReleaseMutex( thread_flow_mutex ));
+            V_( ReleaseMutex( thread_flow_mutex ));
             O{  SwitchToThread();
                 N exit_code;
                 V_( GetExitCodeThread( thread_flow_mutex, &exit_code ));
@@ -631,9 +631,9 @@ E_flow_Q_impulser_I_activate( I id
 void
 E_flow_Q_impulser_I_deactivate( I id
 ){  struct E_flow_Q_timer_Z *timer = E_mem_Q_tab_R( E_base_S->E_flow_Q_timer_S, id );
-    if( !_timerisset( &timer->left ))
+    if( !timer->left )
         return;
-    _timerclear( &timer->left );
+    timer->left = 0;
     for_each_out( id, timer_id_, E_base_S->E_flow_Q_timer_S, E_mem_Q_tab )
     {   struct E_flow_Q_timer_Z *timer_ = E_mem_Q_tab_R( E_base_S->E_flow_Q_timer_S, timer_id_ );
         if( timer_->period
@@ -979,14 +979,14 @@ void
 E_flow_Z_signal_V_process_call_req( int uid
 ){  for_each( call_id, E_base_S->E_flow_Q_process_call_srv_S, E_mem_Q_tab )
     {   struct E_flow_Q_process_call_srv_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_srv_S, call_id );
-//        if( call->process_id == siginfo->si_pid )
-//        {   GV_(NXP); Gd( siginfo->si_pid ); // Duplicate process call request.
+/*        if( call->process_id == siginfo->si_pid )
+        {   GV_(NXP); Gd( siginfo->si_pid ); // Duplicate process call request.
             return;
-//        }
+        }*/
     }
     P shm;
-//    if( !~(N)( shm = E_mem_Q_shared_Q_blk_M( siginfo->si_value.sival_int )))
-        return;
+/*    if( !~(N)( shm = E_mem_Q_shared_Q_blk_M( siginfo->si_value.sival_int )))
+        return;*/
     call_id = E_mem_Q_tab_I_add( E_base_S->E_flow_Q_process_call_srv_S );
     struct E_flow_Q_process_call_srv_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_srv_S, call_id );
 //    call->process_id = siginfo->si_pid;
@@ -1012,13 +1012,13 @@ I
 E_flow_Q_process_call_M( N l
 , P *data
 ){  N shm_id;
-    if( !~( shm_id = E_mem_Q_shared_M(l)))
-        return ~0;
+/*    if( !~( shm_id = E_mem_Q_shared_M(l)))
+        return ~0;*/
     P shm;
-    if( !~(N)( shm = E_mem_Q_shared_Q_blk_M( shm_id )))
+/*    if( !~(N)( shm = E_mem_Q_shared_Q_blk_M( shm_id )))
     {   E_mem_Q_shared_W( shm_id );
         return ~0;
-    }
+    }*/
     I call_id = E_mem_Q_tab_I_add( E_base_S->E_flow_Q_process_call_cli_S );
     struct E_flow_Q_process_call_cli_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_cli_S, call_id );
     U_L( call->state, active );
@@ -1030,8 +1030,8 @@ E_flow_Q_process_call_M( N l
 void
 E_flow_Q_process_call_W( I id
 ){  struct E_flow_Q_process_call_cli_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_cli_S, id );
-    E_mem_Q_shared_Q_blk_W( call->shm );
-    E_mem_Q_shared_W( call->shm_id );
+/*    E_mem_Q_shared_Q_blk_W( call->shm );
+    E_mem_Q_shared_W( call->shm_id );*/
     E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_process_call_cli_S, id );
 }
 //------------------------------------------------------------------------------
@@ -1067,9 +1067,9 @@ D( flow, call_srv )
             break;
         for_each_pop( call_id, E_base_S->E_flow_Q_process_call_srv_S, E_mem_Q_tab )
         {   struct E_flow_Q_process_call_srv_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_srv_S, call_id );
-            E_flow_Q_process_call_I_func( call->shm );
+/*            E_flow_Q_process_call_I_func( call->shm );
             E_mem_Q_shared_Q_blk_W( call->shm );
-//            V0( kill( call->process_id, SIGUSR2 )){}
+            V0( kill( call->process_id, SIGUSR2 )){}*/
         }
     }
     X_W( flow, call_req );

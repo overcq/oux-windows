@@ -24,7 +24,7 @@ E_base_W( void
 //    D_W( io, stream_write );
     for_each( call_id, E_base_S->E_flow_Q_process_call_cli_S, E_mem_Q_tab )
     {   struct E_flow_Q_process_call_cli_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_cli_S, call_id );
-        E_mem_Q_shared_W( call->shm_id );
+//        E_mem_Q_shared_W( call->shm_id );
     }
         #ifdef C_line_report
     E_flow_Z_line_report_I_write_Z_c( '\n' );

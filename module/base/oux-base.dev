@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=6
 CompilerSettings=000100d0e0110000000001001
-UnitCount=11
+UnitCount=12
 
 [VersionInfo]
 Major=1
@@ -130,17 +130,8 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit9]
-FileName=math-bignum.cx
-Folder=
-Compile=0
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
 [Unit10]
-FileName=datetime.c
+FileName=flow-log.c
 CompileCpp=0
 Folder=
 Compile=1
@@ -150,7 +141,27 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit11]
-FileName=flow-log.c
+FileName=math-bignum.c
+CompileCpp=0
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit9]
+FileName=datetime.c
+CompileCpp=0
+Folder=
+Compile=1
+Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit12]
+FileName=mem-file.c
 CompileCpp=0
 Folder=
 Compile=1

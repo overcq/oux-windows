@@ -98,13 +98,13 @@ E_flow_Z_line_report_Z_date_I( SYSTEMTIME *st
     s_ = E_text_Z_n_N_s( &s[6], st->wMonth, sizeof( st->wMonth ), 10 );
     E_text_Z_s_P_c_fill( &s[4], s_, '0' );
     E_text_Z_n_N_s( &s[4], st->wYear, sizeof( st->wYear ), 10 );
-    E_io_Q_stream_out_P( 0, s, l - 1 );
+//    E_io_Q_stream_out_P( 0, s, l - 1 );
 }
 void
 E_flow_Z_line_report_Z_s_I( Pc s
 , N l
-){  E_io_Q_stream_out_P_c( 0, '|' );
-    E_io_Q_stream_out_P( 0, s, l );
+){  //E_io_Q_stream_out_P_c( 0, '|' );
+    //E_io_Q_stream_out_P( 0, s, l );
 }
 _internal
 void
@@ -116,7 +116,7 @@ _internal
 void
 E_flow_Z_line_report_Z_c_I( C c
 ){  C c_[2] = { '|', c };
-    E_io_Q_stream_out_P( 0, c_, 2 );
+    //E_io_Q_stream_out_P( 0, c_, 2 );
 }
 _internal
 void
@@ -212,7 +212,7 @@ E_flow_Z_line_report_Z_line_I( Pc file
 ){  SYSTEMTIME st;
     GetSystemTime( &st );
     file = E_flow_Z_line_report_N_source_filename(file);
-    E_io_Q_stream_out_P_c( 0, '\n' );
+    //E_io_Q_stream_out_P_c( 0, '\n' );
     E_flow_Z_line_report_Z_date_I( &st );
     E_flow_Z_line_report_Z_s_I( E_base_S->E_flow_S_exe_name, 0 );
     E_flow_Z_line_report_Z_n_I( E_base_S->E_flow_S_exe_pid, sizeof( E_base_S->E_flow_S_exe_pid ), 10 );

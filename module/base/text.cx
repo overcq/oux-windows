@@ -617,7 +617,7 @@ E_text_Z_s_N_f( Pc s
                 floating_point--;
             break;
         }
-        if( isless( n, n_prev ))
+        if( n < n_prev )
         {   n = n_prev;
             if( ~floating_point )
                 floating_point--;
@@ -664,7 +664,7 @@ E_text_Z_s0_N_f( Pc s
                 floating_point--;
             break;
         }
-        if( isless( n, n_prev ))
+        if( n < n_prev )
         {   n = n_prev;
             if( ~floating_point )
                 floating_point--;
