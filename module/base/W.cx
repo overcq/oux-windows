@@ -12,7 +12,7 @@
 //TODO Procedura do u³o¿enia.
 void
 E_base_W( void
-){  //D_W( mem, file_save );
+){  D_W( mem, file_save );
     D_W( flow, call_srv ); // Przedostatnie ‹zadanie›.
     // Dopóki wypisywanie “G”[…] jest do tego samego “strumienia” jak “G”[…]“_”, to jeœli ‹raporty linii› s¹ w³¹czone, to znak nowej linii jest dorzucany synchronicznie, na koñcu tej procedury usuwania ‹modu³u›.
         //#ifdef C_line_report

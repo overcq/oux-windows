@@ -40,7 +40,7 @@ enum E_flow_Z_run_state
 struct E_flow_Q_task_Z
 { Pc exe_stack;
   N run_state_time;
-  Pc stack;
+  Pc reserved_stack, stack;
   Pc touched_stack;
     #ifdef C_line_report
   Pc proc_name;
@@ -105,14 +105,14 @@ E_flow_Q_task_I_granulation( void
             if( task->stack + task->stack_size - granulation_u <= task->touched_stack )
             {   N subtract = task->stack_size - granulation_u - E_base_S->E_mem_S_page_size;
                 if(subtract)
-                {   V_( VirtualFree( task->stack, subtract, MEM_RELEASE ));
+                {   V_( VirtualFree( task->stack, subtract, MEM_DECOMMIT ));
                     task->stack += subtract;
                     task->stack_size -= subtract;
                 }
             }else
             {   N subtract = task->touched_stack - E_base_S->E_mem_S_page_size - task->stack;
                 if(subtract)
-                {   V_( VirtualFree( task->stack, subtract, MEM_RELEASE ));
+                {   V_( VirtualFree( task->stack, subtract, MEM_DECOMMIT ));
                     task->stack += subtract;
                     task->stack_size -= subtract;
                 }
@@ -149,7 +149,7 @@ E_flow_Q_task_M( I *uid
             if( task->stack + task->stack_size - granulation_u <= task->touched_stack )
             {   N subtract = task->stack_size - granulation_u - E_base_S->E_mem_S_page_size;
                 if(subtract)
-                {   V_( VirtualFree( task->stack, subtract, MEM_RELEASE ));
+                {   V_( VirtualFree( task->stack, subtract, MEM_DECOMMIT ));
                     task->stack += subtract;
                     task->stack_size -= subtract;
                 }
@@ -157,7 +157,7 @@ E_flow_Q_task_M( I *uid
             {   GV_(NDFN); // Late instrumentation error: task stack larger than granulation unit.
                 N subtract = task->touched_stack - E_base_S->E_mem_S_page_size - task->stack;
                 if(subtract)
-                {   V_( VirtualFree( task->stack, subtract, MEM_RELEASE ));
+                {   V_( VirtualFree( task->stack, subtract, MEM_DECOMMIT ));
                     task->stack += subtract;
                     task->stack_size -= subtract;
                 }
@@ -169,11 +169,7 @@ E_flow_Q_task_M( I *uid
     N touched_size;
     Pc touched_stack;
     if( !task_in_thread_kind )
-    {   V( stack = VirtualAlloc( 0
-        , stack_size
-        , MEM_RESERVE
-        , PAGE_NOACCESS
-        ))
+    {   V( stack = VirtualAlloc( 0, stack_size, MEM_RESERVE, PAGE_NOACCESS ))
         {   if( thread_proc_arg )
                 W( thread_proc_arg );
             return ~0;
@@ -181,16 +177,26 @@ E_flow_Q_task_M( I *uid
         exe_stack = stack + stack_size;
         touched_size = E_base_S->E_mem_S_page_size;
         touched_stack = exe_stack - touched_size;
+        V( VirtualAlloc( touched_stack, touched_size, MEM_COMMIT, PAGE_READWRITE ))
+        {   V_( VirtualFree( stack, 0, MEM_RELEASE ));
+            if( thread_proc_arg )
+                W( thread_proc_arg );
+            return ~0;
+        }
     }
+    if( E_base_S->E_flow_Q_task_S_current )
+        E_flow_Q_task_I_touch_stack();
     I task_id = E_mem_Q_tab_I_add( E_base_S->E_flow_Q_task_S );
     struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, task_id );
-    task->stack = stack;
-    task->touched_stack = touched_stack;
+    if( !task_in_thread_kind )
+    {   task->reserved_stack = task->stack = stack;
+        task->touched_stack = touched_stack;
+        task->stack_size = stack_size;
+    }
         #ifdef C_line_report
     task->proc_name = task_proc_name;
         #endif
     task->run_state = E_flow_Z_run_state_S_starting_by_task;
-    task->stack_size = stack_size;
     U_R( task->type, system_unblock_report ) = task_in_thread_kind;
     if( task_in_thread_kind )
     {   task->thread_proc_arg = thread_proc_arg;
@@ -202,7 +208,7 @@ E_flow_Q_task_M( I *uid
                 W( thread_proc_arg );
             return ~0;
         }
-        B *M_( thread_switch_back );
+        volatile B *M_( thread_switch_back );
         if( !thread_switch_back )
         {   V_( CloseHandle( thread_flow_mutex ));
             E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, task_id );
@@ -217,7 +223,7 @@ E_flow_Q_task_M( I *uid
         I task_id_ = E_base_S->E_flow_Q_task_S_current;
         E_base_S->E_flow_Q_task_S_current = task_id;
         N thread_id;
-        V( task->thread = CreateThread( 0, 0, E_flow_Q_task_in_thread_I_thread_proc, task_proc, 0, &thread_id ))
+        V( task->thread = CreateThread( 0, 0, &E_flow_Q_task_in_thread_I_thread_proc, task_proc, 0, &thread_id ))
         {   E_base_S->E_flow_Q_task_S_current = task_id_;
             W( thread_switch_back );
             V_( CloseHandle( thread_flow_mutex ));
@@ -236,10 +242,11 @@ E_flow_Q_task_M( I *uid
         task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, task_id );
         if( task->run_state != E_flow_Z_run_state_S_ready )
         {   task->run_state = E_flow_Z_run_state_S_stopping_by_task;
+            HANDLE thread = task->thread;
             V_( ReleaseMutex( thread_flow_mutex ));
             O{  SwitchToThread();
                 N exit_code;
-                V_( GetExitCodeThread( thread_flow_mutex, &exit_code ));
+                V_( GetExitCodeThread( thread, &exit_code ));
                 if( exit_code != STILL_ACTIVE )
                     break;
             }
@@ -322,7 +329,7 @@ E_flow_Q_task_M_thread( I *uid
 }
 // Procedura ‹zadañ› w w¹tku systemowym.
 _internal
-P
+WINAPI N
 E_flow_Q_task_in_thread_I_thread_proc( P arg
 ){  struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
     V_( WaitForSingleObject( task->thread_flow_mutex, INFINITE ) == WAIT_OBJECT_0 );
@@ -339,7 +346,7 @@ E_flow_Q_task_I_begin( void
 ){  struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
     task->run_state = E_flow_Z_run_state_S_ready;
     if( U_R( task->type, system_unblock_report ))
-    {   B *thread_switch_back = task->thread_switch_back;
+    {   volatile B *thread_switch_back = task->thread_switch_back;
         *thread_switch_back = yes;
         HANDLE thread_flow_mutex = task->thread_flow_mutex;
         V_( ReleaseMutex( thread_flow_mutex ));
@@ -364,13 +371,13 @@ E_flow_Q_task_W( I *uid
     if( U_R( task->type, system_unblock_report ))
     {   if( *task->thread_switch_back )
             task->thread_unblock_proc( task->thread_proc_arg );
-        HANDLE thread = task->thread;
         E_base_S->E_flow_Q_task_S_current = id;
+        HANDLE thread = task->thread;
         HANDLE thread_flow_mutex = task->thread_flow_mutex;
         V_( ReleaseMutex( thread_flow_mutex ));
         O{  SwitchToThread();
             N exit_code;
-            V_( GetExitCodeThread( thread_flow_mutex, &exit_code ));
+            V_( GetExitCodeThread( thread, &exit_code ));
             if( exit_code != STILL_ACTIVE )
                 break;
         }
@@ -383,9 +390,9 @@ E_flow_Q_task_W( I *uid
     }else
     {   E_flow_Q_task_I_switch(id); // Prze³¹cz tylko po to, by ‹zadanie› zwalniane zwolni³o zasoby; równie¿ stosowo, hierarchicznie z powrotem prze³¹czaj¹c przy zwalnianiu ‹zadañ› przez siebie uruchomionych.
         task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, id );
+        V_( VirtualFree( task->reserved_stack, 0, MEM_RELEASE ));
     }
     E_flow_Q_task_I_touch_stack();
-    V_( VirtualFree( task->stack, 0, MEM_RELEASE ));
     E_mem_Q_tab_I_remove( E_base_S->E_flow_Q_task_S, id );
 }
 void
@@ -656,7 +663,7 @@ E_flow_Q_impulser_I_wait( I id
 void
 E_flow_Q_thread_system_unblock_report_M( void ( *thread_unblock_proc )(P)
 , HANDLE *thread_flow_mutex
-, B **thread_switch_back
+, volatile B **thread_switch_back
 ){  struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
     task->thread_unblock_proc = thread_unblock_proc;
     *thread_flow_mutex = task->thread_flow_mutex;
@@ -808,7 +815,7 @@ Loop:
         for_each_out( E_base_S->E_flow_Q_task_S_current, task_id, E_base_S->E_flow_Q_task_S, E_mem_Q_tab )
         {   struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, task_id );
             if( U_R( task->type, system_unblock_report ))
-            {   B *thread_switch_back = task->thread_switch_back;
+            {   volatile B *thread_switch_back = task->thread_switch_back;
                 if( !*thread_switch_back )
                 {   E_base_S->E_flow_Q_task_S_current = task_id;
                     HANDLE thread_flow_mutex = task->thread_flow_mutex;
@@ -840,7 +847,7 @@ Loop:
         }
         struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
         if( U_R( task->type, system_unblock_report ))
-        {   B *thread_switch_back = task->thread_switch_back;
+        {   volatile B *thread_switch_back = task->thread_switch_back;
             if( !*thread_switch_back )
             {   HANDLE thread_flow_mutex = task->thread_flow_mutex;
                 V_( ReleaseMutex( thread_flow_mutex ));
@@ -904,14 +911,11 @@ E_flow_Q_task_I_switch( I task_to_id
     : "=m" ( task_from->exe_stack )
     : "r" ( task_to->exe_stack )
     : "cc", "memory"
-//CONF Jest ‘fpu’?
-        #if 1
     , "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)"
-            #ifdef __MMX__
+        #ifdef __MMX__
     , "mm0", "mm1", "mm2", "mm3", "mm4", "mm5", "mm6", "mm7"
-                #ifdef __SSE__
+            #ifdef __SSE__
     , "xmm0", "xmm1", "xmm2", "xmm3", "xmm4", "xmm5", "xmm6", "xmm7"
-                #endif
             #endif
         #endif
         #if defined( __i386__ )
@@ -938,8 +942,8 @@ E_flow_I_exception_handler( EXCEPTION_POINTERS *ex
 ){  if( ex->ExceptionRecord->ExceptionCode == EXCEPTION_ACCESS_VIOLATION
     && E_base_S->E_flow_Q_task_S_current
     ){  struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
-        if( ex->ExceptionRecord->ExceptionInformation[1] < task->touched_stack )
-        {   if( ex->ExceptionRecord->ExceptionInformation[1] >= task->stack + E_base_S->E_mem_S_page_size )
+        if( (Pc)ex->ExceptionRecord->ExceptionInformation[1] < task->touched_stack )
+        {   if( (Pc)ex->ExceptionRecord->ExceptionInformation[1] >= task->stack + E_base_S->E_mem_S_page_size )
             {   Pc new_base = E_simple_Z_p_I_align_down_to_v2( ex->ExceptionRecord->ExceptionInformation[1], E_base_S->E_mem_S_page_size );
                 V_( VirtualAlloc( new_base
                 , task->touched_stack - new_base
@@ -949,13 +953,13 @@ E_flow_I_exception_handler( EXCEPTION_POINTERS *ex
                 task->touched_stack = new_base;
                 return EXCEPTION_CONTINUE_EXECUTION;
             }
-            if( ex->ExceptionRecord->ExceptionInformation[1] >= task->stack )
+            if( (Pc)ex->ExceptionRecord->ExceptionInformation[1] >= task->stack )
             {   GV_(NA); // Late instrumentation error: task stack too small.
             }
         }
     }
-    GV_(NDFN); Gd( ex->ExceptionRecord->ExceptionCode ); Gh( ex->ExceptionRecord->ExceptionAddress ); // Other fault.
-    return EXCEPTION_CONTINUE_SEARCH;
+    GV_(NDFN); Gh( ex->ExceptionRecord->ExceptionCode ); Gh( ex->ExceptionRecord->ExceptionAddress ); // Other fault.
+    return E_base_S->E_flow_S_default_exception_filter(ex);
 }
 //------------------------------------------------------------------------------
 _internal

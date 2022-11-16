@@ -1288,7 +1288,7 @@ E_text_Z_s_Z_cmdline_N_quote_I_open( Pc cmdline
 , B *inside
 , N level
 ){  for_n_rev( i, level )
-    {   E_mem_Q_blk_P_fill_c( cmdline + *l, ( 1 << i ) - 1, '\\' );
+    {   FillMemory( cmdline + *l, ( 1 << i ) - 1, '\\' );
         *l += ( 1 << i ) - 1;
         *( cmdline + *l ) = '\'';
         ++*l;
@@ -1302,7 +1302,7 @@ E_text_Z_s_Z_cmdline_N_quote_I_close( Pc cmdline
 , B *inside
 , N level
 ){  for_n( i, level )
-    {   E_mem_Q_blk_P_fill_c( cmdline + *l, ( 1 << i ) - 1, '\\' );
+    {   FillMemory( cmdline + *l, ( 1 << i ) - 1, '\\' );
         *l += ( 1 << i ) - 1;
         *( cmdline + *l ) = '\'';
         ++*l;
@@ -1351,7 +1351,7 @@ E_text_Z_s_Z_cmdline_N_quote( Pc cmdline
                     E_text_Z_s_Z_cmdline_N_quote_I_close( cmdline, &l, &inside, level + arg_quote );
                 }else if( inside )
                     E_text_Z_s_Z_cmdline_N_quote_I_close( cmdline, &l, &inside, level );
-                E_mem_Q_blk_P_fill_c( cmdline + l, ( 2 << level ) - 1, '\\' );
+                FillMemory( cmdline + l, ( 2 << level ) - 1, '\\' );
                 l += ( 2 << level ) - 1;
                 *( cmdline + l ) = '\'';
                 l++;
@@ -1370,7 +1370,7 @@ E_text_Z_s_Z_cmdline_N_quote( Pc cmdline
                         if( arg_quote )
                             E_text_Z_s_Z_cmdline_N_quote_I_close( cmdline, &l, &inside, level + arg_quote );
                     }
-                    E_mem_Q_blk_P_fill_c( cmdline + l, ( 2 << level ) - 1, '\\' );
+                    FillMemory( cmdline + l, ( 2 << level ) - 1, '\\' );
                     l += ( 2 << level ) - 1;
                     *( cmdline + l ) = '\'';
                     l++;

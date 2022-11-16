@@ -4,7 +4,7 @@ Name=oux-base
 Type=3
 Ver=2
 ObjFiles=
-Includes=.;..;../../compile;../../pcre2
+Includes=.;..;..\..\compile;..\..\pcre2
 Libs=
 PrivateResource=
 ResourceIncludes=
@@ -28,7 +28,7 @@ Folders=
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=6
-CompilerSettings=000100d0e0110000000001001
+CompilerSettings=000100d0e0100000000001001
 UnitCount=12
 
 [VersionInfo]

@@ -485,9 +485,9 @@ E_math_Q_bignum_I_add(
 ){  B sign = E_math_Q_bignum_R_sign( num_0 );
     if( !~E_math_Q_bignum_I_add_subtract_begin( num_0, num_1 ))
         return ~0;
-    B go_to_next;
+    B go_to_next = no;
     __asm__ (
-    #if defined( __i386__ )
+        #if defined( __i386__ )
     "\n" "mov       (%2),%%eax"
     "\n" "add       %%eax,(%1)"
     "\n" "seto      %%al"
@@ -511,7 +511,7 @@ E_math_Q_bignum_I_add(
     "\n 3:test      %%al,%%al"
     "\n" "setz      %0"
     "\n 4:"
-    #elif defined( __x86_64__ )
+        #elif defined( __x86_64__ )
     "\n" "mov       (%2),%%rax"
     "\n" "add       %%rax,(%1)"
     "\n" "seto      %%al"
@@ -535,21 +535,21 @@ E_math_Q_bignum_I_add(
     "\n 3:test      %%al,%%al"
     "\n" "setz      %0"
     "\n 4:"
-    #else
+        #else
 #error not implemented
-    #endif
-    : "=r" ( go_to_next )
+       #endif
+    : "+r" ( go_to_next )
     : "r" ( num_0->digits )
     , "r" ( num_1->digits )
     , "rm" ( num_0->digits_n )
     , "rm" ( num_1->digits_n )
     , "r" ( sizeof(N) )
     : "cc"
-    #if defined( __i386__ )
+        #if defined( __i386__ )
     , "eax"
-    #elif defined( __x86_64__ )
+        #elif defined( __x86_64__ )
     , "rax"
-    #endif
+        #endif
     );
     if( go_to_next )
         goto Next;
@@ -570,9 +570,9 @@ E_math_Q_bignum_I_subtract(
 ){  B sign = E_math_Q_bignum_R_sign( num_0 );
     if( !~E_math_Q_bignum_I_add_subtract_begin( num_0, num_1 ))
         return ~0;
-    B go_to_next;
+    B go_to_next = no;
     __asm__ (
-    #if defined( __i386__ )
+        #if defined( __i386__ )
     "\n" "mov       (%2),%%eax"
     "\n" "sub       %%eax,(%1)"
     "\n 1:decl      %4"
@@ -592,7 +592,7 @@ E_math_Q_bignum_I_subtract(
     "\n" "jnz       2b"
     "\n 3:setnc     %0"
     "\n 4:"
-    #elif defined( __x86_64__ )
+        #elif defined( __x86_64__ )
     "\n" "mov       (%2),%%rax"
     "\n" "sub       %%rax,(%1)"
     "\n 1:decq      %4"
@@ -612,21 +612,21 @@ E_math_Q_bignum_I_subtract(
     "\n" "jnz       2b"
     "\n 3:setnc     %0"
     "\n 4:"
-    #else
+        #else
 #error not implemented
-    #endif
-    : "=r" ( go_to_next )
+       #endif
+    : "+r" ( go_to_next )
     : "r" ( num_0->digits )
     , "r" ( num_1->digits )
     , "rm" ( num_1->digits_n )
     , "rm" ( num_0->digits_n )
     , "r" ( sizeof(N) )
     : "cc"
-    #if defined( __i386__ )
+        #if defined( __i386__ )
     , "eax"
-    #elif defined( __x86_64__ )
+        #elif defined( __x86_64__ )
     , "rax"
-    #endif
+        #endif
     );
     if( go_to_next )
         goto Next;
@@ -1930,7 +1930,8 @@ E_math_Q_bignum_I_power_n( struct E_math_Z_bignum *num
         return ~0;
     num_->digits[0] = 1;
     while(n)
-    {   if( n & 1 )
+    {   
+        if( n & 1 )
             if( !~E_math_Q_bignum_I_multiply( num_, num ))
             {   E_math_Q_bignum_W( num_ );
                 return ~0;

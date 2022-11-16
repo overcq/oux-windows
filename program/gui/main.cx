@@ -12,27 +12,13 @@ N E_main_Q_timer_S_minute;
 N E_main_Q_timer_S_second;
 N E_main_Q_http_req_ret_count;
 //=============================================================================
-void
-http_req_ret_func( N connection_i
-){  E_main_Q_http_req_ret_count++;
-    G_(); Gs0( E_net_http_S_connect[ connection_i ].file_name );
-    V0( unlink( E_net_http_S_connect[ connection_i ].file_name ) ){}
-    E_net_http_S_connect[ connection_i ].ret_func = 0;
-}
-void
-http2_req_ret_func( N connection_i
-, I stream_id
-){  E_main_Q_http_req_ret_count++;
-    struct E_net_http2_Z_stream *stream = E_mem_Q_tab_R( E_net_http2_S_connect[ connection_i ].stream, stream_id );
-    G_(); Gs0( stream->file_name );
-    V0( unlink( stream->file_name ) ){}
-}
-int
-main(
-  int argc
-, Pc argv[]
-){  E_base_M( argc, argv );
-    E_x_M();
+WINAPI int
+WinMain( HINSTANCE h_instance
+, HINSTANCE h_prev_instance
+, LPSTR cmd_line
+, int show
+){  E_base_M( cmd_line );
+/*    E_x_M();
     E_ui_M();
 #ifndef C_line_report
     I out = E_io_Q_stream_out_M_fd( STDERR_FILENO );
@@ -190,7 +176,7 @@ End_2:  D_W( main, timer_draw );
 End_1:
     X_W( x_window, close_window );
 End:E_ui_W();
-    E_x_W();
+    E_x_W();*/
     E_base_W();
     return 0;
 }
@@ -221,11 +207,11 @@ End:E_ui_W();
     //Y_W(timer);
 //}
 D( main, timer_draw )
-{   time_t time_u = time(0);
-    struct tm *time_s = localtime( &time_u );
-    E_main_Q_timer_S_hour = time_s->tm_hour % 12;
-    E_main_Q_timer_S_minute = time_s->tm_min;
-    E_main_Q_timer_S_second = time_s->tm_sec;
+{   SYSTEMTIME st;
+    GetLocalTime( &st );
+    E_main_Q_timer_S_hour = st.wHour % 12;
+    E_main_Q_timer_S_minute = st.wMinute;
+    E_main_Q_timer_S_second = st.wSecond;
     I timer = Y_M(1000000);
     I_D
     {   N timer_lost_count;
@@ -239,13 +225,13 @@ D( main, timer_draw )
         E_main_Q_timer_S_hour += E_main_Q_timer_S_minute / 60;
         E_main_Q_timer_S_minute %= 60;
         E_main_Q_timer_S_hour %= 12;
-        E_x_Q_object_I_draw_Z_draw_proc( E_main_Q_timer_I_draw, !!timer_lost_count );
+//        E_x_Q_object_I_draw_Z_draw_proc( E_main_Q_timer_I_draw, !!timer_lost_count );
     }
     Y_W(timer);
 }
 #define E_main_I_draw_Z_angle_line_(arc_i,arc_n,line_length_i,line_length_n,color)    E_main_I_draw_Z_angle_line( display, screen, window, object, arc_i, arc_n, line_length_i, line_length_n, color )
-void
-E_main_I_draw_Z_angle_line(
+/*void
+//E_main_I_draw_Z_angle_line(
   struct E_x_Q_display_Z *display
 , struct E_x_Q_screen_Z *screen
 , struct E_x_Q_window_Z *window
@@ -321,7 +307,7 @@ E_main_I_draw_Z_angle_line(
 }
 //NDFN konkretne stany wygl¹du obiektów maj¹ce konkretne znaczenia.
 void
-E_main_Q_timer_I_draw(
+//E_main_Q_timer_I_draw(
   struct E_x_Q_display_Z *display
 , struct E_x_Q_screen_Z *screen
 , struct E_x_Q_window_Z *window
@@ -369,10 +355,5 @@ E_main_Q_timer_I_draw(
       , 100
       })
     );
-}
-//==============================================================================
-void
-E_flow_Q_process_call_I_func( P data
-){
-}
+}*/
 /******************************************************************************/

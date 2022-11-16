@@ -45,6 +45,7 @@ struct E_base_Z
     #endif
   HANDLE E_flow_S_resume;
   HANDLE E_flow_S_stderr;
+  LPTOP_LEVEL_EXCEPTION_FILTER E_flow_S_default_exception_filter;
 } *E_base_S;
 //==============================================================================
 _internal
@@ -101,8 +102,7 @@ E_mem_M_file( void
 }
 void
 E_base_M(
-  int argc
-, Pc *argv
+  Pc cmd_line
 ){
         #ifdef C_line_report
     AllocConsole();
@@ -125,13 +125,14 @@ E_base_M(
     };
     task->thread = GetCurrentThread();
     // Ustawienie podstawowych zmiennych ‹modu³u›.
-    if(argc) //NDFN Dlaczego to sprawdzenie? Czy standard nie gwarantuje “>= 1”?
+/*    if(argc) //NDFN Dlaczego to sprawdzenie? Czy standard nie gwarantuje “>= 1”?
     {   Pc s = E_text_Z_s0_R_c_search_last( argv[0], E_mem_Q_file_S_filename_separator );
         E_base_S->E_flow_S_exe_name = *s == E_mem_Q_file_S_filename_separator ? s + 1 : argv[0];
-    }
-    E_base_S->E_flow_S_exe_args.argc = argc;
-    E_base_S->E_flow_S_exe_args.argv = argv;
-    N l = GetCurrentDirectory( 0, E_base_S->E_flow_S_cwd );
+    }*/
+    E_base_S->E_flow_S_exe_name = ""; //TODO Tymczasowo.
+//    E_base_S->E_flow_S_exe_args.argc = argc;
+//    E_base_S->E_flow_S_exe_args.argv = argv;
+    N l = GetCurrentDirectory( 0, 0 );
     if( !l )
     {   GV_(NA); _V();
     }
@@ -140,7 +141,7 @@ E_base_M(
     {   GV_(NA); _V();
     }
     N l_ = GetCurrentDirectory( l, E_base_S->E_flow_S_cwd );
-    if( l_ != l )
+    if( l_ != l - 1 )
     {   GV_(NA); _V();
     }
     if( *E_base_S->E_flow_S_cwd != E_mem_Q_file_S_filename_separator )
@@ -172,14 +173,14 @@ E_base_M(
     {   GV_(NA); _V();
     }
     E_mem_M_file();
-    V_( AddVectoredExceptionHandler( yes, E_flow_I_exception_handler ));
     V_( E_base_S->E_flow_S_resume = CreateEvent( 0, no, no, 0 ));
+    E_base_S->E_flow_S_default_exception_filter = SetUnhandledExceptionFilter( E_flow_I_exception_handler );
     D_M( flow, call_srv )
     {   GV_(NA); _V();
     }
-/*    D_M( mem, file_save )
+    D_M( mem, file_save )
     {   GV_(NA); _V();
-    }*/
+    }
     E_flow_Z_stat_I_stat();
 }
 /******************************************************************************/

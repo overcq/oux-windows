@@ -125,7 +125,7 @@ E_main_I_check_winapi_error_internal( int line
     {   fprintf( stderr, "\nUnable to format message: %lu.\n", GetLastError() );
         return;
     }
-    fprintf( stderr, ": (%lu) %s.\n", e, s );
+    fprintf( stderr, ": (%lu) %s", e, s );
     LocalFree(s);
 }
 void
@@ -140,13 +140,12 @@ E_main_I_check_winapi_error_v_internal( int line
     {   fprintf( stderr, "\nUnable to format message: %lu.\n", GetLastError() );
         return;
     }
-    fprintf( stderr, ": (%lu) %s.\n", e, s );
+    fprintf( stderr, ": (%lu) %s", e, s );
     LocalFree(s);
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 struct E_main_Z_build_resources
-{ char *file_h_to_libs;
-  unsigned long file_h_to_libs_buffer_size, file_h_not_to_libs_buffer_size;
+{ unsigned long file_h_to_libs_buffer_size, file_h_not_to_libs_buffer_size;
   char *file_h_to_libs_buffer, *file_h_not_to_libs_buffer;
   unsigned long xyi_array_a_n, xyi_array_b_n;
   char **xyi_array_a, **xyi_array_b;
@@ -183,10 +182,6 @@ E_main_Q_pcre2_code_M( char *pattern
 int
 E_main_Q_build_resources_M( struct E_main_Z_build_resources *data
 ){  ZeroMemory( data, sizeof( *data ));
-    data->file_h_to_libs = HeapAlloc( E_main_S_process_heap, 0, 29 + 1 );
-    Vv( data->file_h_to_libs, "Unable to allocate" )
-        return 1;
-    E_main_Q_s_s0_I_strcpy( data->file_h_to_libs, "..\\module\\E_cplus_S_to_libs.h" );
     data->file_h_to_libs_buffer_size = 147;
     data->file_h_to_libs_buffer = HeapAlloc( E_main_S_process_heap, 0, data->file_h_to_libs_buffer_size );
     Vv( data->file_h_to_libs_buffer, "Unable to allocate" )
@@ -269,8 +264,6 @@ E_main_Q_build_resources_W( struct E_main_Z_build_resources *data
     }
     if( data->file_h_to_libs_buffer )
         HeapFree( E_main_S_process_heap, 0, data->file_h_to_libs_buffer );
-    if( data->file_h_to_libs )
-        HeapFree( E_main_S_process_heap, 0, data->file_h_to_libs );
 }
 //==============================================================================
 int
@@ -1141,7 +1134,7 @@ E_main_I_find_file_I_module_1( WIN32_FIND_DATA *found_file
         }
         SetFilePointer( h_file_cx, 0, 0, FILE_BEGIN );
 Cont_1: CloseHandle( h_file );
-        unsigned long l_added = 22 + l_dir + 2 + l_file - 2 + 4;
+/*        unsigned long l_added = 22 + l_dir + 2 + l_file - 2 + 4;
         char *file_h_to_libs_buffer_ = HeapReAlloc( E_main_S_process_heap, 0, data->file_h_to_libs_buffer, data->file_h_to_libs_buffer_size + l_added );
         Vv( file_h_to_libs_buffer_, "Unable to reallocate" )
             goto Err_2;
@@ -1152,7 +1145,7 @@ Cont_1: CloseHandle( h_file );
         E_main_Q_s_s0_I_strcpy( data->file_h_to_libs_buffer + 22, data->found_dir );
         E_main_Q_s_s0_I_strcpy( data->file_h_to_libs_buffer + 22 + l_dir, "__" );
         CopyMemory( data->file_h_to_libs_buffer + 22 + l_dir + 2, found_file->cFileName, l_file - 2 );
-        CopyMemory( data->file_h_to_libs_buffer + 22 + l_dir + 2 + l_file - 2, "h\"\r\n", 4 );
+        CopyMemory( data->file_h_to_libs_buffer + 22 + l_dir + 2 + l_file - 2, "h\"\r\n", 4 );*/
         char *path = HeapAlloc( E_main_S_process_heap, 0, l_dir + 1 + l_file + 1 );
         Vv( path, "Unable to allocate" )
             goto Err_2;
@@ -1176,10 +1169,10 @@ Cont_1: CloseHandle( h_file );
                 break;
         }while(TRUE);
         unsigned long l_enc = E_main_Q_s0_R_strlen(enc);
-        l_added = 10 + l_enc + 4;
+        unsigned long l_added = 10 + l_enc + 4;
         if( E_main_Q_s0_s0_I_strncmp( s, "enum\r\n{ _F_uid( ", 16 ))
             l_added += 6 + 43;
-        file_h_to_libs_buffer_ = HeapReAlloc( E_main_S_process_heap, 0, data->file_h_to_libs_buffer, data->file_h_to_libs_buffer_size + l_added );
+        char *file_h_to_libs_buffer_ = HeapReAlloc( E_main_S_process_heap, 0, data->file_h_to_libs_buffer, data->file_h_to_libs_buffer_size + l_added );
         if( !file_h_to_libs_buffer_ )
         {   HeapFree( E_main_S_process_heap, 0, enc );
             goto Err_2;
@@ -1486,9 +1479,16 @@ E_main_I_build_I_to_libs( struct E_main_Z_build_resources *data
         }
         CopyMemory( s, "};\r\n", 4 );
     }
-    HANDLE h_file_h_to_libs = CreateFile( data->file_h_to_libs, GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0 );
-    V( h_file_h_to_libs != INVALID_HANDLE_VALUE, "Unable to create file" )
+    char *file_h_to_libs = HeapAlloc( E_main_S_process_heap, 0, 29 + 1 );
+    Vv( file_h_to_libs, "Unable to allocate" )
         return 1;
+    E_main_Q_s_s0_I_strcpy( file_h_to_libs, "..\\module\\E_cplus_S_to_libs.h" );
+    HANDLE h_file_h_to_libs = CreateFile( file_h_to_libs, GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0 );
+    V( h_file_h_to_libs != INVALID_HANDLE_VALUE, "Unable to create file" )
+    {   HeapFree( E_main_S_process_heap, 0, file_h_to_libs );
+        return 1;
+    }
+    HeapFree( E_main_S_process_heap, 0, file_h_to_libs );
     unsigned long wrote;
     V( WriteFile( h_file_h_to_libs, data->file_h_to_libs_buffer, data->file_h_to_libs_buffer_size, &wrote, 0 )
     && wrote == data->file_h_to_libs_buffer_size
@@ -1552,9 +1552,8 @@ E_main_I_find_file_I_program( WIN32_FIND_DATA *found_file
             E_main_Q_s_s0_I_strcpy( file_mask + l_file_mask - 1 + l_dir, "\\*" );
             char *found_dir = data->found_dir;
             data->found_dir = file_mask;
-            ret = E_main_I_find_file( file_mask, ( E_main_I_find_file_Z_proc )E_main_I_find_file_I_program, data );
-            if( !ret )
-                ret = E_main_I_build_program_I_not_to_libs(data);
+            !( ret = E_main_I_find_file( file_mask, ( E_main_I_find_file_Z_proc )E_main_I_find_file_I_program, data ))
+            && !( ret = E_main_I_build_program_I_not_to_libs(data) );
             data->found_dir = found_dir;
             HeapFree( E_main_S_process_heap, 0, file_mask );
             data->file_h_not_to_libs_buffer_size = file_h_not_to_libs_buffer_size;
@@ -1579,8 +1578,7 @@ E_main_I_find_file_I_program( WIN32_FIND_DATA *found_file
                 if( h_file != INVALID_HANDLE_VALUE )
                 {   FILETIME file_time;
                     if( GetFileTime( h_file, 0, 0, &file_time ))
-                    {   CloseHandle( h_file );
-                        ULARGE_INTEGER file_cx_time_u, file_time_u;
+                    {   ULARGE_INTEGER file_cx_time_u, file_time_u;
                         file_cx_time_u.LowPart = found_file->ftLastWriteTime.dwLowDateTime;
                         file_cx_time_u.HighPart = found_file->ftLastWriteTime.dwHighDateTime;
                         file_time_u.LowPart = file_time.dwLowDateTime;
@@ -1600,7 +1598,7 @@ E_main_I_find_file_I_program( WIN32_FIND_DATA *found_file
                 }
                 SetFilePointer( h_file_cx, 0, 0, FILE_BEGIN );
 Cont_1:         CloseHandle( h_file );
-                unsigned long l_added = 22 + l_file - 2 + 4;
+/*                unsigned long l_added = 22 + l_file - 2 + 4;
                 char *file_h_not_to_libs_buffer_ = HeapReAlloc( E_main_S_process_heap, 0, data->file_h_not_to_libs_buffer, data->file_h_not_to_libs_buffer_size + l_added );
                 Vv( file_h_not_to_libs_buffer_, "Unable to reallocate" )
                     goto Err_2;
@@ -1609,7 +1607,7 @@ Cont_1:         CloseHandle( h_file );
                 data->file_h_not_to_libs_buffer_size += l_added;
                 E_main_Q_s_s0_I_strcpy( data->file_h_not_to_libs_buffer, "#include \"E_cplus_S_0_" );
                 CopyMemory( data->file_h_not_to_libs_buffer + 22, found_file->cFileName, l_file - 2 );
-                CopyMemory( data->file_h_not_to_libs_buffer + 22 + l_file - 2, "h\"\r\n", 4 );
+                CopyMemory( data->file_h_not_to_libs_buffer + 22 + l_file - 2, "h\"\r\n", 4 );*/
                 enc = E_main_Q_filename_I_encode( found_file->cFileName );
                 if( !enc )
                     goto Err_2;
@@ -1624,8 +1622,8 @@ Cont_1:         CloseHandle( h_file );
                         break;
                 }while(TRUE);
                 unsigned long l_enc = E_main_Q_s0_R_strlen(enc);
-                l_added = 10 + l_enc + 4;
-                file_h_not_to_libs_buffer_ = HeapReAlloc( E_main_S_process_heap, 0, data->file_h_not_to_libs_buffer, data->file_h_not_to_libs_buffer_size + l_added );
+                unsigned long l_added = 10 + l_enc + 4;
+                char *file_h_not_to_libs_buffer_ = HeapReAlloc( E_main_S_process_heap, 0, data->file_h_not_to_libs_buffer, data->file_h_not_to_libs_buffer_size + l_added );
                 Vv( file_h_not_to_libs_buffer_, "Unable to reallocate" )
                     goto Err_3;
                 s = file_h_not_to_libs_buffer_ + ( s - data->file_h_not_to_libs_buffer );
@@ -1772,7 +1770,8 @@ E_main_I_find_file_I_programs( WIN32_FIND_DATA *found_file
         E_main_Q_s_s0_I_strcpy( file_mask + 11, found_file->cFileName );
         E_main_Q_s_s0_I_strcpy( file_mask + 11 + l_dir, "\\*" );
         data->found_dir = file_mask;
-        ret = E_main_I_find_file( file_mask, ( E_main_I_find_file_Z_proc )E_main_I_find_file_I_program, data );
+        !( ret = E_main_I_find_file( file_mask, ( E_main_I_find_file_Z_proc )E_main_I_find_file_I_program, data ))
+        && !( ret = E_main_I_build_program_I_not_to_libs(data) );
         HeapFree( E_main_S_process_heap, 0, file_mask );
         HeapFree( E_main_S_process_heap, 0, data->file_h_not_to_libs_buffer );
     }
