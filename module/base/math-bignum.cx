@@ -530,7 +530,7 @@ E_math_Q_bignum_I_add(
     "\n" "lea       (%1,%5),%1"
     "\n" "adcq      $0,(%1)"
     "\n" "seto      %%al"
-    "\n" "decq      %2"
+    "\n" "decq      %3"
     "\n" "jnz       2b"
     "\n 3:test      %%al,%%al"
     "\n" "setz      %0"
@@ -551,14 +551,13 @@ E_math_Q_bignum_I_add(
     , "rax"
         #endif
     );
-    if( go_to_next )
-        goto Next;
-    N *p = E_mem_Q_blk_I_append( &num_0->digits, 1 );
-    if( !p )
-        return ~0;
-    *p = sign ? ~0 : 1;
-    num_0->digits_n++;
-Next:
+    if( !go_to_next )
+    {   N *p = E_mem_Q_blk_I_append( &num_0->digits, 1 );
+        if( !p )
+            return ~0;
+        *p = sign ? ~0 : 1;
+        num_0->digits_n++;
+    }
     if( !~E_math_Q_bignum_I_add_subtract_end( num_0, num_1 ))
         return ~0;
     return 0;
@@ -586,12 +585,10 @@ E_math_Q_bignum_I_subtract(
     "\n" "jmp       1b"
     "\n 2:lea       (%1,%5),%1"
     "\n" "sbbl      $0,(%1)"
-    "\n" "setnc     %0"
-    "\n" "jnc       4f"
+    "\n" "jnc       3f"
     "\n" "decl      %4"
     "\n" "jnz       2b"
     "\n 3:setnc     %0"
-    "\n 4:"
         #elif defined( __x86_64__ )
     "\n" "mov       (%2),%%rax"
     "\n" "sub       %%rax,(%1)"
@@ -606,12 +603,10 @@ E_math_Q_bignum_I_subtract(
     "\n" "jmp       1b"
     "\n 2:lea       (%1,%5),%1"
     "\n" "sbbq      $0,(%1)"
-    "\n" "setnc     %0"
-    "\n" "jnc       4f"
+    "\n" "jnc       3f"
     "\n" "decq      %4"
     "\n" "jnz       2b"
     "\n 3:setnc     %0"
-    "\n 4:"
         #else
 #error not implemented
        #endif
@@ -628,9 +623,8 @@ E_math_Q_bignum_I_subtract(
     , "rax"
         #endif
     );
-    if( go_to_next )
-        goto Next;
-    if( sign
+    if( !go_to_next
+    && sign
     && !E_math_Q_bignum_R_sign( num_0 )
     )
     {   N *p = E_mem_Q_blk_I_append( &num_0->digits, 1 );
@@ -639,7 +633,6 @@ E_math_Q_bignum_I_subtract(
         *p = ~0;
         num_0->digits_n++;
     }
-Next:;
     N n = 0;
     for_n_rev( i, num_0->digits_n - 1 )
     {   if( num_0->digits[ i + 1 ] != ~0
@@ -2009,10 +2002,17 @@ E_math_Q_bignum_I_pi( N digits_h
     struct E_math_Z_bignum *num = E_math_Q_bignum_M();
     if( !num )
         return 0;
+    struct E_math_Z_bignum *num_16 = E_math_Q_bignum_M();
+    if( !num_16 )
+    {   E_math_Q_bignum_W(num);
+        return 0;
+    }
+    num_16->digits[0] = 1;
     for_n( k, digits_h )
     {   struct E_math_Z_bignum *num_0 = E_math_Q_bignum_M();
         if( !num_0 )
         {   E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         num_0->digits[0] = 4;
@@ -2020,6 +2020,7 @@ E_math_Q_bignum_I_pi( N digits_h
         if( !num_1 )
         {   E_math_Q_bignum_W( num_0 );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         num_1->digits[0] = 8 * k + 1;
@@ -2027,6 +2028,7 @@ E_math_Q_bignum_I_pi( N digits_h
         {   E_math_Q_bignum_W( num_1 );
             E_math_Q_bignum_W( num_0 );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         E_math_Q_bignum_W( num_1 );
@@ -2035,6 +2037,7 @@ E_math_Q_bignum_I_pi( N digits_h
         if( !num_0 )
         {   E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         num_0->digits[0] = 2;
@@ -2043,6 +2046,7 @@ E_math_Q_bignum_I_pi( N digits_h
         {   E_math_Q_bignum_W( num_0 );
             E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         num_1->digits[0] = 8 * k + 4;
@@ -2051,6 +2055,7 @@ E_math_Q_bignum_I_pi( N digits_h
             E_math_Q_bignum_W( num_0 );
             E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         E_math_Q_bignum_W( num_1 );
@@ -2058,6 +2063,7 @@ E_math_Q_bignum_I_pi( N digits_h
         {   E_math_Q_bignum_W( num_0 );
             E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         E_math_Q_bignum_W( num_0 );
@@ -2065,6 +2071,7 @@ E_math_Q_bignum_I_pi( N digits_h
         if( !num_0 )
         {   E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         num_0->digits[0] = 1;
@@ -2073,6 +2080,7 @@ E_math_Q_bignum_I_pi( N digits_h
         {   E_math_Q_bignum_W( num_0 );
             E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         num_1->digits[0] = 8 * k + 5;
@@ -2081,6 +2089,7 @@ E_math_Q_bignum_I_pi( N digits_h
             E_math_Q_bignum_W( num_0 );
             E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         E_math_Q_bignum_W( num_1 );
@@ -2088,6 +2097,7 @@ E_math_Q_bignum_I_pi( N digits_h
         {   E_math_Q_bignum_W( num_0 );
             E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         E_math_Q_bignum_W( num_0 );
@@ -2095,6 +2105,7 @@ E_math_Q_bignum_I_pi( N digits_h
         if( !num_0 )
         {   E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         num_0->digits[0] = 1;
@@ -2103,6 +2114,7 @@ E_math_Q_bignum_I_pi( N digits_h
         {   E_math_Q_bignum_W( num_0 );
             E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         num_1->digits[0] = 8 * k + 6;
@@ -2111,6 +2123,7 @@ E_math_Q_bignum_I_pi( N digits_h
             E_math_Q_bignum_W( num_0 );
             E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         E_math_Q_bignum_W( num_1 );
@@ -2118,31 +2131,41 @@ E_math_Q_bignum_I_pi( N digits_h
         {   E_math_Q_bignum_W( num_0 );
             E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         E_math_Q_bignum_W( num_0 );
-        num_1 = E_math_Q_bignum_M();
-        num_1->digits[0] = 16;
-        if( !~E_math_Q_bignum_I_power_n( num_1, k ))
-        {   E_math_Q_bignum_W( num_1 );
-            E_math_Q_bignum_W( num_ );
+        num_1 = E_math_Q_bignum_M_copy( num_16 );
+        if( !num_1 )
+        {   E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
-        if( !~E_math_Q_bignum_I_divide_modulo_min_prec( num_, num_1, prec ))
+        //TODO Zrobiæ przybli¿anie do precyzji cyfry liczby pi.
+        if( !~E_math_Q_bignum_I_divide_modulo_min_prec( num_, num_1, sizeof(N) * 8 / 4 + k / ( sizeof(N) * 8 / 4 )))
         {   E_math_Q_bignum_W( num_1 );
             E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         E_math_Q_bignum_W( num_1 );
         if( !~E_math_Q_bignum_I_add( num, num_ ))
         {   E_math_Q_bignum_W( num_ );
             E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
             return 0;
         }
         E_math_Q_bignum_W( num_ );
+        if( !~E_math_Q_bignum_I_multiply_n( num_16, 16 ))
+        {   E_math_Q_bignum_W( num_ );
+            E_math_Q_bignum_W(num);
+            E_math_Q_bignum_W( num_16 );
+            return 0;
+        }
     }
+    E_math_Q_bignum_W( num_16 );
     return num;
 }
 /******************************************************************************/
