@@ -9,7 +9,7 @@ Libs=
 PrivateResource=
 ResourceIncludes=
 MakeIncludes=
-Compiler=-DBUILDING_DLL=1_@@_-include E_cplus_S_to_libs.h_@@_
+Compiler=-DBUILDING_DLL=1_@@_-include E_cplus_S_to_libs.h_@@_-fwrapv_@@_
 CppCompiler=-DBUILDING_DLL=1_@@_
 Linker=
 IsCpp=0

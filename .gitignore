@@ -9,7 +9,8 @@
 *.def
 *.layout
 Makefile.win
-!0.h
+!/compile/*.h
 !/make-oux/*.c
 !/module/*/dllmain.c
+!/module/base/base.h
 /pcre2
