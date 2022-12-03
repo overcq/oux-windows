@@ -1,4 +1,3 @@
-//-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
 *  ¦OUX¦  C+
@@ -79,7 +78,7 @@ E_flow_Q_task_R_exit( void
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 _inline
-int
+HANDLE
 E_mem_Q_file_R_handle( I id
 ){  struct E_mem_Q_file_Z *file = E_mem_Q_tab_R( E_base_S->E_mem_Q_file_S, id );
     return file->handle;

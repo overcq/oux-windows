@@ -1,12 +1,5 @@
 //-*-C-*-
-/*******************************************************************************
-*   ___   publicplace
-*  ¦OUX¦  C+
-*  ¦/C+¦  component
-*   ---   base
-*         memory blocks manager
-* ©overcq                on "Gentoo Linux 13.0” “x86_64”             2015-4-28 *
-*******************************************************************************/
+//******************************************************************************
 /** Mened¿er bloków pamiêci alokowanej dynamicznie, ale nie do niepotrzebnego alokowania i zwalniania w pêtlach, przechowuj¹cy rozmiar pojedynczego elementu bloku tylko do w³asnej administracji pamiêci¹.
 Implementacyjnie– w “E_mem_Q_blk” uchwytami s¹ adresy elementów (ponad zmienianymi numerami elementów), a w “E_mem_Q_tab”– numery elementów (ponad zmienianymi adresami). Czyli w sensie funkcjonalnym z zewn¹trz– ten pierwszy jest mened¿erem tablic rzeczywistych (ci¹g³ych w pamiêci), a ten drugi– zarz¹dzanych.
 ?
@@ -1562,4 +1555,4 @@ E_mem_Q_blk_I_remove( P p
     }
     return p_;
 }
-/******************************************************************************/
+//******************************************************************************

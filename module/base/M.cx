@@ -1,20 +1,11 @@
 //-*-C-*-
-/*******************************************************************************
-*   ___   publicplace
-*  ¦OUX¦  C+
-*  ¦/C+¦  component
-*   ---   base
-*         tworzenie ‹modu³u› przy rozpoczêciu programu
-* ©overcq                on "Gentoo Linux 13.0” “x86_64”             2016-2-28 N
-*******************************************************************************/
+//******************************************************************************
 //DFN Globalnie: utworzenie ‹modu³u› ([…]“_M”) mo¿e byæ wykonane w programie tylko raz.
 //==============================================================================
-    #ifdef E_flow_C_errno_p
-int *E_flow_S_errno;
-    #endif
 struct E_base_Z
 { N E_flow_Q_timer_S_last_real_time;
   N E_flow_Q_timer_S_next_real_time;
+  HINSTANCE E_flow_S_h_instance;
   Pc E_flow_S_system_name;
   Pc E_flow_S_hostname;
   Pc E_flow_S_exe_name;
@@ -104,13 +95,14 @@ E_mem_M_file( void
     V_( E_base_S->E_mem_Q_file_S_buffer = VirtualAlloc( 0, E_base_S->E_mem_Q_file_S_buffer_l , MEM_COMMIT , PAGE_READWRITE ));
 }
 void
-E_base_M(
-  Pc cmd_line
+E_base_M( HINSTANCE h_instance
+, Pc cmd_line
 ){
         #ifdef C_line_report
     AllocConsole();
         #endif
     E_mem_M_blk();
+    E_base_S->E_flow_S_h_instance = h_instance;
     E_base_S->E_flow_S_cmd_line = cmd_line;
     MEMORYSTATUS ms;
     GlobalMemoryStatus( &ms );
@@ -190,4 +182,4 @@ E_base_M(
     }
     E_flow_Z_stat_I_stat();
 }
-/******************************************************************************/
+//******************************************************************************

@@ -1,43 +1,32 @@
 //-*-C-*-
-/*******************************************************************************
-*   ___   publicplace
-*  ¦OUX¦  C+
-*  ¦/C+¦  component
-*   ---   "X window” —high ‘cpu’
-*         window objects manager
-* ©overcq                on "Gentoo Linux 13.0” “x86_64”             2015-4-28 *
-*******************************************************************************/
+//******************************************************************************
 // S¹ to obiekty wizualne.
 // Ka¿dy obiekt okna jest jednokrotny w konkretnym oknie.
 //==============================================================================
 typedef
 void
 (*draw_object_proc)(
-  struct E_x_Q_display_Z *
-, struct E_x_Q_screen_Z *
-, struct E_x_Q_window_Z *
-, struct E_x_Q_object_Z *
+  struct E_window_Q_window_Z *
+, struct E_window_Q_object_Z *
 );
 typedef
 void
 (*click_object_proc)(
-  struct E_x_Q_window_Z *
-, struct E_x_Q_object_Z *
+  struct E_window_Q_window_Z *
+, struct E_window_Q_object_Z *
 , N8 // button
 , N8 // sequence
 );
-struct E_x_Q_object_Z
+struct E_window_Q_object_Z
 { void // Ale obiekt zawiera punkty, które narysuje ta funkcja w czasie wywo³ania.
   (*draw)(
-    struct E_x_Q_display_Z *
-  , struct E_x_Q_screen_Z *
-  , struct E_x_Q_window_Z *
-  , struct E_x_Q_object_Z *
+    struct E_window_Q_window_Z *
+  , struct E_window_Q_object_Z *
   );
   void
   (*click)(
-    struct E_x_Q_window_Z *
-  , struct E_x_Q_object_Z *
+    struct E_window_Q_window_Z *
+  , struct E_window_Q_object_Z *
   , N8
   , N8
   );
@@ -52,7 +41,7 @@ struct E_x_Q_object_Z
   unsigned U_R( mode, draggable )       :1;
   unsigned U_R( mode, drag_src )        :1;
 };
-struct E_x_Q_object_Z_data_Z_entry
+struct E_window_Q_object_Z_data_Z_entry
 { I font;
   Pc text;
   N text_start;
@@ -60,12 +49,11 @@ struct E_x_Q_object_Z_data_Z_entry
   unsigned U_R( state, cursor_visible_ ) :1;
 };
 //==============================================================================
-S16 E_x_Q_object_S_layout_dx = 4, E_x_Q_object_S_layout_dy = 4;
+S16 E_window_Q_object_S_layout_dx = 4, E_window_Q_object_S_layout_dy = 4;
 //==============================================================================
 I
-E_x_Q_object_M(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_window_Z *window
+E_window_Q_object_M(
+  struct E_window_Q_window_Z *window
 , N child_n
 , S16 x
 , S16 y
@@ -75,22 +63,20 @@ E_x_Q_object_M(
   (*clear_data)(P)
 , void
   (*draw)(
-    struct E_x_Q_display_Z *
-  , struct E_x_Q_screen_Z *
-  , struct E_x_Q_window_Z *
-  , struct E_x_Q_object_Z *
+    struct E_window_Q_window_Z *
+  , struct E_window_Q_object_Z *
   )
 , void
   (*click)(
-    struct E_x_Q_window_Z *
-  , struct E_x_Q_object_Z *
+    struct E_window_Q_window_Z *
+  , struct E_window_Q_object_Z *
   , N8
   , N8
   )
 ){  I object_id = E_mem_Q_tab_I_add( window->object );
     if( !~object_id )
         return ~0;
-    struct E_x_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+    struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
     object->draw = draw;
     object->click = click;
     object->clear_data = clear_data;
@@ -111,11 +97,10 @@ E_x_Q_object_M(
     return object_id;
 }
 void
-E_x_Q_object_W(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_window_Z *window
+E_window_Q_object_W(
+  struct E_window_Q_window_Z *window
 , I object_id
-){  struct E_x_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+){  struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
     if( object->data )
     {   if( object->clear_data )
             object->clear_data( object->data );
@@ -126,11 +111,11 @@ E_x_Q_object_W(
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 I
-E_x_Q_object_R_parent( struct E_x_Q_window_Z *window
+E_window_Q_object_R_parent( struct E_window_Q_window_Z *window
 , I id
 ){  J_assert( E_mem_Q_tab_T( window->object, id ));
     for_each( object_id, window->object, E_mem_Q_tab )
-    {   struct E_x_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+    {   struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
         for_n( child_i, object->child_n )
         {   if( object->child[ child_i ] == id )
                 return object_id;
@@ -139,17 +124,17 @@ E_x_Q_object_R_parent( struct E_x_Q_window_Z *window
     return ~0;
 }
 B
-E_x_Q_object_R_top( struct E_x_Q_window_Z *window
+E_window_Q_object_R_top( struct E_window_Q_window_Z *window
 , I id
-){  return !~E_x_Q_object_R_parent( window, id );
+){  return !~E_window_Q_object_R_parent( window, id );
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 N
-E_x_Q_object_I_add( struct E_x_Q_window_Z *window
+E_window_Q_object_I_add( struct E_window_Q_window_Z *window
 , I id
 , I child_id
 ){  J_assert( E_mem_Q_tab_T( window->object, child_id ));
-    struct E_x_Q_object_Z *object = E_mem_Q_tab_R( window->object, id );
+    struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, id );
     if( !E_mem_Q_blk_I_append( &object->child, 1 ))
         return ~0;
     object->child[ object->child_n ] = child_id;
@@ -158,15 +143,15 @@ E_x_Q_object_I_add( struct E_x_Q_window_Z *window
 }
 //------------------------------------------------------------------------------
 N
-E_x_Q_object_I_rem( struct E_x_Q_window_Z *window
+E_window_Q_object_I_rem( struct E_window_Q_window_Z *window
 , I id
 ){  for_each( object_id, window->object, E_mem_Q_tab )
-    {   struct E_x_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+    {   struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
         for_n( child_i, object->child_n )
         {   if( object->child[ child_i ] == id )
             {   E_mem_Q_blk_I_remove( &object->child, child_i, 1 );
                 object->child_n--;
-                struct E_x_Q_object_Z *object_rem = E_mem_Q_tab_R( window->object, id );
+                struct E_window_Q_object_Z *object_rem = E_mem_Q_tab_R( window->object, id );
                 if( object_rem->child_n )
                 {   if( !E_mem_Q_blk_I_append( &object->child, object_rem->child_n ))
                         return ~0;
@@ -183,9 +168,9 @@ End:E_mem_Q_tab_I_remove( window->object, id );
     return 0;
 }
 N
-E_x_Q_object_I_rem_descendants( struct E_x_Q_window_Z *window
+E_window_Q_object_I_rem_descendants( struct E_window_Q_window_Z *window
 , I id
-){  struct E_x_Q_object_Z *object = E_mem_Q_tab_R( window->object, id );
+){  struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, id );
     N ids_n = object->child_n;
     I * Mt_( ids, ids_n );
     if( !ids )
@@ -211,29 +196,26 @@ E_x_Q_object_I_rem_descendants( struct E_x_Q_window_Z *window
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 I
-E_x_Q_object_Z_button_M(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_window_Z *window
-){  return E_x_Q_object_M( display, window
+E_window_Q_object_Z_button_M(
+  struct E_window_Q_window_Z *window
+){  return E_window_Q_object_M( window
     , 0
     , 0
     , 0
     , 20
     , 10
     , 0
-    , E_x_Q_object_Z_button_I_draw
-    , E_x_Q_object_Z_button_I_click
+    , E_window_Q_object_Z_button_I_draw
+    , E_window_Q_object_Z_button_I_click
     );
 }
 void
-E_x_Q_object_Z_button_I_draw(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_screen_Z *screen
-, struct E_x_Q_window_Z *window
-, struct E_x_Q_object_Z *object
-){  E_x_Q_object_I_draw_P_color_( E_x_Q_theme.line );
-    E_x_Q_object_I_draw_Z_rectangles_((
-      ( xcb_rectangle_t[] )
+E_window_Q_object_Z_button_I_draw(
+  struct E_window_Q_window_Z *window
+, struct E_window_Q_object_Z *object
+){  E_window_Q_object_I_draw_P_color_( E_window_Q_theme.line );
+    E_window_Q_object_I_draw_Z_rectangles_((
+      ( struct E_window_Z_rectangle[] )
       { { .x = 0
         , .y = 0
         , .width = object->width
@@ -241,9 +223,9 @@ E_x_Q_object_Z_button_I_draw(
         }
       }
     ));
-    E_x_Q_object_I_draw_P_color_( E_x_Q_theme.object_bg );
-    E_x_Q_object_I_fill_Z_rectangles_((
-      ( xcb_rectangle_t[] )
+    E_window_Q_object_I_draw_P_color_( E_window_Q_theme.object_bg );
+    E_window_Q_object_I_fill_Z_rectangles_((
+      ( struct E_window_Z_rectangle[] )
       { { .x = 1
         , .y = 1
         , .width = object->width - 2
@@ -253,9 +235,9 @@ E_x_Q_object_Z_button_I_draw(
     ));
 }
 void
-E_x_Q_object_Z_button_I_click(
-  struct E_x_Q_window_Z *window
-, struct E_x_Q_object_Z *object
+E_window_Q_object_Z_button_I_click(
+  struct E_window_Q_window_Z *window
+, struct E_window_Q_object_Z *object
 , N8 button
 , N8 seq
 ){  if( button == 1 && seq == 2 )
@@ -264,54 +246,51 @@ E_x_Q_object_Z_button_I_click(
 }
 //------------------------------------------------------------------------------
 void
-E_x_Q_object_Z_entry_I_clear_data( P data
-){  struct E_x_Q_object_Z_data_Z_entry *object_data = data;
+E_window_Q_object_Z_entry_I_clear_data( P data
+){  struct E_window_Q_object_Z_data_Z_entry *object_data = data;
     W( object_data->text );
 }
 I
-E_x_Q_object_Z_entry_M(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_window_Z *window
+E_window_Q_object_Z_entry_M(
+  struct E_window_Q_window_Z *window
 , I font_id
 , Pc text
-){  J_assert( E_mem_Q_tab_T( E_x_Q_font_S, font_id ));
-    I object_id = E_x_Q_object_M( display, window
+){  J_assert( E_mem_Q_tab_T( E_window_Q_font_S, font_id ));
+    I object_id = E_window_Q_object_M( window
     , 0
     , 0
     , 0
     , 16
     , 8
-    , E_x_Q_object_Z_font_I_clear_data
-    , E_x_Q_object_Z_entry_I_draw
+    , E_window_Q_object_Z_font_I_clear_data
+    , E_window_Q_object_Z_entry_I_draw
     , 0
     );
-    struct E_x_Q_object_Z_data_Z_entry *M_( object_data );
+    struct E_window_Q_object_Z_data_Z_entry *M_( object_data );
     if( !object_data )
-    {   E_x_Q_object_W( display, window, object_id );
+    {   E_window_Q_object_W( window, object_id );
         return ~0;
     }
     object_data->font = font_id;
     object_data->text = M( E_text_Z_s0_R_0_l(text) );
     object_data->text_start = 0;
     if( !object_data->text )
-    {   E_x_Q_object_W( display, window, object_id );
+    {   E_window_Q_object_W( window, object_id );
         return ~0;
     }
     E_text_Z_s_P_s0_copy_0( object_data->text, text );
     U_L( object_data->state, cursor_visible_ );
-    struct E_x_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+    struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
     object->data = object_data;
     return object_id;
 }
 void
-E_x_Q_object_Z_entry_I_draw(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_screen_Z *screen
-, struct E_x_Q_window_Z *window
-, struct E_x_Q_object_Z *object
-){  E_x_Q_object_I_draw_P_color_( E_x_Q_theme.window_bg );
-    E_x_Q_object_I_fill_Z_rectangles_((
-      ( xcb_rectangle_t[] )
+E_window_Q_object_Z_entry_I_draw(
+  struct E_window_Q_window_Z *window
+, struct E_window_Q_object_Z *object
+){  E_window_Q_object_I_draw_P_color_( E_window_Q_theme.window_bg );
+    E_window_Q_object_I_fill_Z_rectangles_((
+      ( struct E_window_Z_rectangle[] )
       { { .x = 0
         , .y = 0
         , .width = object->width
@@ -319,15 +298,15 @@ E_x_Q_object_Z_entry_I_draw(
         }
       }
     ));
-    struct E_x_Q_object_Z_data_Z_entry *object_data = object->data;
-    struct E_x_Q_font_Z *font = E_mem_Q_tab_R( E_x_Q_font_S, object_data->font );
+    struct E_window_Q_object_Z_data_Z_entry *object_data = object->data;
+    struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, object_data->font );
     S16 x = 0;
     Pc s = object_data->text;
     for_n( i, object_data->text_start )
     {   U u = ~0;
         s = E_text_Z_su_R_u( s, &u );
         if( !~u )
-        {   GV_(bad UTF-8 character); V();
+        {   GV_(bad UTF-8 character); _V();
         }
     }
     Pc s_ = s;
@@ -335,7 +314,7 @@ E_x_Q_object_Z_entry_I_draw(
     {   U u = ~0;
         s = E_text_Z_su_R_u( s, &u );
         if( !~u )
-        {   GV_(bad UTF-8 character); V();
+        {   GV_(bad UTF-8 character); _V();
         }
         for_n( i, font->bitmap_n )
             if( font->bitmap[i].u == u )
@@ -349,17 +328,17 @@ E_x_Q_object_Z_entry_I_draw(
     }
     C c = *s;
     *s = '\0';
-    E_x_Q_object_I_draw_Z_font_Z_s_( 0, 0, E_x_Q_theme.text, object_data->font, s_ );
+    E_window_Q_object_I_draw_Z_font_Z_s_( 0, 0, E_window_Q_theme.text, object_data->font, s_ );
     *s = c;
     if( U_R( object_data->state, cursor_visible_ ))
-    {   struct E_x_Q_font_Z *font = E_mem_Q_tab_R( E_x_Q_font_S, object_data->font );
+    {   struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, object_data->font );
         S16 x = 0;
         Pc s = object_data->text;
         for_n( i, object_data->text_start )
         {   U u = ~0;
             s = E_text_Z_su_R_u( s, &u );
             if( !~u )
-            {   GV_(bad UTF-8 character); V();
+            {   GV_(bad UTF-8 character); _V();
             }
         }
         N l = object_data->cursor_pos - object_data->text_start;
@@ -367,7 +346,7 @@ E_x_Q_object_Z_entry_I_draw(
         {   U u = ~0;
             s = E_text_Z_su_R_u( s, &u );
             if( !~u )
-            {   GV_(bad UTF-8 character); V();
+            {   GV_(bad UTF-8 character); _V();
             }
             for_n( i, font->bitmap_n )
                 if( font->bitmap[i].u == u )
@@ -378,29 +357,28 @@ E_x_Q_object_Z_entry_I_draw(
                 x += ( x != 0 ? 1 : 0 ) + font->bitmap[0].width;
             l--;
         }
-        E_x_Q_object_I_draw_P_color_( E_x_Q_theme.cursor );
-        xcb_segment_t segments[1] =
+        E_window_Q_object_I_draw_P_color_( E_window_Q_theme.cursor );
+        struct E_window_Z_segment segments[1] =
         { x
         , 0
         , x
         , object->height - 1
         };
-        E_x_Q_object_I_draw_Z_segments_(segments);
+        E_window_Q_object_I_draw_Z_segments_(segments);
     }
 }
 //------------------------------------------------------------------------------
 void
-E_x_Q_object_Z_font_I_clear_data( P data
-){  struct E_x_Q_object_Z_data_Z_font *object_data = data;
+E_window_Q_object_Z_font_I_clear_data( P data
+){  struct E_window_Q_object_Z_data_Z_font *object_data = data;
     W( object_data->label );
 }
 I
-E_x_Q_object_Z_font_M(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_window_Z *window
+E_window_Q_object_Z_font_M(
+  struct E_window_Q_window_Z *window
 , I font_id
 , Pc label
-){  struct E_x_Q_font_Z *font = E_mem_Q_tab_R( E_x_Q_font_S, font_id );
+){  struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, font_id );
     N16 width = 2, width_ = 0;
     N16 height = font->height;
     Pc s = label;
@@ -427,66 +405,61 @@ E_x_Q_object_Z_font_M(
     }
     if( width_ > width )
         width = width_;
-    I object_id = E_x_Q_object_M( display, window
+    I object_id = E_window_Q_object_M( window
     , 0
     , 0
     , 0
     , width
     , height
-    , E_x_Q_object_Z_font_I_clear_data
-    , E_x_Q_object_Z_font_I_draw
+    , E_window_Q_object_Z_font_I_clear_data
+    , E_window_Q_object_Z_font_I_draw
     , 0
     );
-    struct E_x_Q_object_Z_data_Z_font *M_( object_data );
+    struct E_window_Q_object_Z_data_Z_font *M_( object_data );
     if( !object_data )
-    {   E_x_Q_object_W( display, window, object_id );
+    {   E_window_Q_object_W( window, object_id );
         return ~0;
     }
     object_data->font = font_id;
     object_data->label = M( E_text_Z_s0_R_0_l(label) );
     if( !object_data->label )
-    {   E_x_Q_object_W( display, window, object_id );
+    {   E_window_Q_object_W( window, object_id );
         return ~0;
     }
     E_text_Z_s_P_s0_copy_0( object_data->label, label );
-    struct E_x_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+    struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
     object->data = object_data;
     return object_id;
 }
 void
-E_x_Q_object_Z_font_I_draw(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_screen_Z *screen
-, struct E_x_Q_window_Z *window
-, struct E_x_Q_object_Z *object
-){  struct E_x_Q_object_Z_data_Z_font *object_data = object->data;
-    E_x_Q_object_I_draw_Z_font_Z_s_( 0, 0, E_x_Q_theme.text, object_data->font, object_data->label );
+E_window_Q_object_Z_font_I_draw(
+  struct E_window_Q_window_Z *window
+, struct E_window_Q_object_Z *object
+){  struct E_window_Q_object_Z_data_Z_font *object_data = object->data;
+    E_window_Q_object_I_draw_Z_font_Z_s_( 0, 0, E_window_Q_theme.text, object_data->font, object_data->label );
 }
 //------------------------------------------------------------------------------
 I
-E_x_Q_object_Z_frame_M(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_window_Z *window
-){  return E_x_Q_object_M( display, window
+E_window_Q_object_Z_frame_M(
+  struct E_window_Q_window_Z *window
+){  return E_window_Q_object_M( window
     , 0
     , 0
     , 0
     , 16
     , 8
     , 0
-    , E_x_Q_object_Z_frame_I_draw
+    , E_window_Q_object_Z_frame_I_draw
     , 0
     );
 }
 void
-E_x_Q_object_Z_frame_I_draw(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_screen_Z *screen
-, struct E_x_Q_window_Z *window
-, struct E_x_Q_object_Z *object
-){  E_x_Q_object_I_draw_P_color_( E_x_Q_theme.line );
-    E_x_Q_object_I_draw_Z_rectangles_((
-      ( xcb_rectangle_t[] )
+E_window_Q_object_Z_frame_I_draw(
+  struct E_window_Q_window_Z *window
+, struct E_window_Q_object_Z *object
+){  E_window_Q_object_I_draw_P_color_( E_window_Q_theme.line );
+    E_window_Q_object_I_draw_Z_rectangles_((
+      ( struct E_window_Z_rectangle[] )
       { { .x = 0
         , .y = 0
         , .width = object->width
@@ -497,19 +470,18 @@ E_x_Q_object_Z_frame_I_draw(
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 N
-E_x_Q_object_I_lay(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_window_Z *window
+E_window_Q_object_I_lay(
+  struct E_window_Q_window_Z *window
 ){  if( !E_mem_Q_tab_R_n( window->object ))
         return 0;
     struct Z_stack
-    { struct E_x_Q_object_Z *object;
+    { struct E_window_Q_object_Z *object;
       N i;
     };
-    struct E_x_Q_object_Z *object = E_mem_Q_tab_R( window->object, 0 );
+    struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, 0 );
     if( object->child_n )
     {   for_each( id, window->object, E_mem_Q_tab )
-        {   struct E_x_Q_object_Z *object = E_mem_Q_tab_R( window->object, id );
+        {   struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, id );
             U_L( object->mode, lay_height );
         }
 Restart:;
@@ -517,19 +489,19 @@ Restart:;
         if( !stack )
             return ~0;
         N stack_i = ~0;
-        S16 next_x = E_x_Q_object_S_layout_dx;
-        S16 next_y = E_x_Q_object_S_layout_dy;
-        S16 after_x = E_x_Q_object_S_layout_dx;
-        S16 after_y = E_x_Q_object_S_layout_dy;
+        S16 next_x = E_window_Q_object_S_layout_dx;
+        S16 next_y = E_window_Q_object_S_layout_dy;
+        S16 after_x = E_window_Q_object_S_layout_dx;
+        S16 after_y = E_window_Q_object_S_layout_dy;
         O{  if( object->child_n )
             {   if( ~stack_i )
                     if( U_R( object->mode, lay_height ))
-                    {   next_x = stack[ stack_i ].object->x + E_x_Q_object_S_layout_dx;
-                        after_x = next_x + E_x_Q_object_S_layout_dx;
+                    {   next_x = stack[ stack_i ].object->x + E_window_Q_object_S_layout_dx;
+                        after_x = next_x + E_window_Q_object_S_layout_dx;
                         next_y = after_y;
-                        after_y += E_x_Q_object_S_layout_dy;
+                        after_y += E_window_Q_object_S_layout_dy;
                     }else
-                        after_y = next_y + E_x_Q_object_S_layout_dy;
+                        after_y = next_y + E_window_Q_object_S_layout_dy;
                 struct Z_stack *stack_top = E_mem_Q_blk_I_append( &stack, 1 );
                 if( !stack_top )
                 {   W(stack);
@@ -540,9 +512,9 @@ Restart:;
                 stack_top->i = 0;
                 object->x = next_x;
                 object->y = next_y;
-                object->width = E_x_Q_object_S_layout_dx;
-                object->height = E_x_Q_object_S_layout_dy;
-                next_x += E_x_Q_object_S_layout_dx;
+                object->width = E_window_Q_object_S_layout_dx;
+                object->height = E_window_Q_object_S_layout_dy;
+                next_x += E_window_Q_object_S_layout_dx;
                 if( next_x > window->width
                 && !U_R( object->mode, lay_height )
                 ){  U_F( object->mode, lay_height );
@@ -556,7 +528,7 @@ Restart:;
                     object = E_mem_Q_tab_R( window->object, 0 );
                     goto Restart;
                 }
-                next_y += E_x_Q_object_S_layout_dy;
+                next_y += E_window_Q_object_S_layout_dy;
                 object = E_mem_Q_tab_R( window->object, object->child[0] );
                 continue;
             }
@@ -564,16 +536,16 @@ Restart:;
             {   stack[ stack_i ].i++;
                 if( U_R( object->mode, lay_height )
                 && stack[ stack_i ].i != 1
-                ){  next_x = stack[ stack_i ].object->x + E_x_Q_object_S_layout_dx;
+                ){  next_x = stack[ stack_i ].object->x + E_window_Q_object_S_layout_dx;
                     next_y = after_y;
                 }
                 object->x = next_x;
                 object->y = next_y;
-                if( after_x < next_x + object->width + E_x_Q_object_S_layout_dx )
-                    after_x = next_x + object->width + E_x_Q_object_S_layout_dx;
-                if( after_y < next_y + object->height + E_x_Q_object_S_layout_dy )
-                    after_y = next_y + object->height + E_x_Q_object_S_layout_dy;
-                struct E_x_Q_object_Z *object_ = object;
+                if( after_x < next_x + object->width + E_window_Q_object_S_layout_dx )
+                    after_x = next_x + object->width + E_window_Q_object_S_layout_dx;
+                if( after_y < next_y + object->height + E_window_Q_object_S_layout_dy )
+                    after_y = next_y + object->height + E_window_Q_object_S_layout_dy;
+                struct E_window_Q_object_Z *object_ = object;
                 N stack_i_ = stack_i;
                 N16 after_x_ = after_x;
                 N16 after_y_ = after_y;
@@ -583,10 +555,10 @@ Restart:;
                         object_->width = after_x_ - object_->x;
                     if( object_->height < after_y_ - object_->y )
                         object_->height = after_y_ - object_->y;
-                    after_x_ += E_x_Q_object_S_layout_dx;
-                    after_y_ += E_x_Q_object_S_layout_dy;
+                    after_x_ += E_window_Q_object_S_layout_dx;
+                    after_y_ += E_window_Q_object_S_layout_dy;
                 }while( ~--stack_i_ );
-                next_x += object->width + E_x_Q_object_S_layout_dx;
+                next_x += object->width + E_window_Q_object_S_layout_dx;
                 if( next_x > window->width
                 && !U_R( object->mode, lay_height )
                 ){  U_F( object->mode, lay_height );
@@ -609,7 +581,7 @@ Restart:;
             }
             N stack_i_1 = stack_i;
             do
-            {   next_x = stack[ stack_i ].object->x + stack[ stack_i ].object->width + E_x_Q_object_S_layout_dx;
+            {   next_x = stack[ stack_i ].object->x + stack[ stack_i ].object->width + E_window_Q_object_S_layout_dx;
                 if( next_x > window->width
                 && !U_R( stack[ stack_i ].object->mode, lay_height )
                 ){  U_F( stack[ stack_i ].object->mode, lay_height );
@@ -656,9 +628,9 @@ Cont:               do
                     object = E_mem_Q_tab_R( window->object, 0 );
                     goto Restart;
                 }
-                next_y -= E_x_Q_object_S_layout_dy;
-                if( after_y < stack[ stack_i ].object->y + stack[ stack_i ].object->height + E_x_Q_object_S_layout_dy )
-                    after_y = stack[ stack_i ].object->y + stack[ stack_i ].object->height + E_x_Q_object_S_layout_dy;
+                next_y -= E_window_Q_object_S_layout_dy;
+                if( after_y < stack[ stack_i ].object->y + stack[ stack_i ].object->height + E_window_Q_object_S_layout_dy )
+                    after_y = stack[ stack_i ].object->y + stack[ stack_i ].object->height + E_window_Q_object_S_layout_dy;
             }while( ~--stack_i
             && ++stack[ stack_i ].i == stack[ stack_i ].object->child_n
             );
@@ -673,68 +645,60 @@ Cont:               do
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void
-E_x_Q_object_I_draw_Z_draw_proc( void (*draw_object_proc)( struct E_x_Q_display_Z *, struct E_x_Q_screen_Z *, struct E_x_Q_window_Z *, struct E_x_Q_object_Z * )
+E_window_Q_object_I_draw_Z_draw_proc( void (*draw_object_proc)( struct E_window_Q_window_Z *, struct E_window_Q_object_Z * )
 , B draw_simple
 ){  X_A( x_window, draw );
-    for_each( display_id, E_x_Q_display_S, E_mem_Q_tab )
-    {   struct E_x_Q_display_Z *display = E_mem_Q_tab_R( E_x_Q_display_S, display_id );
-        if( draw_simple )
-            U_F( display->mode, draw_simple );
-        for_each( window_id, display->window, E_mem_Q_tab )
-        {   struct E_x_Q_window_Z *window = E_mem_Q_tab_R( display->window, window_id );
-            for_each( object_id, window->object, E_mem_Q_tab )
-            {   struct E_x_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
-                if( object->draw == draw_object_proc )
-                {   U_F( window->req, draw );
-                    break;
-                }
-            }
-            if( U_R( window->req, draw ))
-                U_F( display->req, draw );
-        }
-        if( U_R( display->mode, drag ))
-        {   struct E_x_Q_screen_Z *screen = E_mem_Q_tab_R( display->screen, display->drag_S_dnd_window_screen_id );
-            struct E_x_Q_window_Z *window = &screen->dnd_window;
-            for_each( object_id, window->object, E_mem_Q_tab )
-            {   struct E_x_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
-                if( object->draw == draw_object_proc )
-                {   U_F( window->req, draw );
-                    break;
-                }
-            }
-            if( U_R( window->req, draw ))
-                U_F( display->req, draw );
-        }
-        if( U_R( display->req, draw ))
-            U_F( x_window, draw );
-    }
-    X_U( x_window, draw );
-}
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void
-E_x_Q_object_I_draw( struct E_x_Q_window_Z *window_
-){  X_A( x_window, draw );
-    for_each( display_id, E_x_Q_display_S, E_mem_Q_tab )
-    {   struct E_x_Q_display_Z *display = E_mem_Q_tab_R( E_x_Q_display_S, display_id );
-        for_each( window_id, display->window, E_mem_Q_tab )
-        {   struct E_x_Q_window_Z *window = E_mem_Q_tab_R( display->window, window_id );
-            if( window != window_ )
+    for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
+    {   struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
+        for_each( object_id, window->object, E_mem_Q_tab )
+        {   struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+            if( object->draw == draw_object_proc )
             {   U_F( window->req, draw );
-                U_F( display->req, draw );
                 break;
             }
         }
-        if( !U_R( display->mode, drag ))
-        {   struct E_x_Q_screen_Z *screen = E_mem_Q_tab_R( display->screen, display->drag_S_dnd_window_screen_id );
-            struct E_x_Q_window_Z *window = &screen->dnd_window;
-            if( window != window_ )
+        //if( U_R( window->req, draw ))
+            //U_F( display->req, draw );
+    }
+    /*if( U_R( display->mode, drag ))
+    {   struct E_window_Q_screen_Z *screen = E_mem_Q_tab_R( display->screen, display->drag_S_dnd_window_screen_id );
+        struct E_window_Q_window_Z *window = &screen->dnd_window;
+        for_each( object_id, window->object, E_mem_Q_tab )
+        {   struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+            if( object->draw == draw_object_proc )
             {   U_F( window->req, draw );
-                U_F( display->req, draw );
+                break;
             }
         }
-        if( U_R( display->req, draw ))
-            U_F( x_window, draw );
+        if( U_R( window->req, draw ))
+            U_F( display->req, draw );
     }
-    X_U( x_window, draw );
+    if( U_R( display->req, draw ))
+        U_F( x_window, draw );
+    X_U( x_window, draw );*/
 }
-/******************************************************************************/
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+void
+E_window_Q_object_I_draw( struct E_window_Q_window_Z *window_
+){  X_A( x_window, draw );
+    for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
+    {   struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
+        if( window != window_ )
+        {   U_F( window->req, draw );
+            //U_F( display->req, draw );
+            break;
+        }
+    }
+    /*if( !U_R( display->mode, drag ))
+    {   struct E_window_Q_screen_Z *screen = E_mem_Q_tab_R( display->screen, display->drag_S_dnd_window_screen_id );
+        struct E_window_Q_window_Z *window = &screen->dnd_window;
+        if( window != window_ )
+        {   U_F( window->req, draw );
+            U_F( display->req, draw );
+        }
+    }
+    if( U_R( display->req, draw ))
+        U_F( x_window, draw );
+    X_U( x_window, draw );*/
+}
+//******************************************************************************

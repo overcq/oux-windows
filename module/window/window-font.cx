@@ -1,41 +1,32 @@
 //-*-C-*-
-/*******************************************************************************
-*   ___   publicplace
-*  ¦OUX¦  C+
-*  ¦/C+¦  component
-*   ---   "X window” —high ‘cpu’
-*         bitmap font manager
-* ©overcq                on "Gentoo Linux 17.1” “x86_64”            2019-11-23 V
-*******************************************************************************/
-struct E_x_Q_font_Z
+//******************************************************************************
+struct E_window_Q_font_Z
 { Pc name;
   N height;
   N bitmap_n;
-  struct E_x_Q_font_Z_bitmap *bitmap;
+  struct E_window_Q_font_Z_bitmap *bitmap;
 };
-struct E_x_Q_font_Z_bitmap
+struct E_window_Q_font_Z_bitmap
 { U u;
   N width;
   N8 *bitmap;
 };
-struct E_x_Q_object_Z_data_Z_font
+struct E_window_Q_object_Z_data_Z_font
 { I font;
   Pc label;
 };
 //==============================================================================
-struct E_mem_Q_tab_Z *E_x_Q_font_S;
+struct E_mem_Q_tab_Z *E_window_Q_font_S;
 //==============================================================================
 N
-E_x_Q_window_I_draw_Z_font(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_screen_Z *screen
-, struct E_x_Q_window_Z *window
+E_window_Q_window_I_draw_Z_font(
+  struct E_window_Q_window_Z *window
 , S16 x
 , S16 y
 , N color
 , I font_id
 , U u
-){  struct E_x_Q_font_Z *font = E_mem_Q_tab_R( E_x_Q_font_S, font_id );
+){  struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, font_id );
     for_n( i, font->bitmap_n )
         if( font->bitmap[i].u == u )
         {   N j = 0;
@@ -59,7 +50,7 @@ E_x_Q_window_I_draw_Z_font(
                               brightness = 1;
                               break;
                         }
-                        E_x_Q_window_I_draw_aa_Z_pixel( display, screen, window
+                        E_window_Q_window_I_draw_aa_Z_pixel( window
                         , x_, y_
                         , color
                         , brightness
@@ -76,16 +67,14 @@ E_x_Q_window_I_draw_Z_font(
     return ~0;
 }
 N
-E_x_Q_window_I_draw_Z_font_Z_s(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_screen_Z *screen
-, struct E_x_Q_window_Z *window
+E_window_Q_window_I_draw_Z_font_Z_s(
+  struct E_window_Q_window_Z *window
 , S16 x
 , S16 y
 , N color
 , I font_id
 , Pc s
-){  struct E_x_Q_font_Z *font = E_mem_Q_tab_R( E_x_Q_font_S, font_id );
+){  struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, font_id );
     U u;
     S16 x_ = x;
     while( *s )
@@ -101,9 +90,9 @@ E_x_Q_window_I_draw_Z_font_Z_s(
             y += font->height + 1;
             continue;
         }
-        if( E_x_Q_window_I_draw_Z_font( display, screen, window, x_, y, color, font_id, u ))
+        if( E_window_Q_window_I_draw_Z_font( window, x_, y, color, font_id, u ))
         {   u = font->bitmap[0].u;
-            if( E_x_Q_window_I_draw_Z_font( display, screen, window, x_, y, color, font_id, u ))
+            if( E_window_Q_window_I_draw_Z_font( window, x_, y, color, font_id, u ))
                 return ~0;
         }
         for_n( i, font->bitmap_n )
@@ -116,39 +105,35 @@ E_x_Q_window_I_draw_Z_font_Z_s(
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 N
-E_x_Q_object_I_draw_Z_font(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_screen_Z *screen
-, struct E_x_Q_window_Z *window
-, struct E_x_Q_object_Z *object
+E_window_Q_object_I_draw_Z_font(
+  struct E_window_Q_window_Z *window
+, struct E_window_Q_object_Z *object
 , S16 x
 , S16 y
 , N color
 , I font_id
 , U u
-){  return E_x_Q_window_I_draw_Z_font_(
+){  return E_window_Q_window_I_draw_Z_font_(
       object->x + x
     , object->y + y
-    , !U_R( object->mode, drag_src ) ? color : E_x_Q_theme.inactive_text
+    , !U_R( object->mode, drag_src ) ? color : E_window_Q_theme.inactive_text
     , font_id, u
     );
 }
 N
-E_x_Q_object_I_draw_Z_font_Z_s(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_screen_Z *screen
-, struct E_x_Q_window_Z *window
-, struct E_x_Q_object_Z *object
+E_window_Q_object_I_draw_Z_font_Z_s(
+  struct E_window_Q_window_Z *window
+, struct E_window_Q_object_Z *object
 , S16 x
 , S16 y
 , N color
 , I font_id
 , Pc s
-){  return E_x_Q_window_I_draw_Z_font_Z_s_(
+){  return E_window_Q_window_I_draw_Z_font_Z_s_(
       object->x + x
     , object->y + y
-    , !U_R( object->mode, drag_src ) ? color : E_x_Q_theme.inactive_text
+    , !U_R( object->mode, drag_src ) ? color : E_window_Q_theme.inactive_text
     , font_id, s
     );
 }
-/******************************************************************************/
+//******************************************************************************

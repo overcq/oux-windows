@@ -1,12 +1,5 @@
 //-*-C-*-
-/*******************************************************************************
-*   ___   publicplace
-*  ¦OUX¦  C+
-*  ¦/C+¦  component
-*   ---   base
-*         storage memory
-* ©overcq                on "Gentoo Linux 13.0” “x86_64”              2016-2-5 U
-*******************************************************************************/
+//******************************************************************************
 // Obs³ugê plików zrobiæ jako obiekt pamiêci implementuj¹cy niegdyœ wymyœlone pojêcie dostêpu do bloków pamiêci masowej bez obecnoœci tzw. “wymiatania na dysk”. Teraz by³by to raczej obiekt pamiêci operacyjnej do umieszczania w nim danych zachowywanych w postaci integralnej pomiêdzy ‘wywaleniami’ programu. Czyli bazowaæ na automatycznych mechanizmach systemu operacyjnego zapisuj¹cych zawartoœæ pamiêci do wczeœniej gwarantowanego miejsca na dysku— dopiero w momencie koniecznoœci, np. ‘wywalenia’ programu.
 // Trzeba podj¹æ decyzje strukturalne co do sposobu bezpoœredniego indeksowania bloków, bloku bie¿¹cego— w przep³ywie wykonania funkcji ‹modu³u›.
 // Odczyt dostêpnego bloku pamiêci do podanej wielkoœci rozmiaru danych.
@@ -1044,4 +1037,4 @@ D( mem, file_save )
     }
     Y_W(timer);
 }
-/******************************************************************************/
+//******************************************************************************

@@ -1,25 +1,24 @@
 //-*-C-*-
-/*******************************************************************************
-*   ___   laboratory
-*  ¦OUX¦  C+
-*  ¦/C+¦  ‘gui’ sample
-*   ---   "X window”
-*         entry and raw labels
-* ©overcq                on "Gentoo Linux 13.0” “x86_64”              2015-1-6 *
-*******************************************************************************/
+//******************************************************************************
 N E_main_Q_timer_S_hour;
 N E_main_Q_timer_S_minute;
 N E_main_Q_timer_S_second;
 N E_main_Q_http_req_ret_count;
-//=============================================================================
+//==============================================================================
 WINAPI int
 WinMain( HINSTANCE h_instance
 , HINSTANCE h_prev_instance
 , LPSTR cmd_line
-, int show
-){  E_base_M( cmd_line );
-/*    E_x_M();
-    E_ui_M();
+, int cmd_show
+){  E_base_M( h_instance, cmd_line );
+    E_window_M( cmd_show );
+    I window_id = E_window_Q_window_M( 640, 480 );
+    int ret = ~0;
+    if( ~window_id )
+    {  E_window_Q_window_M( 640, 480 );
+       ret = E_window_I_loop();
+    }
+/*    E_ui_M();
 #ifndef C_line_report
     I out = E_io_Q_stream_out_M_fd( STDERR_FILENO );
 #else
@@ -175,10 +174,10 @@ End_2:  D_W( main, timer_draw );
     }
 End_1:
     X_W( x_window, close_window );
-End:E_ui_W();
-    E_x_W();*/
+End:E_ui_W();*/
+    E_window_W();
     E_base_W();
-    return 0;
+    return ret;
 }
 //D( main, cursor )
 //{   X_A( x_window, flush );
@@ -229,13 +228,11 @@ D( main, timer_draw )
     }
     Y_W(timer);
 }
-#define E_main_I_draw_Z_angle_line_(arc_i,arc_n,line_length_i,line_length_n,color)    E_main_I_draw_Z_angle_line( display, screen, window, object, arc_i, arc_n, line_length_i, line_length_n, color )
+#define E_main_I_draw_Z_angle_line_(arc_i,arc_n,line_length_i,line_length_n,color)    E_main_I_draw_Z_angle_line( window, object, arc_i, arc_n, line_length_i, line_length_n, color )
 /*void
 //E_main_I_draw_Z_angle_line(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_screen_Z *screen
-, struct E_x_Q_window_Z *window
-, struct E_x_Q_object_Z *object
+  struct E_window_Q_window_Z *window
+, struct E_window_Q_object_Z *object
 , N arc_i
 , N arc_n
 , N line_length_i
@@ -308,9 +305,7 @@ D( main, timer_draw )
 //NDFN konkretne stany wygl¹du obiektów maj¹ce konkretne znaczenia.
 void
 //E_main_Q_timer_I_draw(
-  struct E_x_Q_display_Z *display
-, struct E_x_Q_screen_Z *screen
-, struct E_x_Q_window_Z *window
+  struct E_x_Q_window_Z *window
 , struct E_x_Q_object_Z *object
 ){  E_x_Q_object_I_draw_P_color_( E_x_Z_color_M( 0xff, 0xff, 0xff ));
     E_x_Q_object_I_draw_Z_rectangles_(
@@ -356,4 +351,4 @@ void
       })
     );
 }*/
-/******************************************************************************/
+//******************************************************************************

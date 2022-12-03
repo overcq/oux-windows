@@ -11,8 +11,8 @@ WINAPI int
 WinMain( HINSTANCE h_instance
 , HINSTANCE h_prev_instance
 , LPSTR cmd_line
-, int show
-){  E_base_M( cmd_line );
+, int cmd_show
+){  E_base_M( h_instance, cmd_line );
     Pc s_0 = "-0.012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789";
     struct E_math_Z_bignum *num = E_math_Q_bignum_I_scan( s_0 );
     if( !num )

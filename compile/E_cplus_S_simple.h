@@ -1,4 +1,3 @@
-//-*-C-*-
 /*******************************************************************************
 *   ___   publicplace
 *  ¦OUX¦  C+
@@ -60,6 +59,29 @@ E_asm_I_bsr( N n
         i = ~0;
         #endif
     return i;
+}
+_inline
+F
+E_asm_I_pow( F x
+, F n
+){
+        #if defined( __i386__ ) || defined( __x86_64__ )
+    __asm__ (
+    "\n" "fyl2x"
+    "\n" "fld1"
+    "\n" "fld        %%st(1)"
+    "\n" "fprem"
+    "\n" "f2xm1"
+    "\n" "faddp"
+    "\n" "fscale"
+    : "+t" (x)
+    : "u" (n)
+//    : "st(2)"
+    );
+        #else
+#error not implemented
+        #endif
+    return x;
 }
 //==============================================================================
 _inline

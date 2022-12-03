@@ -10,6 +10,8 @@
 #define C_line_report
 // Prze³¹cza na jeszcze mniejszy rozmiar identyfikatorów.
 #define C_id_small
+// W³¹cza kontrolê poprawnoœci pamiêci 'alokatora' bloków.
+#define E_mem_Q_blk_C_debug
 //==============================================================================
 // Podejœcie ‘asemblerowe’ wysokiego poziomu.
 // Nadzwyczajne typy danych:
@@ -30,7 +32,7 @@ typedef long                S64;
     #endif
 //------------------------------------------------------------------------------
 // Podstawowe typy danych:
-typedef _Bool               B; // Musi byæ: “true == 1”.
+typedef BOOL                B; // Musi byæ: “true == 1”.
 typedef char                C; // Bajt lub znak bajtowy. Nieprzekraczalne regu³y konwersji domyœlnej w "C” z “char” do “int” wymuszaj¹ deklaracjê “char” bez podania “signed” lub “unsigned”, i nastêpnie w pojedynczych przypadkach domyœlnej zmiany z wielkoœci bajtowej– jawn¹ konwersjê typów, przez “unsigned char”. Sposób masowej realizacji takiej konwersji nie jest jeszcze ustalony.
      #if defined( __i386__ )
 typedef N32                 N;

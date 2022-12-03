@@ -217,7 +217,7 @@ E_main_Q_build_resources_M( struct E_main_Z_build_resources *data
     data->def_name_asterisk_regex = E_main_Q_pcre2_code_M( "^}\\s*(\\*)*\\w" );
     if( !data->def_name_asterisk_regex )
         return 1;
-    data->enum_struct_union_regex_3 = E_main_Q_pcre2_code_M( "^((?:(?:enum|struct|union)\\s+)?\\w+\\s+\\(?:\\**E_[^=;]*)[=;]" );
+    data->enum_struct_union_regex_3 = E_main_Q_pcre2_code_M( "^((?:(?:enum|struct|union)\\s+)?\\w+\\s+\\(?\\**E_[^=;]*)[=;]" );
     if( !data->enum_struct_union_regex_3 )
         return 1;
     data->h_xyi_regex_b = E_main_Q_pcre2_code_M( "\\b(?:X|Yi)_B\\(\\s*(\\w+)\\s*,\\s*(\\w+)\\s*[),]" );
@@ -814,17 +814,17 @@ E_main_I_cx_to_h_3( HANDLE h_file_cx
                     s = s_;
                     E_main_Q_s_s0_I_strcpy( s + l, ";" );
                 }else
-                {   char *s_ = HeapReAlloc( E_main_S_process_heap, 0, s, 1 + 6 + ( match_res == 1 ? 1 : 0 ) + l - 1 + 1 + 1 );
+                {   char *s_ = HeapReAlloc( E_main_S_process_heap, 0, s, 1 + 16 + ( match_res == 1 ? 1 : 0 ) + l - 1 + 1 + 1 );
                     Vv( s_, "Unable to reallocate" )
                     {   HeapFree( E_main_S_process_heap, 0, s );
                         goto Err_2;
                     }
                     s = s_;
-                    MoveMemory( s + 1 + 6 + ( match_res == 1 ? 1 : 0 ), s + 1, l - 1 );
-                    CopyMemory( s + 1, "extern", 6 );
+                    MoveMemory( s + 1 + 16 + ( match_res == 1 ? 1 : 0 ), s + 1, l - 1 );
+                    CopyMemory( s + 1, "extern DLLIMPORT", 16 );
                     if( match_res == 1 )
-                        s[ 1 + 6 ] = ' ';
-                    E_main_Q_s_s0_I_strcpy( s + 1 + 6 + ( match_res == 1 ? 1 : 0 ) + l - 1, ";" );
+                        s[ 1 + 16 ] = ' ';
+                    E_main_Q_s_s0_I_strcpy( s + 1 + 16 + ( match_res == 1 ? 1 : 0 ) + l - 1, ";" );
                 }
                 if( E_main_Q_file_P_line( h_file, s ))
                 {   HeapFree( E_main_S_process_heap, 0, s );
@@ -936,12 +936,12 @@ E_main_I_cx_to_h_3( HANDLE h_file_cx
             }else
             {   PCRE2_SIZE *ovector = pcre2_get_ovector_pointer( data->_3_match_data );
                 unsigned long l = ovector[3];
-                char *s = HeapAlloc( E_main_S_process_heap, 0, 7 + l + 1 + 1 );
+                char *s = HeapAlloc( E_main_S_process_heap, 0, 17 + l + 1 + 1 );
                 Vv( s, "Unable to allocate" )
                     goto Err_2;
-                E_main_Q_s_s0_I_strcpy( s, "extern " );
-                CopyMemory( s + 7, line, l );
-                E_main_Q_s_s0_I_strcpy( s + 7 + l, ";" );
+                E_main_Q_s_s0_I_strcpy( s, "extern DLLIMPORT " );
+                CopyMemory( s + 17, line, l );
+                E_main_Q_s_s0_I_strcpy( s + 17 + l, ";" );
                 if( E_main_Q_file_P_line( h_file, s ))
                 {   HeapFree( E_main_S_process_heap, 0, s );
                     goto Err_2;
@@ -1108,7 +1108,7 @@ E_main_I_find_file_I_module_1( WIN32_FIND_DATA *found_file
         h_file_cx = CreateFile( file, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0 );
         V( h_file_cx != INVALID_HANDLE_VALUE, "Unable to open file" )
             goto Err_1;
-        printf( "Processing file \"%s\"...\n", file );
+        fprintf( stderr, "Processing file \"%s\"...\n", file );
         file[ 10 + l_dir + 1 + l_file - 1 ] = '\0';
         h_file = CreateFile( file, GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0 );
         if( h_file != INVALID_HANDLE_VALUE )
@@ -1297,7 +1297,7 @@ E_main_I_find_file_I_module_2( WIN32_FIND_DATA *found_file
         {   HeapFree( E_main_S_process_heap, 0, file );
             return 1;
         }
-        printf( "Processing file \"%s\"...\n", file );
+        fprintf( stderr, "Processing file \"%s\"...\n", file );
         file_h = HeapAlloc( E_main_S_process_heap, 0, 10 + l_dir + 1 + 12 + l_dir + 2 + l_file - 2 + 1 + 1 );
         Vv( file_h, "Unable to allocate" )
             goto Err_1;
@@ -1407,7 +1407,7 @@ E_main_I_find_file_I_modules_2( WIN32_FIND_DATA *found_file
 }
 int
 E_main_I_build_I_to_libs( struct E_main_Z_build_resources *data
-){  unsigned long l_added = 3;
+){  unsigned long l_added = 4;
     if( data->xyi_array_a_n )
     {   for( unsigned long i = 0; i != data->xyi_array_a_n; i++ )
              for( unsigned long j = 0; j != data->xyi_array_b_n; j++ )
@@ -1572,7 +1572,7 @@ E_main_I_find_file_I_program( WIN32_FIND_DATA *found_file
                 h_file_cx = CreateFile( file, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, 0 );
                 V( h_file_cx != INVALID_HANDLE_VALUE, "Unable to open file" )
                     goto Err_1;
-                printf( "Processing file \"%s\"...\n", file );
+                fprintf( stderr, "Processing file \"%s\"...\n", file );
                 file[ l_file_mask - 1 + l_file - 1 ] = '\0';
                 h_file = CreateFile( file, GENERIC_WRITE, FILE_SHARE_READ, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0 );
                 if( h_file != INVALID_HANDLE_VALUE )
@@ -1805,7 +1805,10 @@ E_main_I_find_file_I_clean_module( WIN32_FIND_DATA *found_file
         file[ 10 + l_dir ] = '\\';
         CopyMemory( file + 10 + l_dir + 1, found_file->cFileName, l_file - 1 );
         file[ 10 + l_dir + 1 + l_file - 1 ] = '\0';
-        printf( "Removing file \"%s\"...\n", file );
+        fprintf( stderr, "Removing file \"%s\"...\n", file );
+        DeleteFile(file);
+        file[ 10 + l_dir + 1 + l_file - 2 ] = 'o';
+        fprintf( stderr, "Removing file \"%s\"...\n", file );
         DeleteFile(file);
         char *file_ = HeapReAlloc( E_main_S_process_heap, 0, file, 10 + l_dir + 1 + 12 + l_dir + 2 + l_file - 2 + 1 + 1 );
         Vv( file_, "Unable to reallocate" )
@@ -1818,13 +1821,13 @@ E_main_I_find_file_I_clean_module( WIN32_FIND_DATA *found_file
         E_main_Q_s_s0_I_strcpy( file + 10 + l_dir + 1 + 12 + l_dir, "__" );
         CopyMemory( file + 10 + l_dir + 1 + 12 + l_dir + 2, found_file->cFileName, l_file - 2 );
         E_main_Q_s_s0_I_strcpy( file + 10 + l_dir + 1 + 12 + l_dir + 2 + l_file - 2, "h" );
-        printf( "Removing file \"%s\"...\n", file );
+        fprintf( stderr, "Removing file \"%s\"...\n", file );
         DeleteFile(file);
         file[ 10 + l_dir + 1 + 10 ] = '1';
-        printf( "Removing file \"%s\"...\n", file );
+        fprintf( stderr, "Removing file \"%s\"...\n", file );
         DeleteFile(file);
         file[ 10 + l_dir + 1 + 10 ] = '2';
-        printf( "Removing file \"%s\"...\n", file );
+        fprintf( stderr, "Removing file \"%s\"...\n", file );
         DeleteFile(file);
         HeapFree( E_main_S_process_heap, 0, file );
     }
@@ -1884,6 +1887,9 @@ E_main_I_find_file_I_clean_program( WIN32_FIND_DATA *found_file
                 CopyMemory( file, data->found_dir, l_file_mask - 1 );
                 CopyMemory( file + l_file_mask - 1, found_file->cFileName, l_file - 1 );
                 file[ l_file_mask - 1 + l_file - 1 ] = '\0';
+                printf( "Removing file \"%s\"...\n", file );
+                DeleteFile(file);
+                file[ l_file_mask - 1 + l_file - 2 ] = 'o';
                 printf( "Removing file \"%s\"...\n", file );
                 DeleteFile(file);
                 char *file_ = HeapReAlloc( E_main_S_process_heap, 0, file, l_file_mask - 1 + 12 + l_file - 2 + 1 + 1 );

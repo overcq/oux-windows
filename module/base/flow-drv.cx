@@ -1,12 +1,5 @@
 //-*-C-*-
-/*******************************************************************************
-*   ___   publicplace
-*  ¦OUX¦  C+
-*  ¦/C+¦  component
-*   ---   base
-*         flow driver
-* ©overcq                on "Gentoo Linux 13.0” “x86_64”             2015-1-26
-*******************************************************************************/
+//******************************************************************************
 // Programista "oux” rozumie nastêpuj¹ce zagadnienia podstawowe:
 // ? prze³¹czanie ‹zadañ› wykonywane w pêtli dla kolejnych obudzonych jako ograniczon¹ liniowym czasem aktywacjê kolejnych warstw wykonawczej sieci informacyjnej (jak biologicznej sieci neuronowo-biochemicznej, inaczej elektryczno-molekularnej, inaczej synaptyczno-organicznej)
 // ? informacyjno-wykonawcz¹ nienazywaj¹c¹ stwórczoœæ bytow¹ (molekularn¹) w postaci bezwarunkowej pêtli programowej odpowiednio u¿ytej
@@ -1078,4 +1071,4 @@ D( flow, call_srv )
     }
     X_W( flow, call_req );
 }
-/******************************************************************************/
+//******************************************************************************

@@ -1,54 +1,34 @@
 //-*-C-*-
-/*******************************************************************************
-*   ___   publicplace
-*  ¦OUX¦  C+
-*  ¦/C+¦  component
-*   ---   "X window” —high ‘cpu’
-*         window driver
-* ©overcq                on "Gentoo Linux 13.0” “x86_64”             2015-4-28 *
-*******************************************************************************/
-// Zewnêtrzne trwa³e “XGrabServer” blokuje system; na przyk³ad u¿ywane przez ró¿nych “mened¿erów okien” "X” podczas przeci¹gania okna.
-// W przysz³oœci, gdy jakiekolwiek pozosta³e “NDFN” zostan¹ zrobione, to w celu sprawdzenia poprawnoœci dzia³ania tego sterownika nie wystarczy jego u¿ytkowanie w ró¿nych warunkach, lecz bêdzie konieczne celowe przetestowanie przez podawanie wszystkich mo¿liwych sekwencji “zdarzeñ” odsuniêtych o losowe minimalne odleg³oœci czasowe i punktowe: ? w forsowaniu u¿ytkowania, ? na wewnêtrznie obci¹¿onym podsystemie "X”. By wyszukiwaæ b³êdne prze³¹czenie przy którymœ ekstremum integralnoœci i wtedy dezintegracjê sterownika rozpoznawan¹ po b³êdnym pojedynczym stanie, podczas gdy nienad¹¿anie nie jest b³êdem.
-//------------------------------------------------------------------------------
-// Okno ‘dnd’ potrzebuje byæ utrzymywane w “mened¿erze okien” na wierzchu wszystkich mo¿liwych. typ okna “_NET_WM_WINDOW_TYPE_DND”, jeœli “mened¿er okien” go obs³uguje: czy ma byæ ³¹cznie z “OVERRIDE_REDIRECT”, tak jak musi byæ dla zwyk³ych “mened¿erów okien”?
-//TODO Rozwa¿yæ jeszcze ·dodatkowo· blok usuniêtego “grab_server”.
-//TODO Uzupe³niæ o deterministyczny czas opóŸnienia przerysowania po ponownym pokazaniu siê okna ‹operatorowi›.
-// Czy dzia³a przeci¹ganie pomiêdzy przyleg³ymi wyœwietlaczami bez “Xinerama”.
-//? uzupe³niæ o upuszczanie obiektu. podczas “drag” (‘grabniêcia’) “configure_notify” raportuje pozycjê wzglêdem okna “root” z b³êdnym, pozostawionym z ostatnich operacji— “above_sibling”, ale i tak jest bezu¿yteczne dla ‘drop’, a tylko s³u¿y do przysz³ej zmiany rozmiaru okna ‘dnd’ (np. przez dodawanie obiektów).
-//? zuniwersalizowaæ synchronizacjê do zwizualizowania klikniêcia ( “U_X( display->req, draw_click )” ).
-//TODO Kiedyœ mo¿na zrobiæ tak, by uchwycenie animowanego elementu obiektu utrzymywa³o okno ‘dnd’ wzglêdem bie¿¹cego po³o¿enia tego punktu elementu w obiekcie.
-//==============================================================================
-    #ifdef E_flow_C_thread_system_unblock_reports
-_internal
-void
-E_x_window_D_events_I_unblock( P display_id
-){  struct E_x_Q_display_Z *display = E_mem_Q_tab_R( E_x_Q_display_S, *( I * )display_id );
-    struct E_x_Q_screen_Z *screen = E_mem_Q_tab_R( display->screen, 0 );
-    struct E_x_Q_window_Z *window = &screen->dnd_window;
-    xcb_client_message_event_t x_client =
-    { .response_type = XCB_CLIENT_MESSAGE
-    , .format = 32
-    , .window = XCB_NONE
-    , .type = XCB_NONE
-    };
-    xcb_send_event( display->x_display
-    , no
-    , window->x_window
-    , XCB_EVENT_MASK_STRUCTURE_NOTIFY
-    , (P)&x_client
-    );
-    xcb_flush( display->x_display );
-}
-D( x_window, events_pointer_button_check )
-{   Yi_M( x_window, events_pointer_button_check );
-    I_D
-    {   Yi_B( x_window, events_pointer_button_check )
-            break;
-        E_flow_Q_thread_system_unblock_report_I_unblock( D_id(x_window,events), 0 ); //NDFN “0”. Zamiast obecnego zrobiæ ci¹g³y, kolejkowany ‹impulsator›.
+//******************************************************************************
+int
+E_window_I_loop( void
+){  MSG msg;
+    N ret;
+    while( ret = GetMessage( &msg, 0, 0, 0 ))
+    {   if( !~ret )
+        {   GV_(NA);
+            return ~0;
+        }
+        TranslateMessage( &msg );
+        DispatchMessage( &msg );
     }
-    Yi_W( x_window, events_pointer_button_check );
+    return msg.wParam;
 }
-    #endif
+CALLBACK LRESULT
+E_window_Q_window_I_proc( HWND h_window
+, UINT msg
+, WPARAM w_param
+, LPARAM l_param
+){  switch(msg)
+    { case WM_DESTROY:
+            PostQuitMessage(0);
+            break;
+      default:
+            return DefWindowProc( h_window, msg, w_param, l_param );
+    }
+    return 0;
+}
+/*
 D( x_window, events )
 {   Dh_();
         #ifdef E_flow_C_thread_system_unblock_reports
@@ -58,7 +38,7 @@ D( x_window, events )
     X_A( x_window, draw );
     X_A( x_window, close_window );
     X_A( x_window, flush );
-/**
+*//**
 czêstotliwoœæ wspomagaj¹cej wizualizacji rêcznego skokowego przesuwania lub rozmiarowania obiektu przestrzeni, niezale¿nie od animowanych w czasie zmian zawartoœci.
 mêcz¹cy w odbiorze test dokonywany przez cz³owieka: szukaæ najwiêkszej czêstotliwoœci przerysowywania obiektów, przy której ka¿de przerysowanie jest ju¿ zauwa¿one bez umys³owego b³ysku pre-mobilizacji adekwatnego do stanu umys³u podczas zauwa¿enia jakiegoœ krótkiego migniêcia ruchu przez rzadkie ale liczebne zaroœla w d¿ungli. jednak w tym teœcie szuka siê p³ynnoœci takich migniêæ podczas powolnego ci¹g³ego przesuwania lub rozmiarowania obiektu albo ramki okna, nie dopuszczaj¹c do zd¹¿enia przerysowania do punktu uchwycenia w rutynie wyæwiczenia, a nie reaguj¹c impulsowo. po przekroczeniu —zmniejszaj¹c— czêstotliwoœci szukanej przerysowanie zaczyna sprawiaæ wra¿enie ‚trupiego’. tym charakteryzuj¹ siê czêstotliwoœci odleg³e od szukanej w okresie o mikrosekundy, bardziej odleg³e czêstotliwoœci zamêczaj¹ uk³ad interpretacji bez informacji mo¿liwych do zinterpretowania w czasie odbioru; jakkolwiek te informacje s¹, tylko niszcz¹ uk³ad interpretacji cz³owieka. dobrze znaleziona czêstotliwoœæ pozwala widzieæ komponentowo (ca³oœciowo) przesuwane lub rozmiarowane obiekty. przypuszczalnie jest wiele pochodnych czêstotliwoœci, które wydaj¹ siê optymalne, ale tylko jedna przechodzi koñcowy test widzenia komponentowego podczas wizualizacji.
 nie uwzglêdnia b³êdu czasu podawanego podczas testu przez “gettimeofday”.
@@ -68,7 +48,7 @@ nie uwzglêdnia b³êdu czasu podawanego podczas testu przez “gettimeofday”.
 po eliminacji opóŸniaj¹cych (serwer "X”) “clip-mask” i innych zmianach:
 ?podniesiona czêstotliwoœæ pochodna: 128244; 7,79763576±?0,00006080 Hz.
 ?stan bie¿¹cy— podniesiona czêstotliwoœæ pochodna: 182999; 5,464510735±<?0,000029861 Hz.
-*/
+*//*
         #ifndef E_flow_C_thread_system_unblock_reports
     I timer = Y_M(182999);
         #else
@@ -1539,5 +1519,5 @@ D( x_window, flush )
         }
     }
     X_W( x_window, flush );
-}
-/******************************************************************************/
+}*/
+//******************************************************************************

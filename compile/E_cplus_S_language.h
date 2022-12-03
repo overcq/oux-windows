@@ -150,7 +150,7 @@ typedef P           *Pp; // WskaŸnik do tablic adresów.
 // Deklaracja ‹procedury› generuj¹cej ‹systemowy raport odblokowuj¹cy› dla ‹zadania›; odblokowuj¹cej to ‹zadanie›.
 #define Xh_A( thread_unblock_proc_ ) \
   HANDLE J_autogen( thread_flow_mutex ); \
-  B *J_autogen( thread_switch_back ); \
+  volatile B *J_autogen( thread_switch_back ); \
   E_flow_Q_thread_system_unblock_report_M(( thread_unblock_proc_ ), &J_autogen( thread_flow_mutex ), &J_autogen( thread_switch_back ))
 // Tu¿ przed wywo³aniem procedury blokuj¹cej w oczekiwaniu na ‹systemowy raport odblokowuj¹cy›.
 #define Xh_B_() \

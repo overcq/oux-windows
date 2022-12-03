@@ -1,17 +1,17 @@
 [Project]
-FileName=oux-base.dev
-Name=oux-base
+FileName=oux-window.dev
+Name=oux-window
 Type=3
 Ver=2
 ObjFiles=
-Includes=.;..;..\..\compile;..\..\pcre2;..\window
-Libs=
+Includes=.;..;..\..\compile;..\base
+Libs=..\base
 PrivateResource=
 ResourceIncludes=
 MakeIncludes=
 Compiler=-DBUILDING_DLL=1_@@_-include E_cplus_S_to_libs.h_@@_-fwrapv_@@_
 CppCompiler=-DBUILDING_DLL=1_@@_
-Linker=
+Linker=-loux-base_@@_
 IsCpp=0
 Icon=
 ExeOutput=
@@ -19,7 +19,7 @@ ObjectOutput=
 LogOutput=
 LogOutputEnabled=0
 OverrideOutput=0
-OverrideOutputName=oux-base.dll
+OverrideOutputName=oux-window.dll
 HostApplication=
 UseCustomMakefile=0
 CustomMakefile=
@@ -29,7 +29,7 @@ IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=6
 CompilerSettings=000100d0e0100000000001001
-UnitCount=12
+UnitCount=9
 
 [VersionInfo]
 Major=1
@@ -61,7 +61,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit2]
-FileName=M.c
+FileName=window-theme.c
 CompileCpp=0
 Folder=
 Compile=1
@@ -71,7 +71,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit3]
-FileName=W.c
+FileName=M.c
 CompileCpp=0
 Folder=
 Compile=1
@@ -81,7 +81,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit4]
-FileName=flow-drv.c
+FileName=W.c
 CompileCpp=0
 Folder=
 Compile=1
@@ -91,7 +91,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit5]
-FileName=text.c
+FileName=window-draw.c
 CompileCpp=0
 Folder=
 Compile=1
@@ -101,7 +101,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit6]
-FileName=mem-blk.c
+FileName=window-drv.c
 CompileCpp=0
 Folder=
 Compile=1
@@ -111,7 +111,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit7]
-FileName=mem-tab.c
+FileName=window-face.c
 CompileCpp=0
 Folder=
 Compile=1
@@ -121,27 +121,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit8]
-FileName=simple.c
-CompileCpp=0
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit10]
-FileName=flow-log.c
-CompileCpp=0
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit11]
-FileName=math-bignum.c
+FileName=window-font.c
 CompileCpp=0
 Folder=
 Compile=1
@@ -151,17 +131,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit9]
-FileName=datetime.c
-CompileCpp=0
-Folder=
-Compile=1
-Link=1
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
-
-[Unit12]
-FileName=mem-file.c
+FileName=window-obj.c
 CompileCpp=0
 Folder=
 Compile=1

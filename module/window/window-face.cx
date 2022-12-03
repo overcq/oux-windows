@@ -1,0 +1,139 @@
+//-*-C-*-
+//******************************************************************************
+// Skróty do dokumentacji:
+// ‘state’– stan obiektu.
+// ‘mode’ wewn¹trzprogramowy– ze wzglêdu na odwewnêtrzn¹ dezintegralnoœæ (nieprzewidywalnoœæ przychodz¹cych sygna³ów) wejœæ/wyjœæ deterministycznych algorytmów przetwarzania danych w sterowniku– wyj¹tkowy (oparty na ·alternatywnych fragmentach· tego samego algorytmu w pe³nym determinizmie) tryb przetwarzania danych podczas przemiany wewnêtrznej.
+// ‘req’– ¿¹danie realizacji funkcji zbiorczej.
+// ‘ex’– uzupe³nienie rodzaju nastêpuj¹cej zmiany (np. ‘mode’).
+//==============================================================================
+struct E_window_Q_window_Z
+{ struct E_mem_Q_tab_Z *object;
+  HWND handle;
+  N32 *drawable;
+  I *object_mask;
+  N last_user_activity_time, user_activity_time;
+  S16 x, y; //NDFN niekoniecznie jest poprawne, bo “configure_notify” wzglêdem “root” nie musz¹ byæ przysy³ane. Ale narazie nie jest niezbêdne.
+  N16 width, height, width_new, height_new;
+  I screen_id;
+  unsigned U_R( state, visible )                        :1;
+  unsigned U_R( mode, resize )                          :1;
+  unsigned U_R( req, resize )                           :1;
+  unsigned U_R( req, draw )                             :1;
+  unsigned U_R( req, close )                            :1;
+};
+//------------------------------------------------------------------------------
+struct E_window_Z_drag_object_src
+{ I window_id;
+  I object_id;
+};
+//------------------------------------------------------------------------------
+struct E_mem_Q_tab_Z *E_window_Q_window_S;
+//==============================================================================
+I
+E_window_Q_window_M(
+  int width
+, int height
+){  I window_id = E_mem_Q_tab_I_add( E_window_Q_window_S );
+    if( !~window_id )
+        return ~0;
+    struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
+    window->x = 0;
+    window->y = 0;
+    window->width_new = window->width = width;
+    window->height_new = window->height = height;
+    window->object = E_mem_Q_tab_M( sizeof( struct E_window_Q_object_Z ), 0 );
+    if( !window->object )
+    {   GV_(NA);
+        if( !~E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+        {   GV_(NA);
+        }
+        return ~0;
+    }
+    Mt_( window->drawable, window->width * window->height );
+    if( !window->drawable )
+    {   GV_(NA);
+        E_mem_Q_tab_W( window->object );
+        if( !~E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+        {   GV_(NA);
+        }
+        return ~0;
+    }
+    Mt_( window->object_mask, window->width * window->height );
+    if( !window->object_mask )
+    {   GV_(NA);
+        W( window->drawable );
+        E_mem_Q_tab_W( window->object );
+        if( !~E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+        {   GV_(NA);
+        }
+        return ~0;
+    }
+    for_n( i, window->width * window->height )
+        window->object_mask[i] = ~0;
+    window->user_activity_time = window->last_user_activity_time = 0;
+    window->handle = CreateWindowEx(
+      WS_EX_ACCEPTFILES | WS_EX_APPWINDOW
+    , "main_window"
+    , "OUX/C+ window"
+    , WS_OVERLAPPEDWINDOW
+    , CW_USEDEFAULT
+    , CW_USEDEFAULT
+    , width
+    , height
+    , 0
+    , 0
+    , E_base_S->E_flow_S_h_instance
+    , 0
+    );
+    if( !window->handle )
+    {   GV_(NA);
+        W( window->object_mask );
+        W( window->drawable );
+        if( !~E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+        {   GV_(NA);
+        }
+        return ~0;
+    }
+    ShowWindow( window->handle, E_window_S->cmd_show );
+    UpdateWindow( window->handle );
+    U_L( window->state, visible );
+    U_L( window->mode, resize );
+    U_L( window->req, resize );
+    U_F( window->req, draw );
+    U_L( window->req, close );
+    //U_F( display->req, draw );
+    //U_L( display->req, flush );
+    return window_id;
+}
+void
+E_window_Q_window_W( I display_id
+, I window_id
+){  struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
+    
+/*    W( window->object_mask );
+    W( window->drawable );
+    E_mem_Q_tab_W( window->object );
+    E_mem_Q_tab_I_remove( display->window, window_id );
+    if( U_R( display->mode, drag ))
+    {   for_n( i, display->drag_S_object_src_n )
+            if( display->drag_S_object_src[i].window_id == window_id )
+            {   U_F( display->mode, drag_stop );
+                    #ifdef E_flow_C_thread_system_unblock_reports
+                E_flow_Q_thread_system_unblock_report_I_unblock( D_id(x_window,events), display_id );
+                    #endif
+                break;
+            }
+    }
+    U_F( display->req, flush );*/
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+N32
+E_window_Q_image_R_pixel( struct E_window_Q_window_Z *window
+, N32 *pixmap
+, S16 x
+, S16 y
+){  J_assert( x >= 0 );
+    J_assert( y >= 0 );
+    return pixmap[ x + y * window->width ];
+}
+//******************************************************************************
