@@ -13,4 +13,5 @@ Makefile.win
 !/make-oux/*.c
 !/module/*/dllmain.c
 !/module/base/base.h
+!/module/window/window.h
 /pcre2

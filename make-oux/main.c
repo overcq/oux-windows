@@ -1816,14 +1816,11 @@ E_main_I_find_file_I_clean_module( WIN32_FIND_DATA *found_file
             return 1;
         }
         file = file_;
-        E_main_Q_s_s0_I_strcpy( file + 10 + l_dir + 1, "E_cplus_S_0_" );
+        E_main_Q_s_s0_I_strcpy( file + 10 + l_dir + 1, "E_cplus_S_1_" );
         E_main_Q_s_s0_I_strcpy( file + 10 + l_dir + 1 + 12, data->found_dir );
         E_main_Q_s_s0_I_strcpy( file + 10 + l_dir + 1 + 12 + l_dir, "__" );
         CopyMemory( file + 10 + l_dir + 1 + 12 + l_dir + 2, found_file->cFileName, l_file - 2 );
         E_main_Q_s_s0_I_strcpy( file + 10 + l_dir + 1 + 12 + l_dir + 2 + l_file - 2, "h" );
-        fprintf( stderr, "Removing file \"%s\"...\n", file );
-        DeleteFile(file);
-        file[ 10 + l_dir + 1 + 10 ] = '1';
         fprintf( stderr, "Removing file \"%s\"...\n", file );
         DeleteFile(file);
         file[ 10 + l_dir + 1 + 10 ] = '2';
@@ -1898,12 +1895,9 @@ E_main_I_find_file_I_clean_program( WIN32_FIND_DATA *found_file
                     return 1;
                 }
                 file = file_;
-                E_main_Q_s_s0_I_strcpy( file + l_file_mask - 1 , "E_cplus_S_0_" );
+                E_main_Q_s_s0_I_strcpy( file + l_file_mask - 1 , "E_cplus_S_1_" );
                 CopyMemory( file + l_file_mask - 1 + 12, found_file->cFileName, l_file - 2 );
                 E_main_Q_s_s0_I_strcpy( file + l_file_mask - 1 + 12 + l_file - 2, "h" );
-                printf( "Removing file \"%s\"...\n", file );
-                DeleteFile(file);
-                file[ l_file_mask - 1 + 10 ] = '1';
                 printf( "Removing file \"%s\"...\n", file );
                 DeleteFile(file);
                 file[ l_file_mask - 1 + 10 ] = '2';
