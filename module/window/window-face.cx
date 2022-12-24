@@ -11,15 +11,10 @@ struct E_window_Q_window_Z
   HWND handle;
   N32 *drawable;
   I *object_mask;
-  N last_user_activity_time, user_activity_time;
   S16 x, y; //NDFN niekoniecznie jest poprawne, bo “configure_notify” wzglêdem “root” nie musz¹ byæ przysy³ane. Ale narazie nie jest niezbêdne.
-  N16 width, height, width_new, height_new;
+  N16 width, height;
   I screen_id;
-  unsigned U_R( state, visible )                        :1;
-  unsigned U_R( mode, resize )                          :1;
-  unsigned U_R( req, resize )                           :1;
-  unsigned U_R( req, draw )                             :1;
-  unsigned U_R( req, close )                            :1;
+  unsigned U_R( req, draw ) :1;
 };
 //------------------------------------------------------------------------------
 struct E_window_Z_drag_object_src
@@ -37,10 +32,9 @@ E_window_Q_window_M(
     if( !~window_id )
         return ~0;
     struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
-    window->x = 0;
-    window->y = 0;
-    window->width_new = window->width = width;
-    window->height_new = window->height = height;
+    window->x = window->y = 0;
+    window->width = window->height = 0;
+    U_L( window->req, draw );
     window->object = E_mem_Q_tab_M( sizeof( struct E_window_Q_object_Z ), 0 );
     if( !window->object )
     {   GV_(NA);
@@ -49,7 +43,7 @@ E_window_Q_window_M(
         }
         return ~0;
     }
-    Mt_( window->drawable, window->width * window->height );
+    Mt_( window->drawable, 0 );
     if( !window->drawable )
     {   GV_(NA);
         E_mem_Q_tab_W( window->object );
@@ -58,7 +52,7 @@ E_window_Q_window_M(
         }
         return ~0;
     }
-    Mt_( window->object_mask, window->width * window->height );
+    Mt_( window->object_mask, 0 );
     if( !window->object_mask )
     {   GV_(NA);
         W( window->drawable );
@@ -68,9 +62,6 @@ E_window_Q_window_M(
         }
         return ~0;
     }
-    for_n( i, window->width * window->height )
-        window->object_mask[i] = ~0;
-    window->user_activity_time = window->last_user_activity_time = 0;
     window->handle = CreateWindowEx(
       WS_EX_ACCEPTFILES | WS_EX_APPWINDOW
     , "main_window"
@@ -96,25 +87,18 @@ E_window_Q_window_M(
     }
     ShowWindow( window->handle, E_window_S->cmd_show );
     UpdateWindow( window->handle );
-    U_L( window->state, visible );
-    U_L( window->mode, resize );
-    U_L( window->req, resize );
-    U_F( window->req, draw );
-    U_L( window->req, close );
-    //U_F( display->req, draw );
-    //U_L( display->req, flush );
     return window_id;
 }
 void
 E_window_Q_window_W( I display_id
 , I window_id
 ){  struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
-    
-/*    W( window->object_mask );
+    DestroyWindow( window->handle );
+    W( window->object_mask );
     W( window->drawable );
     E_mem_Q_tab_W( window->object );
-    E_mem_Q_tab_I_remove( display->window, window_id );
-    if( U_R( display->mode, drag ))
+    E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id );
+    /*if( U_R( display->mode, drag ))
     {   for_n( i, display->drag_S_object_src_n )
             if( display->drag_S_object_src[i].window_id == window_id )
             {   U_F( display->mode, drag_stop );
@@ -123,8 +107,7 @@ E_window_Q_window_W( I display_id
                     #endif
                 break;
             }
-    }
-    U_F( display->req, flush );*/
+    }*/
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 N32

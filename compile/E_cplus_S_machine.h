@@ -11,7 +11,7 @@
 // Prze³¹cza na jeszcze mniejszy rozmiar identyfikatorów.
 #define C_id_small
 // W³¹cza kontrolê poprawnoœci pamiêci 'alokatora' bloków.
-#define E_mem_Q_blk_C_debug
+//#define E_mem_Q_blk_C_debug
 //==============================================================================
 // Podejœcie ‘asemblerowe’ wysokiego poziomu.
 // Nadzwyczajne typy danych:

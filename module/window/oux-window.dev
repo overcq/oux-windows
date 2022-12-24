@@ -11,7 +11,7 @@ ResourceIncludes=
 MakeIncludes=
 Compiler=-DBUILDING_DLL=1_@@_-include E_cplus_S_to_libs.h_@@_-fwrapv_@@_
 CppCompiler=-DBUILDING_DLL=1_@@_
-Linker=-loux-base_@@_
+Linker=-loux-base_@@_-lgdi32_@@_
 IsCpp=0
 Icon=
 ExeOutput=

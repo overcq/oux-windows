@@ -149,7 +149,7 @@ struct E_main_Z_build_resources
   char *file_h_to_libs_buffer, *file_h_not_to_libs_buffer;
   unsigned long xyi_array_a_n, xyi_array_b_n;
   char **xyi_array_a, **xyi_array_b;
-  pcre2_code *x_regex, *yi_regex, *enum_struct_union_regex_1, *enum_struct_union_regex_2, *enum_struct_union_regex_3, *e_regex, *d_regex, *def_name_regex, *def_name_asterisk_regex, *h_xyi_regex_b, *preproc_if_regex, *struct_union_regex;
+  pcre2_code *xb_regex, *yib_regex, *x_regex, *yi_regex, *enum_struct_union_regex_1, *enum_struct_union_regex_2, *enum_struct_union_regex_3, *e_regex, *d_regex, *def_name_regex, *def_name_asterisk_regex, *h_xyi_regex_b, *preproc_if_regex, *struct_union_regex;
   pcre2_match_data *_3_match_data;
   char *found_dir;
 };
@@ -174,7 +174,7 @@ E_main_Q_pcre2_code_M( char *pattern
             HeapFree( E_main_S_process_heap, 0, s );
             return ret;
         }
-        fprintf( stderr, "%s in pos %zd\n", s, error_offset );
+        fprintf( stderr, "%s in pos %ld\n", s, error_offset );
         HeapFree( E_main_S_process_heap, 0, s );
     }
     return ret;
@@ -192,6 +192,12 @@ E_main_Q_build_resources_M( struct E_main_Z_build_resources *data
         return 1;
     data->xyi_array_b = HeapAlloc( E_main_S_process_heap, 0, 0 );
     Vv( data->xyi_array_b, "Unable to allocate" )
+        return 1;
+    data->xb_regex = E_main_Q_pcre2_code_M( "\\bX_B\\(\\s*(\\w+)\\s*,\\s*(\\w+)\\s*[),]" );
+    if( !data->xb_regex )
+        return 1;
+    data->yib_regex = E_main_Q_pcre2_code_M( "\\bYi_B\\(\\s*(\\w+)\\s*,\\s*(\\w+)\\s*\\)" );
+    if( !data->yib_regex )
         return 1;
     data->x_regex = E_main_Q_pcre2_code_M( "\\bX_[AB]\\(\\s*(\\w+)\\s*,\\s*(\\w+)\\s*[),]" );
     if( !data->x_regex )
@@ -251,6 +257,8 @@ E_main_Q_build_resources_W( struct E_main_Z_build_resources *data
     pcre2_code_free( data->enum_struct_union_regex_1 );
     pcre2_code_free( data->yi_regex );
     pcre2_code_free( data->x_regex );
+    pcre2_code_free( data->yib_regex );
+    pcre2_code_free( data->xb_regex );
     if( data->xyi_array_b )
     {   for( unsigned long i = 0; i != data->xyi_array_b_n; i++ )
             HeapFree( E_main_S_process_heap, 0, data->xyi_array_b[i] );
@@ -671,10 +679,10 @@ E_main_I_cx_to_h_1( HANDLE h_file_cx
     if( xyi_array_b_n )
     {   unsigned long l = E_main_Q_s0_R_strlen( xyi_array_b[0] );
         unsigned long l_enc = E_main_Q_s0_R_strlen(enc);
-        unsigned long buffer_size = 18 + l + 17 + l_enc + 3 + 4;
+        unsigned long buffer_size = 18 + l + 17 + l_enc + 3 + 2 + 2;
         for( unsigned long i = 1; i != xyi_array_b_n; i++ )
-        {   unsigned long l = E_main_Q_s0_R_strlen( xyi_array_b[0] );
-            buffer_size += 12 + l + 17 + l_enc + 4;
+        {   unsigned long l = E_main_Q_s0_R_strlen( xyi_array_b[i] );
+            buffer_size += 12 + l + 17 + l_enc + 2 + 2;
         }
         char *buffer = HeapAlloc( E_main_S_process_heap, 0, buffer_size );
         Vv( buffer, "Unable to allocate" )
@@ -686,15 +694,15 @@ E_main_I_cx_to_h_1( HANDLE h_file_cx
         E_main_Q_s_s0_I_strcpy( buffer + 18 + l, ") = _XhYi_F_uid( " );
         E_main_Q_s_s0_I_strcpy( buffer + 18 + l + 17, enc );
         CopyMemory( buffer + 18 + l + 17 + l_enc, " )\r\n", 4 );
-        char *s = buffer + 18 + l + 17 + l_enc + 4;
+        char *s = buffer + 18 + l + 17 + l_enc + 2 + 2;
         for( unsigned long i = 1; i != xyi_array_b_n; i++ )
-        {   unsigned long l = E_main_Q_s0_R_strlen( xyi_array_b[0] );
+        {   unsigned long l = E_main_Q_s0_R_strlen( xyi_array_b[i] );
             E_main_Q_s_s0_I_strcpy( s, ", _XhYi_uid(" );
             E_main_Q_s_s0_I_strcpy( s + 12, xyi_array_b[i] );
             E_main_Q_s_s0_I_strcpy( s + 12 + l, ") = _XhYi_F_uid( " );
             E_main_Q_s_s0_I_strcpy( s + 12 + l + 17, enc );
             E_main_Q_s_s0_I_strcpy( s + 12 + l + 17 + l_enc, " )\r\n" );
-            s += 12 + l + 17 + l_enc + 4;
+            s += 12 + l + 17 + l_enc + 2 + 2;
         }
         CopyMemory( s, "};\r\n", 4 );
         unsigned long wrote;
@@ -967,7 +975,7 @@ Err_1:
     return 1;
 }
 int
-E_main_I_cx_to_xyi_array( HANDLE h_file_cx
+E_main_I_find_file_I_module_I_cx_to_xyi_array( HANDLE h_file_cx
 , struct E_main_Z_build_resources *data
 ){  int eof;
     do
@@ -1059,6 +1067,83 @@ E_main_I_cx_to_xyi_array( HANDLE h_file_cx
                         data->xyi_array_b_n++;
                         data->xyi_array_b[ data->xyi_array_b_n - 1 ] = s;
                     }
+            }
+        }
+    }while( !eof );
+    return 0;
+}
+int
+E_main_I_find_file_I_program_I_cx_to_xyi_array( HANDLE h_file_cx
+, struct E_main_Z_build_resources *data
+){  int eof;
+    do
+    {   char *line;
+        eof = E_main_Q_file_R_line( h_file_cx, &line );
+        if( !line )
+            return 1;
+        int match_res = pcre2_match( data->xb_regex, ( PCRE2_SPTR8 )line, PCRE2_ZERO_TERMINATED, 0, 0, data->_3_match_data, 0 );
+        if( match_res < 0 )
+        {   if( match_res != PCRE2_ERROR_NOMATCH )
+            {   fputs( "Match error for \"x_regex\".\n", stderr );
+                return 1;
+            }
+        }else
+        {   PCRE2_SIZE *ovector = pcre2_get_ovector_pointer( data->_3_match_data );
+            char *s = HeapAlloc( E_main_S_process_heap, 0, ( ovector[3] - ovector[2] ) + 3 + ( ovector[5] - ovector[4] ) + 1 );
+            Vv( s, "Unable to allocate" )
+                return 1;
+            CopyMemory( s, line + ovector[2], ovector[3] - ovector[2] );
+            E_main_Q_s_s0_I_strcpy( s + ( ovector[3] - ovector[2] ), ",X_" );
+            CopyMemory( s + ( ovector[3] - ovector[2] ) + 3, line + ovector[4], ovector[5] - ovector[4]);
+            s[ ( ovector[3] - ovector[2] ) + 3 + ( ovector[5] - ovector[4] ) ] = '\0';
+            unsigned long i;
+            for( i = 0; i != data->xyi_array_b_n; i++ )
+                if( data->xyi_array_b[i]
+                && !E_main_Q_s0_s0_I_strcmp( data->xyi_array_b[i], s )
+                )
+                    break;
+            if( i == data->xyi_array_b_n )
+            {   void *p = HeapReAlloc( E_main_S_process_heap, 0, data->xyi_array_b, sizeof( char * ) * ( data->xyi_array_b_n + 1 ));
+                Vv( p, "Unable to reallocate" )
+                    return 1;
+                data->xyi_array_b = p;
+                data->xyi_array_b_n++;
+                data->xyi_array_b[ data->xyi_array_b_n - 1 ] = s;
+            }
+        }
+        match_res = pcre2_match( data->yib_regex, ( PCRE2_SPTR8 )line, PCRE2_ZERO_TERMINATED, 0, 0, data->_3_match_data, 0 );
+        if( match_res < 0 )
+        {   if( match_res != PCRE2_ERROR_NOMATCH )
+            {   fputs( "Match error for \"yi_regex\".\n", stderr );
+                return 1;
+            }
+        }else
+        {   PCRE2_SIZE *ovector = pcre2_get_ovector_pointer( data->_3_match_data );
+            char *s = HeapAlloc( E_main_S_process_heap, 0, ( ovector[3] - ovector[2] ) + 4 + ( ovector[5] - ovector[4] ) + 1 );
+            Vv( s, "Unable to allocate" )
+                return 1;
+            CopyMemory( s, line + ovector[2], ovector[3] - ovector[2] );
+            E_main_Q_s_s0_I_strcpy( s + ( ovector[3] - ovector[2] ), ",Yi_" );
+            CopyMemory( s + ( ovector[3] - ovector[2] ) + 4, line + ovector[4], ovector[5] - ovector[4]);
+            s[ ( ovector[3] - ovector[2] ) + 4 + ( ovector[5] - ovector[4] ) ] = '\0';
+            unsigned long i;
+            for( i = 0; i != data->xyi_array_b_n; i++ )
+                if( data->xyi_array_b[i]
+                && !E_main_Q_s0_s0_I_strcmp( data->xyi_array_b[i], s )
+                )
+                    break;
+            if( i == data->xyi_array_b_n )
+            {   for( i = 0; i != data->xyi_array_b_n; i++ )
+                    if( !E_main_Q_s0_s0_I_strcmp( data->xyi_array_b[i], s ))
+                        break;
+                if( i == data->xyi_array_b_n )
+                {   void *p = HeapReAlloc( E_main_S_process_heap, 0, data->xyi_array_b, sizeof( char * ) * ( data->xyi_array_b_n + 1 ));
+                    Vv( p, "Unable to reallocate" )
+                        return 1;
+                    data->xyi_array_b = p;
+                    data->xyi_array_b_n++;
+                    data->xyi_array_b[ data->xyi_array_b_n - 1 ] = s;
+                }
             }
         }
     }while( !eof );
@@ -1180,7 +1265,14 @@ Cont_1: CloseHandle( h_file );
         s = file_h_to_libs_buffer_ + ( s - data->file_h_to_libs_buffer );
         data->file_h_to_libs_buffer = file_h_to_libs_buffer_;
         if( !E_main_Q_s0_s0_I_strncmp( s, "enum\r\n{ _F_uid( ", 16 ))
-        {   char *s_ = E_main_Q_s0_I_strstr( s + 16, "\r\n" ) + 2;
+        {   char *s_ = s + 6;
+            do
+            {   s_ = E_main_Q_s0_I_strstr( s_ + 10, "\r\n" ) + 2;
+                if( s_ - data->file_h_not_to_libs_buffer == data->file_h_not_to_libs_buffer_size
+                || *s_ != ','
+                )
+                    break;
+            }while(TRUE);
             MoveMemory( s_ + l_added, s_, data->file_h_to_libs_buffer_size - ( s_ - data->file_h_to_libs_buffer ));
             E_main_Q_s_s0_I_strcpy( s_, ", _F_uid( " );
             E_main_Q_s_s0_I_strcpy( s_ + 10, enc );
@@ -1233,7 +1325,7 @@ Cont_1: CloseHandle( h_file );
         E_main_Q_s_s0_I_strcpy( s + 22 + l_dir, "__" );
         CopyMemory( s + 22 + l_dir + 2, found_file->cFileName, l_file - 2 );
         CopyMemory( s + 22 + l_dir + 2 + l_file - 2, "h\"\r\n", 4 );
-        if( E_main_I_cx_to_xyi_array( h_file_cx, data ))
+        if( E_main_I_find_file_I_module_I_cx_to_xyi_array( h_file_cx, data ))
             goto Err_2;
         CloseHandle( h_file_cx );
         HeapFree( E_main_S_process_heap, 0, file );
@@ -1479,16 +1571,9 @@ E_main_I_build_I_to_libs( struct E_main_Z_build_resources *data
         }
         CopyMemory( s, "};\r\n", 4 );
     }
-    char *file_h_to_libs = HeapAlloc( E_main_S_process_heap, 0, 29 + 1 );
-    Vv( file_h_to_libs, "Unable to allocate" )
-        return 1;
-    E_main_Q_s_s0_I_strcpy( file_h_to_libs, "..\\module\\E_cplus_S_to_libs.h" );
-    HANDLE h_file_h_to_libs = CreateFile( file_h_to_libs, GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0 );
+    HANDLE h_file_h_to_libs = CreateFile( "..\\module\\E_cplus_S_to_libs.h", GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0 );
     V( h_file_h_to_libs != INVALID_HANDLE_VALUE, "Unable to create file" )
-    {   HeapFree( E_main_S_process_heap, 0, file_h_to_libs );
         return 1;
-    }
-    HeapFree( E_main_S_process_heap, 0, file_h_to_libs );
     unsigned long wrote;
     V( WriteFile( h_file_h_to_libs, data->file_h_to_libs_buffer, data->file_h_to_libs_buffer_size, &wrote, 0 )
     && wrote == data->file_h_to_libs_buffer_size
@@ -1498,33 +1583,99 @@ E_main_I_build_I_to_libs( struct E_main_Z_build_resources *data
         return 1;
     }
     CloseHandle( h_file_h_to_libs );
+#if 0
+    if( data->xyi_array_b )
+    {   for( unsigned long i = 0; i != data->xyi_array_b_n; i++ )
+            HeapFree( E_main_S_process_heap, 0, data->xyi_array_b[i] );
+        void *p = HeapReAlloc( E_main_S_process_heap, 0, data->xyi_array_b, 0 );
+        Vv( p, "Unable to reallocate" )
+            return 1;
+        data->xyi_array_b_n = 0;
+    }
+#endif
     return 0;
 }
 int
 E_main_I_build_program_I_not_to_libs( struct E_main_Z_build_resources *data
-){  if( data->file_h_not_to_libs_buffer_size != data->file_h_to_libs_buffer_size )
-    {   unsigned long l_file_mask = E_main_Q_s0_R_strlen( data->found_dir );
-        char *file_h_not_to_libs = HeapAlloc( E_main_S_process_heap, 0, l_file_mask - 1 + 23 + 1 );
-        Vv( file_h_not_to_libs, "Unable to allocate" )
-            return 1;
-        CopyMemory( file_h_not_to_libs, data->found_dir, l_file_mask - 1 );
-        E_main_Q_s_s0_I_strcpy( file_h_not_to_libs + l_file_mask - 1, "E_cplus_S_not_to_libs.h" );
-        HANDLE h_file_h_not_to_libs = CreateFile( file_h_not_to_libs, GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0 );
-        V( h_file_h_not_to_libs != INVALID_HANDLE_VALUE, "Unable to create file" )
-        {   HeapFree( E_main_S_process_heap, 0, file_h_not_to_libs );
-            return 1;
+){  
+#if 0
+    if( data->xyi_array_b_n )
+    {   unsigned long l_added = 0;
+        char *s = E_main_Q_s0_I_strstr( data->file_h_not_to_libs_buffer, "enum\r\n{ _XhYi_uid(" );
+        char *first_line = s;
+        unsigned i = 0;
+        if(s)
+        {   s += 6;
+            do
+            {   s = E_main_Q_s0_I_strstr( s + 12, "\r\n" ) + 2;
+                if( s - data->file_h_not_to_libs_buffer == data->file_h_not_to_libs_buffer_size
+                || *s != ','
+                )
+                    break;
+            }while(TRUE);
+        }else
+        {   s = E_main_Q_s0_I_strstr( data->file_h_not_to_libs_buffer, "enum\r\n{ _F_uid( " ) + 6;
+            do
+            {   s = E_main_Q_s0_I_strstr( s + 10, "\r\n" ) + 2;
+                if( s - data->file_h_not_to_libs_buffer == data->file_h_not_to_libs_buffer_size
+                || *s != ','
+                )
+                    break;
+            }while(TRUE);
+            s += 2 + 2;
+            l_added = 18 + E_main_Q_s0_R_strlen( data->xyi_array_b[i] ) + 50 + 2 + 2;
+            i++;
         }
-        HeapFree( E_main_S_process_heap, 0, file_h_not_to_libs );
-        unsigned long wrote;
-        V( WriteFile( h_file_h_not_to_libs, data->file_h_not_to_libs_buffer, data->file_h_not_to_libs_buffer_size, &wrote, 0 )
-        && wrote == data->file_h_not_to_libs_buffer_size
-        , "Unable to write file"
-        )
-        {   CloseHandle( h_file_h_not_to_libs );
+        for( ; i != data->xyi_array_b_n; i++ )
+            l_added += 12 + E_main_Q_s0_R_strlen( data->xyi_array_b[i] ) + 1 + 2;
+        char *file_h_not_to_libs_buffer_ = HeapReAlloc( E_main_S_process_heap, 0, data->file_h_not_to_libs_buffer, data->file_h_not_to_libs_buffer_size + l_added );
+        Vv( file_h_not_to_libs_buffer_, "Unable to reallocate" )
             return 1;
+        s = file_h_not_to_libs_buffer_ + ( s - data->file_h_not_to_libs_buffer );
+        data->file_h_not_to_libs_buffer = file_h_not_to_libs_buffer_;
+        MoveMemory( s + l_added, s, data->file_h_not_to_libs_buffer_size - ( s - data->file_h_not_to_libs_buffer ));
+        data->file_h_not_to_libs_buffer_size += l_added;
+        i = 0;
+        if( !first_line )
+        {   E_main_Q_s_s0_I_strcpy( s, "enum\r\n{ _XhYi_uid(" );
+            E_main_Q_s_s0_I_strcpy( s + 18, data->xyi_array_b[i] );
+            unsigned long l = E_main_Q_s0_R_strlen( data->xyi_array_b[i] );
+            CopyMemory( s + 18 + l, ") = _F_uid_v( ~0 << ( sizeof(int) * 8 / 2 - 1 ))\r\n", 50 );
+            s += 18 + l + 50;
+            i++;
         }
-        CloseHandle( h_file_h_not_to_libs );
+        for( ; i != data->xyi_array_b_n; i++ )
+        {   E_main_Q_s_s0_I_strcpy( s, ", _XhYi_uid(" );
+            E_main_Q_s_s0_I_strcpy( s + 12, data->xyi_array_b[i] );
+            unsigned long l = E_main_Q_s0_R_strlen( data->xyi_array_b[i] );
+            CopyMemory( s + 12 + l, ")\r\n", 3 );
+            s += 12 + l + 1 + 2;
+        }
+        if( !first_line )
+            CopyMemory( s, "};\r\n", 4 );
     }
+#endif
+    unsigned long l_file_mask = E_main_Q_s0_R_strlen( data->found_dir );
+    char *file_h_not_to_libs = HeapAlloc( E_main_S_process_heap, 0, l_file_mask - 1 + 23 + 1 );
+    Vv( file_h_not_to_libs, "Unable to allocate" )
+        return 1;
+    CopyMemory( file_h_not_to_libs, data->found_dir, l_file_mask - 1 );
+    E_main_Q_s_s0_I_strcpy( file_h_not_to_libs + l_file_mask - 1, "E_cplus_S_not_to_libs.h" );
+    HANDLE h_file_h_not_to_libs = CreateFile( file_h_not_to_libs, GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_ALWAYS, 0, 0 );
+    V( h_file_h_not_to_libs != INVALID_HANDLE_VALUE, "Unable to create file" )
+    {   HeapFree( E_main_S_process_heap, 0, file_h_not_to_libs );
+        return 1;
+    }
+    HeapFree( E_main_S_process_heap, 0, file_h_not_to_libs );
+    unsigned long wrote;
+    V( WriteFile( h_file_h_not_to_libs, data->file_h_not_to_libs_buffer, data->file_h_not_to_libs_buffer_size, &wrote, 0 )
+    && wrote == data->file_h_not_to_libs_buffer_size
+    , "Unable to write file"
+    )
+    {   CloseHandle( h_file_h_not_to_libs );
+        return 1;
+    }
+    CloseHandle( h_file_h_not_to_libs );
     return 0;
 }
 int
@@ -1611,7 +1762,7 @@ Cont_1:         CloseHandle( h_file );
                 enc = E_main_Q_filename_I_encode( found_file->cFileName );
                 if( !enc )
                     goto Err_2;
-                unsigned long pos = E_main_Q_s0_I_strstr( data->file_h_not_to_libs_buffer, "#include \"E_cplus_S_language.h\"\r\n" ) + 33 - data->file_h_not_to_libs_buffer;
+                unsigned long pos = E_main_Q_s0_I_strstr( data->file_h_not_to_libs_buffer, "#include \"E_cplus_S_language.h\"\r\n" ) + 31 - data->file_h_not_to_libs_buffer;
                 char *s = data->file_h_not_to_libs_buffer + pos;
                 do
                 {   s = E_main_Q_s0_I_strstr( s, "\r\n" ) + 2;
@@ -1621,6 +1772,16 @@ Cont_1:         CloseHandle( h_file );
                     )
                         break;
                 }while(TRUE);
+                if( s - data->file_h_not_to_libs_buffer != data->file_h_not_to_libs_buffer_size
+                && E_main_Q_s0_s0_I_strncmp( s, "#include \"", 10 )
+                )
+                    do
+                    {   s = E_main_Q_s0_I_strstr( s + 10, "\r\n" ) + 2;
+                        if( s - data->file_h_not_to_libs_buffer == data->file_h_not_to_libs_buffer_size
+                        || *s != ','
+                        )
+                            break;
+                    }while(TRUE);
                 unsigned long l_enc = E_main_Q_s0_R_strlen(enc);
                 unsigned long l_added = 10 + l_enc + 4;
                 char *file_h_not_to_libs_buffer_ = HeapReAlloc( E_main_S_process_heap, 0, data->file_h_not_to_libs_buffer, data->file_h_not_to_libs_buffer_size + l_added );
@@ -1628,7 +1789,6 @@ Cont_1:         CloseHandle( h_file );
                     goto Err_3;
                 s = file_h_not_to_libs_buffer_ + ( s - data->file_h_not_to_libs_buffer );
                 data->file_h_not_to_libs_buffer = file_h_not_to_libs_buffer_;
-                s = E_main_Q_s0_I_strstr( s + 15, "\r\n" ) + 2;
                 MoveMemory( s + l_added, s, data->file_h_not_to_libs_buffer_size - ( s - data->file_h_not_to_libs_buffer ));
                 E_main_Q_s_s0_I_strcpy( s, ", _F_uid( " );
                 E_main_Q_s_s0_I_strcpy( s + 10, enc );
@@ -1728,6 +1888,8 @@ Cont_2:         CloseHandle( h_file );
                 }
 Cont_3:         CloseHandle( h_file );
                 HeapFree( E_main_S_process_heap, 0, enc );
+                if( E_main_I_find_file_I_program_I_cx_to_xyi_array( h_file_cx, data ))
+                    goto Err_2;
                 CloseHandle( h_file_cx );
                 HeapFree( E_main_S_process_heap, 0, file );
             }

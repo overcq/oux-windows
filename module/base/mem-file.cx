@@ -1028,7 +1028,7 @@ E_mem_Q_file_P_rem_s( I id
     return 0;
 }
 D( mem, file_save )
-{   I timer = Y_M(1000000000);
+{   I timer = Y_M(1000000);
     I_D
     {   Y_B( timer, 0 )
             break;

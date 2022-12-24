@@ -107,11 +107,11 @@ typedef P           *Pp; // WskaŸnik do tablic adresów.
 // Utworzenie i wyrzucenie ‹zadania› lub ‹zadania› “w¹tkowanego” czekaj¹cego na ‹systemowy raport odblokowuj¹cy›.
 //TODO Rozdzieliæ dla “Dh”— na ‹zadania› takie jak “D” (bez “subid”) oraz takie jak obecnie “Dh” (“Dhi”).
     #ifdef C_line_report
-#define D_M(module,task)                    if( ~E_flow_Q_task_M( &(D_id(module,task)), _D_proc(module,task), 0, no, J_s( _D_proc(module,task) ))){} else
-#define Dh_M(module,task,subid,arg)         if( ~E_flow_Q_task_M_thread( &(D_id(module,task)), (subid), _D_proc(module,task), (arg), J_s( _D_proc(module,task) ))){} else
+#define D_M(module,task)                    if( ~E_flow_Q_task_M( &(D_id(module,task)), &_D_proc(module,task), 0, no, J_s( _D_proc(module,task) ))){} else
+#define Dh_M(module,task,subid,arg)         if( ~E_flow_Q_task_M_thread( &(D_id(module,task)), (subid), &_D_proc(module,task), (arg), J_s( _D_proc(module,task) ))){} else
     #else
-#define D_M(module,task)                    if( ~E_flow_Q_task_M( &(D_id(module,task)), _D_proc(module,task), 0, no )){} else
-#define Dh_M(module,task,subid,arg)         if( ~E_flow_Q_task_M_thread( &(D_id(module,task)), (subid), _D_proc(module,task), (arg) )){} else
+#define D_M(module,task)                    if( ~E_flow_Q_task_M( &(D_id(module,task)), &_D_proc(module,task), 0, no )){} else
+#define Dh_M(module,task,subid,arg)         if( ~E_flow_Q_task_M_thread( &(D_id(module,task)), (subid), &_D_proc(module,task), (arg) )){} else
     #endif
 #define Dh_W(module,task,subid)             E_flow_Q_task_W_thread( &(D_id(module,task)), (subid) )
 #define D_W(module,task)                    E_flow_Q_task_W( &(D_id(module,task)) )

@@ -647,18 +647,17 @@ Cont:               do
 void
 E_window_Q_object_I_draw_Z_draw_proc( void (*draw_object_proc)( struct E_window_Q_window_Z *, struct E_window_Q_object_Z * )
 , B draw_simple
-){  X_A( x_window, draw );
-    for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
+){  for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
     {   struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
         for_each( object_id, window->object, E_mem_Q_tab )
         {   struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
             if( object->draw == draw_object_proc )
-            {   U_F( window->req, draw );
+            {   U_R( E_window_S->mode, draw_simple ) = draw_simple;
+                InvalidateRect( window->handle, 0, FALSE );
+                UpdateWindow( window->handle );
                 break;
             }
         }
-        //if( U_R( window->req, draw ))
-            //U_F( display->req, draw );
     }
     /*if( U_R( display->mode, drag ))
     {   struct E_window_Q_screen_Z *screen = E_mem_Q_tab_R( display->screen, display->drag_S_dnd_window_screen_id );
@@ -670,22 +669,16 @@ E_window_Q_object_I_draw_Z_draw_proc( void (*draw_object_proc)( struct E_window_
                 break;
             }
         }
-        if( U_R( window->req, draw ))
-            U_F( display->req, draw );
-    }
-    if( U_R( display->req, draw ))
-        U_F( x_window, draw );
-    X_U( x_window, draw );*/
+    }*/
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void
 E_window_Q_object_I_draw( struct E_window_Q_window_Z *window_
-){  X_A( x_window, draw );
-    for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
+){  for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
     {   struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
         if( window != window_ )
-        {   U_F( window->req, draw );
-            //U_F( display->req, draw );
+        {   InvalidateRect( window->handle, 0, FALSE );
+            UpdateWindow( window->handle );
             break;
         }
     }
@@ -696,9 +689,6 @@ E_window_Q_object_I_draw( struct E_window_Q_window_Z *window_
         {   U_F( window->req, draw );
             U_F( display->req, draw );
         }
-    }
-    if( U_R( display->req, draw ))
-        U_F( x_window, draw );
-    X_U( x_window, draw );*/
+    }*/
 }
 //******************************************************************************

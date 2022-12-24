@@ -258,9 +258,12 @@ E_flow_Q_task_M( I *uid
     task->exe_stack = 0;
     task->run_state_object = E_base_S->E_flow_Q_task_S_current;
     P *p = ( P * )exe_stack - 1;
+        #if defined( __i386__ )
+    p--;
+        #endif
     *p = (P)&E_flow_Q_task_I_stop;
     E_flow_Q_task_I_switch( task_id );
-    if( !task->exe_stack ) // W blokuñ nowe ãzadanieõ: nic nie zmieniaÊ na stosie naleøπcym do prze≥πczanego.
+    if( !task->exe_stack ) // W bloku ñ nowe ãzadanieõ: nic nie zmieniaÊ na stosie naleøπcym do prze≥πczanego.
     {   __asm__ volatile (
         #if defined( __i386__ ) || defined( __x86_64__ )
             #if defined( __i386__ )
@@ -272,7 +275,7 @@ E_flow_Q_task_M( I *uid
         //NKN Pozostaje zagwarantowanie, øe procedura ãzadaniaõ nie bÍdzie nigdy oczekiwaÊ (ze wzglÍdu na ëabií) niczego tutaj nie zapewnianego przez ëcalleraí (m.in. rezerwacji obszaru na stosie, gdy argumentÛw i tak nie ma przekazywanych).
         :
         : "r" (p), "r" ( task_proc )
-                #if defined( __i386__ )
+            #if defined( __i386__ )
         : "esp"
             #else
         : "rsp"
@@ -549,7 +552,7 @@ E_flow_Q_timer_W( I id
         )
             return;
     }
-    E_base_S->E_flow_Q_timer_S_next_real_time = ~0;
+    E_base_S->E_flow_Q_timer_S_next_real_time = GetTickCount() + ( (N)~0 >> 1 );
 }
 //------------------------------------------------------------------------------
 B
@@ -641,7 +644,7 @@ E_flow_Q_impulser_I_deactivate( I id
         )
             return;
     }
-    E_base_S->E_flow_Q_timer_S_next_real_time = ~0;
+    E_base_S->E_flow_Q_timer_S_next_real_time = GetTickCount() + ( (N)~0 >> 1 );
 }
 //------------------------------------------------------------------------------
 //NDFN DodaÊ ìlost_countî?
@@ -712,8 +715,8 @@ Loop:
             X_F( flow, call_req );
         if( U_E( E_base_S->E_flow_S_signal, io_ready ))
             X_F( io, stream_write );*/
-        N next_real_time = ~0;
         N t = GetTickCount();
+        N next_real_time = t + ( (N)~0 >> 1 );
         for_each( call_id, E_base_S->E_flow_Q_process_call_cli_S, E_mem_Q_tab )
         {   struct E_flow_Q_process_call_cli_Z *call = E_mem_Q_tab_R( E_base_S->E_flow_Q_process_call_cli_S, call_id );
             if( !U_R( call->state, active ))
@@ -737,18 +740,18 @@ Loop:
                 }*/
             }
         }
-        if( (S)( t - E_base_S->E_flow_Q_timer_S_next_real_time ) >= 0 ) // Czy trzeba uaktualniÊ kolejne czasy ãcyklerÛwõ.
+        if( (S)( t - E_base_S->E_flow_Q_timer_S_next_real_time ) >= 0 ) // Czy trzeba uaktualniÊ kolejne czasy ãcyklerÛwõ?
         {   N elapsed_time = t - E_base_S->E_flow_Q_timer_S_last_real_time;
             //NDFN Uzupe≥niÊ o jakieú przewidywanie ëoverheadí na podstawie poprzedniego, by wyeliminowaÊ moøliwoúÊ powtarzania pÍtli w pesymistycznym przypadku dla kaødego ãcykleraõ? Ale obliczaÊ ten czas tylko wtedy, jeøeli ten fragment nie bÍdzie mÛg≥ byÊ wyw≥aszczony z wykonywania w czasie rzeczywistym (wszystkie przerwania wy≥πczone).
             O{  B some_timer_is_active = no, some_timer_has_deactivated = no;
                 B some_task_got_ready = no;
-                N suspend_time = ~0;
+                N suspend_time = (N)~0 >> 1;
                 for_each( timer_id, E_base_S->E_flow_Q_timer_S, E_mem_Q_tab )
                 {   struct E_flow_Q_timer_Z *timer = E_mem_Q_tab_R( E_base_S->E_flow_Q_timer_S, timer_id );
                     if( timer->period ) // ãcyklerõ.
-                    {   if( (S)( elapsed_time - timer->left ) >= 0 ) // ãcyklerõ wykona≥ obiegó ãzadanieõ do wznowienia.
+                    {   if( (S)( elapsed_time - timer->left ) >= 0 ) // ãCyklerõ wykona≥ obieg ó ãzadanieõ do wznowienia.
                         {   N overlate_time = elapsed_time - timer->left;
-                            if( (S)( overlate_time - timer->period ) >= 0 ) // ãcyklerõ wykona≥ wiÍcej niø jeden obieg.
+                            if( (S)( overlate_time - timer->period ) >= 0 ) // ãCyklerõ wykona≥ wiÍcej niø jeden obieg.
                             {   timer->lost_count += overlate_time / timer->period;
                                 overlate_time %= timer->period;
                                 GV_(NA); Gd( timer->lost_count ); Gd( timer->period ); Gd( overlate_time ); // lost time.
@@ -763,7 +766,7 @@ Loop:
                             }else
                                 timer->lost_count++;
                         }else
-                            timer->left= timer->left - elapsed_time;
+                            timer->left -= elapsed_time;
                         if( (S)( suspend_time - timer->left ) > 0 )
                         {   suspend_time = timer->left;
                             some_timer_is_active = yes;
@@ -790,7 +793,7 @@ Loop:
                 }
                 if( some_timer_has_deactivated
                 && !some_timer_is_active
-                ){  E_base_S->E_flow_Q_timer_S_next_real_time = ~0;
+                ){  E_base_S->E_flow_Q_timer_S_next_real_time = t;
                     break;
                 }
                 N t_2 = GetTickCount();
@@ -802,7 +805,7 @@ Loop:
                     break;
                 }
                 t = t_2;
-                GV_(NA); Gd( suspend_time ); Gd( elapsed_time ); // Timer schedule loop overhead.
+                GV_(NA); Gh( suspend_time ); Gh( elapsed_time ); // Timer schedule loop overhead.
             }
         }
         for_each_out( E_base_S->E_flow_Q_task_S_current, task_id, E_base_S->E_flow_Q_task_S, E_mem_Q_tab )
@@ -864,7 +867,7 @@ Loop:
             continue;
         if( (S)( next_real_time - E_base_S->E_flow_Q_timer_S_next_real_time ) > 0 )
             next_real_time = E_base_S->E_flow_Q_timer_S_next_real_time;
-        B U_has_suspend_time = ~next_real_time;
+        B U_has_suspend_time = (S)( next_real_time - t ) > 0;
         if( U_has_suspend_time )
             t = GetTickCount();
         if(( !U_has_suspend_time
@@ -872,7 +875,23 @@ Loop:
           )
         && !U_R( E_base_S->E_flow_S_signal, exit )
         )
-            MsgWaitForMultipleObjectsEx( 1, &E_base_S->E_flow_S_resume, FALSE, U_has_suspend_time ? next_real_time - t : INFINITE, QS_ALLEVENTS );
+        {   N ret = MsgWaitForMultipleObjects( 1, &E_base_S->E_flow_S_resume, FALSE, U_has_suspend_time ? next_real_time - t : INFINITE, QS_ALLEVENTS );
+            switch(ret)
+            { case WAIT_OBJECT_0:
+                    break;
+              case WAIT_OBJECT_0 + 1:
+                {   X_A( window, loop );
+                    X_F( window, loop );
+                    ResetEvent( E_base_S->E_flow_S_resume );
+                    break;
+                }
+              case WAIT_TIMEOUT:
+                    break;
+              default:
+                {   GV_(NA); Gh(ret); _V();
+                }
+            }
+        }
     }
 }
 // Prze≥πczenie do ãzadaniaõ przez prze≥πczenie wskaünika ìstosuî wykonania.
@@ -890,7 +909,7 @@ E_flow_Q_task_I_switch( I task_to_id
     "\n" "test      %1,%1"
 //CONF jest ëcmoví?
             #if 1
-    "\n" "cmovne    %1,%%esp"
+    "\n" "cmovnz    %1,%%esp"
             #else
     "\n" "jz        0f"
     "\n" "mov       %1,%%esp"

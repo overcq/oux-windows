@@ -54,7 +54,7 @@ E_mem_M_blk( void
     E_base_S->E_mem_S_page_size = si.dwPageSize;
     E_base_S->E_mem_S_page_granulation = si.dwAllocationGranularity;
     E_base_S->E_flow_Q_task_S_current = 0;
-    E_base_S->E_flow_Q_timer_S_next_real_time = ~0;
+    E_base_S->E_flow_Q_timer_S_next_real_time = GetTickCount() + ( (N)~0 >> 1 );
     U_L( E_base_S->E_flow_S_signal, exit );
     U_L( E_base_S->E_flow_S_signal, exit_all );
     E_base_S->E_flow_S_exe_pid = GetCurrentProcessId();
@@ -174,6 +174,7 @@ E_base_M( HINSTANCE h_instance
     E_mem_M_file();
     V_( E_base_S->E_flow_S_resume = CreateEvent( 0, no, no, 0 ));
     E_base_S->E_flow_S_default_exception_filter = SetUnhandledExceptionFilter( E_flow_I_exception_handler );
+    E_base_S->E_flow_Q_process_call_S_ping_period = 1000;
     D_M( flow, call_srv )
     {   GV_(NA); _V();
     }

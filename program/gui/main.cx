@@ -12,12 +12,6 @@ WinMain( HINSTANCE h_instance
 , int cmd_show
 ){  E_base_M( h_instance, cmd_line );
     E_window_M( cmd_show );
-    I window_id = E_window_Q_window_M( 640, 480 );
-    int ret = ~0;
-    if( ~window_id )
-    {  E_window_Q_window_M( 640, 480 );
-       ret = E_window_I_loop();
-    }
 /*    E_ui_M();
 #ifndef C_line_report
     I out = E_io_Q_stream_out_M_fd( STDERR_FILENO );
@@ -87,97 +81,79 @@ End_3:;
         }
     }
     E_data_Q_layout_I_add( E_data_Q_field_S_text, "44. text input ¹ê", 100 );
-    E_ncurses_I_lay();
+    E_ncurses_I_lay();*/
 
-    X_M( x_window, close_window );
-    for_n_( i, 1 )
-    {   D_M( main, timer_draw )
-            goto End_1;
-        N display_id = E_x_Q_display_M();
-        if( !~display_id )
-            goto End_2;
-        struct E_x_Q_display_Z *display = E_mem_Q_tab_R( E_x_Q_display_S, display_id );
-        for_each( screen_id, display->screen, E_mem_Q_tab )
-        {   struct E_x_Q_screen_Z *screen = E_mem_Q_tab_R( display->screen, screen_id );
-            U_F( screen->mode, animation );
-            for_n( i, 2 )
-            {   N window_id = E_x_Q_window_M( display_id, screen_id
-                , 450, 500
-                );
-                struct E_x_Q_window_Z *window = E_mem_Q_tab_R( display->window, window_id );
-                I object_id = E_x_Q_object_Z_frame_M( display, window );
-                for_n( i, 3 )
-                {   I id = E_x_Q_object_Z_frame_M( display, window );
-                    E_x_Q_object_I_add( window, object_id, id );
-                    for_n( i, 5 )
-                    {   I id_2 = E_x_Q_object_Z_frame_M( display, window );
-                        E_x_Q_object_I_add( window, id, id_2 );
-                        for_n( i, 2 )
-                        {   I id_3 = E_x_Q_object_Z_frame_M( display, window );
-                            E_x_Q_object_I_add( window, id_2, id_3 );
-                            for_n( i, 3 )
-                            {   I id_4 = E_x_Q_object_Z_button_M( display, window );
-                                E_x_Q_object_I_add( window, id_3, id_4 );
-                                I id_5 = E_x_Q_object_Z_font_M( display, window, 0, "abc" );
-                                E_x_Q_object_I_add( window, id_4, id_5 );
-                            }
-                        }
-                        for_n_( i, 2 )
-                        {   I id_3 = E_x_Q_object_Z_button_M( display, window );
-                            E_x_Q_object_I_add( window, id_2, id_3 );
-                            I id_4 = E_x_Q_object_Z_font_M( display, window, 0, "abcd" );
-                            E_x_Q_object_I_add( window, id_3, id_4 );
-                        }
-                    }
-                    for_n_( i, 5 )
-                    {   I id_2 = E_x_Q_object_Z_frame_M( display, window );
-                        E_x_Q_object_I_add( window, id, id_2 );
-                        I id_3 = E_x_Q_object_Z_entry_M( display, window, 0, "abcdefghijkl" );
-                        E_x_Q_object_I_add( window, id_2, id_3 );
+    X_M( main, loop );
+    D_M( main, timer_draw );
+    for_n( i, 2 )
+    {   N window_id = E_window_Q_window_M( 450, 500 );
+        struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
+        I object_id = E_window_Q_object_Z_frame_M(window);
+        for_n( i, 3 )
+        {   I id = E_window_Q_object_Z_frame_M(window);
+            E_window_Q_object_I_add( window, object_id, id );
+            for_n( i, 5 )
+            {   I id_2 = E_window_Q_object_Z_frame_M(window);
+                E_window_Q_object_I_add( window, id, id_2 );
+                for_n( i, 2 )
+                {   I id_3 = E_window_Q_object_Z_frame_M(window);
+                    E_window_Q_object_I_add( window, id_2, id_3 );
+                    for_n( i, 3 )
+                    {   I id_4 = E_window_Q_object_Z_button_M(window);
+                        E_window_Q_object_I_add( window, id_3, id_4 );
+                        I id_5 = E_window_Q_object_Z_font_M( window, 0, "abc" );
+                        E_window_Q_object_I_add( window, id_4, id_5 );
                     }
                 }
-                E_x_Q_object_M( display, window
-                , 0
-                , 5, 5
-                , 61, 61
-                , 0
-                , E_main_Q_timer_I_draw
-                , 0
-                );
-                E_x_Q_object_M( display, window
-                , 0
-                , 55, 53
-                , 171, 191
-                , 0
-                , E_main_Q_timer_I_draw
-                , 0
-                );
-                E_x_Q_object_M( display, window
-                , 0
-                , 151, 191
-                , 21, 21
-                , 0
-                , E_main_Q_timer_I_draw
-                , 0
-                );
-                E_x_Q_object_I_lay( display, window );
+                for_n_( i, 2 )
+                {   I id_3 = E_window_Q_object_Z_button_M(window);
+                    E_window_Q_object_I_add( window, id_2, id_3 );
+                    I id_4 = E_window_Q_object_Z_font_M( window, 0, "abcd" );
+                    E_window_Q_object_I_add( window, id_3, id_4 );
+                }
+            }
+            for_n_( i, 5 )
+            {   I id_2 = E_window_Q_object_Z_frame_M(window);
+                E_window_Q_object_I_add( window, id, id_2 );
+                I id_3 = E_window_Q_object_Z_entry_M( window, 0, "abcdefghijkl" );
+                E_window_Q_object_I_add( window, id_2, id_3 );
             }
         }
-        //D_M( main, cursor );
-        X_B( x_window, close_window, 0 )
-            U_F( E_base_S->E_flow_S_signal, exit_all );
-        //D_W( main, cursor );
-        E_x_Q_display_W( display_id );
-End_2:  D_W( main, timer_draw );
-        if( U_R( E_base_S->E_flow_S_signal, exit_all ))
-            break;
+        E_window_Q_object_M( window
+        , 0
+        , 5, 5
+        , 61, 61
+        , 0
+        , E_main_Q_timer_I_draw
+        , 0
+        );
+        E_window_Q_object_M( window
+        , 0
+        , 55, 53
+        , 171, 191
+        , 0
+        , E_main_Q_timer_I_draw
+        , 0
+        );
+        E_window_Q_object_M( window
+        , 0
+        , 151, 191
+        , 21, 21
+        , 0
+        , E_main_Q_timer_I_draw
+        , 0
+        );
+        E_window_Q_object_I_lay(window);
     }
-End_1:
-    X_W( x_window, close_window );
-End:E_ui_W();*/
+    //D_M( main, cursor );
+    X_B( main, loop, 0 ){}
+    //D_W( main, cursor );
+    D_W( main, timer_draw );
+    X_W( main, loop );
+End://E_ui_W();
     E_window_W();
     E_base_W();
-    return ret;
+    return 0;
 }
 //D( main, cursor )
 //{   X_A( x_window, flush );
@@ -211,7 +187,7 @@ D( main, timer_draw )
     E_main_Q_timer_S_hour = st.wHour % 12;
     E_main_Q_timer_S_minute = st.wMinute;
     E_main_Q_timer_S_second = st.wSecond;
-    I timer = Y_M(1000000);
+    I timer = Y_M(1000);
     I_D
     {   N timer_lost_count;
         Y_B( timer, &timer_lost_count )
@@ -224,13 +200,13 @@ D( main, timer_draw )
         E_main_Q_timer_S_hour += E_main_Q_timer_S_minute / 60;
         E_main_Q_timer_S_minute %= 60;
         E_main_Q_timer_S_hour %= 12;
-//        E_x_Q_object_I_draw_Z_draw_proc( E_main_Q_timer_I_draw, !!timer_lost_count );
+        E_window_Q_object_I_draw_Z_draw_proc( &E_main_Q_timer_I_draw, !!timer_lost_count );
     }
     Y_W(timer);
 }
 #define E_main_I_draw_Z_angle_line_(arc_i,arc_n,line_length_i,line_length_n,color)    E_main_I_draw_Z_angle_line( window, object, arc_i, arc_n, line_length_i, line_length_n, color )
-/*void
-//E_main_I_draw_Z_angle_line(
+void
+E_main_I_draw_Z_angle_line(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
 , N arc_i
@@ -274,10 +250,10 @@ D( main, timer_draw )
             y = -y;
             break;
     }
-    if( !U_R( display->mode, draw_simple ))
-        E_x_Q_object_I_draw_aa_Z_lines( display, screen, window, object
+    if( !U_R( E_window_S->mode, draw_simple ))
+        E_window_Q_object_I_draw_aa_Z_lines( window, object
         , 2
-        , (( xcb_point_t[] )
+        , (( struct E_window_Z_point[] )
           { { object->width / 2
             , object->height / 2
             }
@@ -290,7 +266,7 @@ D( main, timer_draw )
         , 0.01 * object->width * line_length_n / line_length_i
         );
     else
-    {   xcb_point_t points[2] =
+    {   struct E_window_Z_point points[2] =
         { { object->width / 2
           , object->height / 2
           }
@@ -298,57 +274,57 @@ D( main, timer_draw )
           , object->height / 2 + y
           }
         };
-        E_x_Q_object_I_draw_P_color_(color);
-        E_x_Q_object_I_draw_Z_lines_(points);
+        E_window_Q_object_I_draw_P_color_(color);
+        E_window_Q_object_I_draw_Z_lines_(points);
     }
 }
 //NDFN konkretne stany wygl¹du obiektów maj¹ce konkretne znaczenia.
 void
-//E_main_Q_timer_I_draw(
-  struct E_x_Q_window_Z *window
-, struct E_x_Q_object_Z *object
-){  E_x_Q_object_I_draw_P_color_( E_x_Z_color_M( 0xff, 0xff, 0xff ));
-    E_x_Q_object_I_draw_Z_rectangles_(
-      (( xcb_rectangle_t[] )
+E_main_Q_timer_I_draw(
+  struct E_window_Q_window_Z *window
+, struct E_window_Q_object_Z *object
+){  E_window_Q_object_I_draw_P_color_( E_window_Z_color_M( 0xff, 0xff, 0xff ));
+    E_window_Q_object_I_draw_Z_rectangles_(
+      (( struct E_window_Z_rectangle[] )
       { 0
       , 0
       , object->width - 1
       , object->height - 1
       })
     );
-    E_x_Q_object_I_draw_Z_font_Z_s_( 1, 1, 0, 0, "A¥BCÆDEÊFGHIJKL£MNÑOÓPQRSŒTUVWXYZ¯\na¹bcædeêfghijkl³mnñoópqrsœtuvwxyzŸ¿\n0123456789\n!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\n´–!?2?3No -/÷°??×??–—?±?-?•®SM©™µ?????<?> ¦-?'"‚„‘“’”???·…‹«›» ?€c" );
-    E_x_Q_object_I_draw_P_color_( E_x_Z_color_M( 0, 0, 0x9f ));
+    E_window_Q_object_I_draw_Z_font_Z_s_( 1, 1, 0, 0, "AÄ„BCÄ†DEÄ˜FGHIJKLÅMNÅƒOÃ“PQRSÅšTUVWXYZÅ¹Å»\naÄ…bcÄ‡deÄ™fghijklÅ‚mnÅ„oÃ³pqrsÅ›tuvwxyzÅºÅ¼\n0123456789\n!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\nâ€²âˆ’Â¡â€½Â²âªÂ³â„–âŸâ€’â„Ã·Â°ã€ƒâ‡¢Ã—â‘â‚â€“â€”â‰ˆÂ±âƒâ€•â€£â€¢Â®â„ Â©â„¢Âµâ›ââœââ…âŒ©â†âŒªâ€‰Â¦â€Õšâ€›â€Ÿâ€šâ€â€˜â€œâ€™â€ââ‹âœ“Â·â€¦â€¹Â«â€ºÂ»â€ƒÂ¿â‚¬Â¢" );
+    E_window_Q_object_I_draw_P_color_( E_window_Z_color_M( 0, 0, 0x9f ));
     E_main_I_draw_Z_angle_line_(
       E_main_Q_timer_S_hour
     , 12
     , 1
     , 2
-    , E_x_Z_color_M( 0, 0, 0x9f )
+    , E_window_Z_color_M( 0, 0, 0x9f )
     );
-    E_x_Q_object_I_draw_P_color_( E_x_Z_color_M( 0, 0xbf, 0 ));
+    E_window_Q_object_I_draw_P_color_( E_window_Z_color_M( 0, 0xbf, 0 ));
     E_main_I_draw_Z_angle_line_(
       E_main_Q_timer_S_minute
     , 60
     , 3
     , 4
-    , E_x_Z_color_M( 0, 0xbf, 0 )
+    , E_window_Z_color_M( 0, 0xbf, 0 )
     );
-    E_x_Q_object_I_draw_P_color_( E_x_Z_color_M( 0, 0, 0 ));
+    E_window_Q_object_I_draw_P_color_( E_window_Z_color_M( 0, 0, 0 ));
     E_main_I_draw_Z_angle_line_(
       E_main_Q_timer_S_second
     , 60
     , 1
     , 1
-    , E_x_Z_color_M( 0, 0, 0 )
+    , E_window_Z_color_M( 0, 0, 0 )
     );
-    E_x_Q_object_I_draw_P_color_( E_x_Z_color_M( 0, 0, 0xff ));
-    E_x_Q_object_I_fill_Z_arcs_(
-      (( xcb_arc_t[] )
+    E_window_Q_object_I_draw_P_color_( E_window_Z_color_M( 0, 0, 0xff ));
+    E_window_Q_object_I_fill_Z_arcs_(
+      (( struct E_window_Z_arc[] )
       { 100
       , 100
       , 50
       , 100
       })
     );
-}*/
+}
 //******************************************************************************

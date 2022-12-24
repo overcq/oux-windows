@@ -5,6 +5,7 @@ struct E_window_Z
   N32 draw_color;
   I current_object;
   F pixel_width, pixel_height;
+  unsigned U_R( mode, draw_simple ) :1;
 } *E_window_S;
 //==============================================================================
 void
@@ -14,6 +15,11 @@ E_window_M( int cmd_show
     {   GV_(NA); _V();
     }
     E_window_S->cmd_show = cmd_show;
+    HDC dc = GetDC(0);
+    E_window_S->pixel_width = (F)GetDeviceCaps( dc, HORZSIZE ) / GetDeviceCaps( dc, HORZRES );
+    E_window_S->pixel_height = (F)GetDeviceCaps( dc, VERTSIZE ) / GetDeviceCaps( dc, VERTRES );
+    ReleaseDC( 0, dc );
+    U_L( E_window_S->mode, draw_simple );
     WNDCLASSEX wcx =
     { .cbSize = sizeof( WNDCLASSEX )
     , .style = 0
@@ -37,6 +43,8 @@ E_window_M( int cmd_show
     }
     E_window_M_font();
     E_window_M_theme();
+    D_M( window, draw );
+    D_M( window, loop );
 }
 void
 E_window_M_font( void

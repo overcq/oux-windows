@@ -2,7 +2,9 @@
 //******************************************************************************
 void
 E_window_W( void
-){  E_window_font_W();
+){  D_W( window, loop );
+    D_W( window, draw );
+    E_window_font_W();
     E_mem_Q_tab_W( E_window_Q_window_S );
     W( E_window_S );
 }

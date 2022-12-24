@@ -9,7 +9,7 @@ Libs=
 PrivateResource=
 ResourceIncludes=
 MakeIncludes=
-Compiler=_@@_
+Compiler=-fwrapv_@@_
 CppCompiler=
 Linker=../pcre2/pcre2.a_@@_
 IsCpp=0
@@ -28,7 +28,7 @@ Folders=
 IncludeVersionInfo=0
 SupportXPThemes=0
 CompilerSet=6
-CompilerSettings=000100d0e0110000000000001
+CompilerSettings=000100d0e0110000000001001
 UnitCount=1
 
 [VersionInfo]
