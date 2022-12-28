@@ -23,34 +23,24 @@ struct E_window_Z_arc
 { N16 x, y, width, height, angle1, angle2;
 };
 //==============================================================================
-N32
-E_window_Z_color_M(
-  N8 red
-, N8 green
-, N8 blue
-){  return ( red << 16 ) | ( green << 8 ) | blue;
+N8
+E_window_Z_color_R_red( COLORREF color
+){  return color && 0xff;
 }
 N8
-E_window_Z_color_R_red( N32 color
-){  J_assert( !( color & ~0xffffff ));
-    return ( color >> 16 ) & 0xff;
+E_window_Z_color_R_green( COLORREF color
+){  return ( color >> 8 ) & 0xff;
 }
 N8
-E_window_Z_color_R_green( N32 color
-){  J_assert( !( color & ~0xffffff ));
-    return ( color >> 8 ) & 0xff;
+E_window_Z_color_R_blue( COLORREF color
+){  return ( color >> 16 ) & 0xff;
 }
-N8
-E_window_Z_color_R_blue( N32 color
-){  J_assert( !( color & ~0xffffff ));
-    return color & 0xff;
-}
-N32
+COLORREF
 E_window_Z_color_M_gray( N8 luminance
-){  return E_window_Z_color_M( luminance, luminance, luminance );
+){  return RGB( luminance, luminance, luminance );
 }
-N32
-E_window_Z_color_P_luminance( N32 color
+COLORREF
+E_window_Z_color_P_luminance( COLORREF color
 , F luminance
 ){  J_assert( luminance >= 0 && luminance <= 1 );
     N8 red = E_window_Z_color_R_red(color);
@@ -67,28 +57,27 @@ E_window_Z_color_P_luminance( N32 color
         blue += lround(( 0xff - blue ) * ( luminance - color_luminance ) / ( 1 - color_luminance ));
     }else
         return color;
-    return E_window_Z_color_M( red, green, blue );
+    return RGB( red, green, blue );
 }
 F
-E_window_Z_color_R_luminance( N32 color
+E_window_Z_color_R_luminance( COLORREF color
 ){  return 0;//( display->red_luminance_ratio * E_window_Z_color_R_red(color) + display->green_luminance_ratio * E_window_Z_color_R_green(color) + display->blue_luminance_ratio * E_window_Z_color_R_blue(color) ) / 255;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void
-E_window_Q_window_I_draw_P_color( N32 color
-){  J_assert( !( color & ~0xffffff ));
-    E_window_S->draw_color = color;
+E_window_Q_window_I_draw_P_color( COLORREF color
+){  E_window_S->draw_color = color;
 }
 //------------------------------------------------------------------------------
 void
 E_window_Q_window_I_draw_Z_points(
   struct E_window_Q_window_Z *window
-, N32 n
+, N n
 , struct E_window_Z_point *points
 ){  J_assert(n);
     for_n( i, n )
         if( points[i].x < window->width && points[i].y < window->height )
-        {   window->drawable[ points[i].y * window->width + points[i].x ] = E_window_S->draw_color;
+        {   SetPixelV( window->dc, points[i].x, points[i].y, E_window_S->draw_color );
             //if( !U_R( screen->state, draw_object_drag_move ))
                 window->object_mask[ points[i].y * window->width + points[i].x ] = E_window_S->current_object;
             //else
@@ -168,7 +157,7 @@ E_window_Q_window_I_draw_Z_segments_Z_high(
 N
 E_window_Q_window_I_draw_Z_segments(
   struct E_window_Q_window_Z *window
-, N32 n
+, N n
 , struct E_window_Z_segment *segments
 ){  J_assert(n);
     for_n( i, n )
@@ -218,7 +207,7 @@ E_window_Q_window_I_draw_Z_segments(
 N
 E_window_Q_window_I_draw_Z_lines(
   struct E_window_Q_window_Z *window
-, N32 n
+, N n
 , struct E_window_Z_point *points
 ){  J_assert( n > 1 );
     struct E_window_Z_segment *Mt_( segments, n - 1 );
@@ -244,7 +233,7 @@ E_window_Q_window_I_draw_Z_lines(
 N
 E_window_Q_window_I_draw_Z_rectangles(
   struct E_window_Q_window_Z *window
-, N32 n
+, N n
 , struct E_window_Z_rectangle *rectangles
 ){  J_assert(n);
     struct E_window_Z_segment *Mt_( segments, n * 4 );
@@ -343,7 +332,7 @@ E_window_Q_window_I_draw_Z_arcs_I_8points_b( struct E_window_Z_arc arc
 N
 E_window_Q_window_I_draw_Z_arcs(
   struct E_window_Q_window_Z *window
-, N32 n
+, N n
 , struct E_window_Z_arc *arcs
 ){  J_assert(n);
     N points_n = 0;
@@ -381,7 +370,7 @@ E_window_Q_window_I_draw_Z_arcs(
 void
 E_window_Q_window_I_fill_Z_points(
   struct E_window_Q_window_Z *window
-, N32 n
+, N n
 , struct E_window_Z_point *points
 ){  J_assert( n > 2 );
     //TODO
@@ -390,7 +379,7 @@ E_window_Q_window_I_fill_Z_points(
 N
 E_window_Q_window_I_fill_Z_rectangles(
   struct E_window_Q_window_Z *window
-, N32 n
+, N n
 , struct E_window_Z_rectangle *rectangles
 ){  J_assert(n);
     struct E_window_Z_segment *Mt_( segments, 0 );
@@ -478,7 +467,7 @@ E_window_Q_window_I_fill_Z_arcs_I_4segments_b( struct E_window_Z_arc arc
 N
 E_window_Q_window_I_fill_Z_arcs(
   struct E_window_Q_window_Z *window
-, N32 n
+, N n
 , struct E_window_Z_arc *arcs
 ){  J_assert(n);
     N segments_n = 0;
@@ -533,23 +522,22 @@ E_window_Q_window_I_draw_aa_Z_pixel(
   struct E_window_Q_window_Z *window
 , S16 x
 , S16 y
-, N32 color
+, COLORREF color
 , F brightness
 , N get_pixel
-){  J_assert( !( color & ~0xffffff ));
-    J_assert( brightness >= 0 && brightness <= 1 );
+){  J_assert( brightness >= 0 && brightness <= 1 );
     N background_red, background_green, background_blue;
     N n = 0;
     //if( !U_R( screen->state, draw_object_drag_move ))
     {   N p[8];
-        p[0] = ( get_pixel & E_window_Z_aa_pixel_S_e ) && x + 1 < window->width ? E_window_Q_image_R_pixel( window, window->drawable, x + 1, y ) : color;
-        p[1] = ( get_pixel & E_window_Z_aa_pixel_S_se ) && x + 1 < window->width && y + 1 < window->height ? E_window_Q_image_R_pixel( window, window->drawable, x + 1, y + 1 ) : color;
-        p[2] = ( get_pixel & E_window_Z_aa_pixel_S_s ) && y + 1 < window->height ? E_window_Q_image_R_pixel( window, window->drawable, x, y + 1 ) : color;
-        p[3] = ( get_pixel & E_window_Z_aa_pixel_S_sw ) && x > 0 && y + 1 < window->height ? E_window_Q_image_R_pixel( window, window->drawable, x - 1, y + 1 ) : color;
-        p[4] = ( get_pixel & E_window_Z_aa_pixel_S_w ) && x > 0 ? E_window_Q_image_R_pixel( window, window->drawable, x - 1, y ) : color;
-        p[5] = ( get_pixel & E_window_Z_aa_pixel_S_nw ) && x > 0 && y > 0 ? E_window_Q_image_R_pixel( window, window->drawable, x - 1, y - 1 ) : color;
-        p[6] = ( get_pixel & E_window_Z_aa_pixel_S_n ) && y > 0 ? E_window_Q_image_R_pixel( window, window->drawable, x, y - 1 ) : color;
-        p[7] = ( get_pixel & E_window_Z_aa_pixel_S_ne ) && x + 1 < window->width && y > 0 ? E_window_Q_image_R_pixel( window, window->drawable, x + 1, y - 1 ) : color;
+        p[0] = ( get_pixel & E_window_Z_aa_pixel_S_e ) && x + 1 < window->width ? E_window_R_pixel( window, x + 1, y ) : color;
+        p[1] = ( get_pixel & E_window_Z_aa_pixel_S_se ) && x + 1 < window->width && y + 1 < window->height ? E_window_R_pixel( window, x + 1, y + 1 ) : color;
+        p[2] = ( get_pixel & E_window_Z_aa_pixel_S_s ) && y + 1 < window->height ? E_window_R_pixel( window, x, y + 1 ) : color;
+        p[3] = ( get_pixel & E_window_Z_aa_pixel_S_sw ) && x > 0 && y + 1 < window->height ? E_window_R_pixel( window, x - 1, y + 1 ) : color;
+        p[4] = ( get_pixel & E_window_Z_aa_pixel_S_w ) && x > 0 ? E_window_R_pixel( window, x - 1, y ) : color;
+        p[5] = ( get_pixel & E_window_Z_aa_pixel_S_nw ) && x > 0 && y > 0 ? E_window_R_pixel( window, x - 1, y - 1 ) : color;
+        p[6] = ( get_pixel & E_window_Z_aa_pixel_S_n ) && y > 0 ? E_window_R_pixel( window, x, y - 1 ) : color;
+        p[7] = ( get_pixel & E_window_Z_aa_pixel_S_ne ) && x + 1 < window->width && y > 0 ? E_window_R_pixel( window, x + 1, y - 1 ) : color;
         background_red = background_green = background_blue = 0;
         for_n( i, 8 )
             if( p[i] != color )
@@ -583,7 +571,7 @@ E_window_Q_window_I_draw_aa_Z_pixel(
         blue = background_blue + ( blue - background_blue ) * brightness;
     else
         blue = background_blue - ( background_blue - blue ) * brightness;
-    E_window_Q_window_I_draw_P_color_( E_window_Z_color_M( red, green, blue ));
+    E_window_Q_window_I_draw_P_color_( RGB( red, green, blue ));
     E_window_Q_window_I_draw_Z_points_(
       (( struct E_window_Z_point[] )
       { x, y
@@ -596,9 +584,8 @@ E_window_Q_window_I_draw_aa_Z_lines(
 , N n
 , struct E_window_Z_point *points
 , F thickness
-, N32 color
+, COLORREF color
 ){  J_assert( n > 1 );
-    J_assert( !( color & ~0xffffff ));
     F a = E_window_S->pixel_width;
     F b = E_window_S->pixel_height;
     F pole_pixela = a * b;
@@ -1297,7 +1284,7 @@ E_window_Q_window_I_draw_aa_Z_lines(
 void
 E_window_Q_object_I_draw_P_color(
   struct E_window_Q_object_Z *object
-, N32 color
+, COLORREF color
 ){  if( !U_R( object->mode, drag_src ))
         E_window_Q_window_I_draw_P_color_(color);
 }
@@ -1306,7 +1293,7 @@ void
 E_window_Q_object_I_draw_Z_points(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, N32 n
+, N n
 , struct E_window_Z_point *points
 ){  for_n( i, n )
     {   points[i].x += object->x;
@@ -1318,7 +1305,7 @@ void
 E_window_Q_object_I_draw_Z_segments(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, N32 n
+, N n
 , struct E_window_Z_segment *segments
 ){  for_n( i, n )
     {   segments[i].x1 += object->x;
@@ -1332,7 +1319,7 @@ void
 E_window_Q_object_I_draw_Z_lines(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, N32 n
+, N n
 , struct E_window_Z_point *points
 ){  for_n( i, n )
     {   points[i].x += object->x;
@@ -1344,7 +1331,7 @@ void
 E_window_Q_object_I_draw_Z_rectangles(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, N32 n
+, N n
 , struct E_window_Z_rectangle *rectangles
 ){  for_n( i, n )
     {   rectangles[i].x += object->x;
@@ -1356,7 +1343,7 @@ void
 E_window_Q_object_I_draw_Z_arcs(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, N32 n
+, N n
 , struct E_window_Z_arc *arcs
 ){  for_n( i, n )
     {   arcs[i].x += object->x;
@@ -1368,7 +1355,7 @@ void
 E_window_Q_object_I_fill_Z_points(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, N32 n
+, N n
 , struct E_window_Z_point *points
 ){  for_n( i, n )
     {   points[i].x += object->x;
@@ -1380,7 +1367,7 @@ void
 E_window_Q_object_I_fill_Z_rectangles(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, N32 n
+, N n
 , struct E_window_Z_rectangle *rectangles
 ){  for_n( i, n )
     {   rectangles[i].x += object->x;
@@ -1392,7 +1379,7 @@ void
 E_window_Q_object_I_fill_Z_arcs(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, N32 n
+, N n
 , struct E_window_Z_arc *arcs
 ){  for_n( i, n )
     {   arcs[i].x += object->x;
@@ -1407,7 +1394,7 @@ E_window_Q_object_I_draw_aa_Z_pixel(
 , struct E_window_Q_object_Z *object
 , S16 x
 , S16 y
-, N32 color
+, COLORREF color
 , F brightness
 , N get_pixel
 ){  E_window_Q_window_I_draw_aa_Z_pixel_(
@@ -1424,8 +1411,8 @@ E_window_Q_object_I_draw_aa_Z_lines(
 , struct E_window_Q_object_Z *object
 , N n
 , struct E_window_Z_point *points
-, N32 color
 , F thickness
+, COLORREF color
 ){  for_n( i, n )
     {   points[i].x += object->x;
         points[i].y += object->y;

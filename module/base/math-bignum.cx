@@ -179,7 +179,7 @@ E_math_Q_bignum_I_multiply_2( struct E_math_Z_bignum *num
         "\n" "or        %%ebx,%1"
         #elif defined( __x86_64__ )
         "\n" "mov       %0,%%rbx"
-        "\n" "shl       %1"
+        "\n" "shlq      %1"
         "\n" "setc      %%al"
         "\n" "or        %%rbx,%1"
         #else
@@ -525,7 +525,7 @@ E_math_Q_bignum_I_add(
     "\n" "jnz       2b"
     "\n 3:test      %%al,%%al"
     "\n" "setz      %%al"
-    "\n 4:movzq     %%al,%0"
+    "\n 4:movzbq    %%al,%0"
         #else
 #error not implemented
        #endif

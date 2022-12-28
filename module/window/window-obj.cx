@@ -653,8 +653,7 @@ E_window_Q_object_I_draw_Z_draw_proc( void (*draw_object_proc)( struct E_window_
         {   struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
             if( object->draw == draw_object_proc )
             {   U_R( E_window_S->mode, draw_simple ) = draw_simple;
-                InvalidateRect( window->handle, 0, FALSE );
-                UpdateWindow( window->handle );
+                RedrawWindow( window->handle, 0, 0, RDW_INVALIDATE );
                 break;
             }
         }
@@ -677,8 +676,7 @@ E_window_Q_object_I_draw( struct E_window_Q_window_Z *window_
 ){  for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
     {   struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
         if( window != window_ )
-        {   InvalidateRect( window->handle, 0, FALSE );
-            UpdateWindow( window->handle );
+        {   RedrawWindow( window->handle, 0, 0, RDW_INVALIDATE );
             break;
         }
     }

@@ -2,9 +2,9 @@
 //******************************************************************************
 struct E_window_Z
 { int cmd_show;
-  N32 draw_color;
   I current_object;
   F pixel_width, pixel_height;
+  COLORREF draw_color;
   unsigned U_R( mode, draw_simple ) :1;
 } *E_window_S;
 //==============================================================================
@@ -20,20 +20,17 @@ E_window_M( int cmd_show
     E_window_S->pixel_height = (F)GetDeviceCaps( dc, VERTSIZE ) / GetDeviceCaps( dc, VERTRES );
     ReleaseDC( 0, dc );
     U_L( E_window_S->mode, draw_simple );
-    WNDCLASSEX wcx =
-    { .cbSize = sizeof( WNDCLASSEX )
-    , .style = 0
-    , .lpfnWndProc = &E_window_Q_window_I_proc
-    , .cbClsExtra = 0
-    , .cbWndExtra = 0
-    , .hInstance = E_base_S->E_flow_S_h_instance
-    , .hIcon = LoadIcon( 0, IDI_APPLICATION )
-    , .hCursor = LoadCursor( 0, IDC_ARROW )
-    , .hbrBackground = 0
-    , .lpszMenuName = 0
-    , .lpszClassName = "main_window"
-    , .hIconSm = 0
-    };
+    E_window_M_font();
+    E_window_M_theme();
+    WNDCLASSEX wcx;
+    ZeroMemory( &wcx, sizeof(wcx) );
+    wcx.cbSize = sizeof( WNDCLASSEX );
+    wcx.hInstance = E_base_S->E_flow_S_h_instance;
+    wcx.lpszClassName = "main_window";
+    wcx.lpfnWndProc = &E_window_Q_window_I_proc;
+    wcx.hIcon = LoadIcon( 0, IDI_APPLICATION );
+    wcx.hIconSm = LoadIcon( 0, IDI_APPLICATION );
+    wcx.hCursor = LoadCursor( 0, IDC_ARROW );
     if( !RegisterClassEx( &wcx ))
     {   GV_(NA); _V();
     }
@@ -41,9 +38,6 @@ E_window_M( int cmd_show
     if( !E_window_Q_window_S )
     {   GV_(NA); _V();
     }
-    E_window_M_font();
-    E_window_M_theme();
-    D_M( window, draw );
     D_M( window, loop );
 }
 void
@@ -2551,35 +2545,35 @@ E_window_M_font( void
 void
 E_window_M_theme( void
 ){  E_window_Q_theme = ( struct E_window_Q_theme_Z )
-    { .window_bg = E_window_Z_color_M( 0xa2, 0xa2, 0xa2 )
-    , .object_bg = E_window_Z_color_M( 0xca, 0xca, 0xca )
-    , .volatile_window_bg = E_window_Z_color_M( 0xdf, 0xde, 0xff )
-    , .line = E_window_Z_color_M( 0x7a, 0x7a, 0x7f )
-    , .text = E_window_Z_color_M( 0, 0, 0 )
-    , .inactive_text = E_window_Z_color_M( 0x57, 0x57, 0x57 )
-    , .line_numbers = E_window_Z_color_M( 0x5f, 0x5f, 0x5f )
-    , .current_line_number = E_window_Z_color_M( 0x4a, 0x4a, 0x4f )
-    , .current_line = E_window_Z_color_M( 0xce, 0xce, 0xce )
-    , .cursor = E_window_Z_color_M( 0xbf, 0x5f, 0 )
-    , .current_brace = E_window_Z_color_M( 0x2b, 0x5f, 0xff )
-    , .search_bg = E_window_Z_color_M( 0xc7, 0x9c, 0x9c )
-    , .selection_bg = E_window_Z_color_M( 0xc4, 0x9c, 0x9c )
-    , .line_selection_bg = E_window_Z_color_M( 0xb8, 0xb8, 0xb8 )
-    , .cursor_jump_bg = E_window_Z_color_M( 0xb6, 0xb6, 0xb6 )
+    { .window_bg = RGB( 0xa2, 0xa2, 0xa2 )
+    , .object_bg = RGB( 0xca, 0xca, 0xca )
+    , .volatile_window_bg = RGB( 0xdf, 0xde, 0xff )
+    , .line = RGB( 0x7a, 0x7a, 0x7f )
+    , .text = RGB( 0, 0, 0 )
+    , .inactive_text = RGB( 0x57, 0x57, 0x57 )
+    , .line_numbers = RGB( 0x5f, 0x5f, 0x5f )
+    , .current_line_number = RGB( 0x4a, 0x4a, 0x4f )
+    , .current_line = RGB( 0xce, 0xce, 0xce )
+    , .cursor = RGB( 0xbf, 0x5f, 0 )
+    , .current_brace = RGB( 0x2b, 0x5f, 0xff )
+    , .search_bg = RGB( 0xc7, 0x9c, 0x9c )
+    , .selection_bg = RGB( 0xc4, 0x9c, 0x9c )
+    , .line_selection_bg = RGB( 0xb8, 0xb8, 0xb8 )
+    , .cursor_jump_bg = RGB( 0xb6, 0xb6, 0xb6 )
     , .code =
-      { .comment = E_window_Z_color_M( 0x5f, 0x5f, 0x5f )
-      , .doc_comment = E_window_Z_color_M( 0x2b, 0x37, 0x5f )
-      , .label = E_window_Z_color_M( 0x5f, 0, 0 )
-      , .keyword = E_window_Z_color_M( 0, 0, 0x5f )
-      , .preprocessor_markup = E_window_Z_color_M( 0, 0x2b, 0 )
-      , .type = E_window_Z_color_M( 0, 0x5f, 0 )
-      , .number = E_window_Z_color_M( 0x5f, 0, 0x37 )
-      , .text = E_window_Z_color_M( 0x5f, 0x37, 0 )
-      , .character = E_window_Z_color_M( 0x5f, 0x37, 0 )
+      { .comment = RGB( 0x5f, 0x5f, 0x5f )
+      , .doc_comment = RGB( 0x2b, 0x37, 0x5f )
+      , .label = RGB( 0x5f, 0, 0 )
+      , .keyword = RGB( 0, 0, 0x5f )
+      , .preprocessor_markup = RGB( 0, 0x2b, 0 )
+      , .type = RGB( 0, 0x5f, 0 )
+      , .number = RGB( 0x5f, 0, 0x37 )
+      , .text = RGB( 0x5f, 0x37, 0 )
+      , .character = RGB( 0x5f, 0x37, 0 )
       }
     , .terminal =
-      { .bg = E_window_Z_color_M( 0, 0, 0 )
-      , .text = E_window_Z_color_M( 0xee, 0xee, 0xec )
+      { .bg = RGB( 0, 0, 0 )
+      , .text = RGB( 0xee, 0xee, 0xec )
       }
     };
 }

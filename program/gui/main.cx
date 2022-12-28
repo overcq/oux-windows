@@ -213,7 +213,7 @@ E_main_I_draw_Z_angle_line(
 , N arc_n
 , N line_length_i
 , N line_length_n
-, N32 color
+, COLORREF color
 ){
     S16 x = line_length_i * ( object->width / 2 - 1 ) / line_length_n;
     S16 y = line_length_i * ( object->height / 2 - 1 ) / line_length_n;
@@ -262,8 +262,8 @@ E_main_I_draw_Z_angle_line(
             }
           }
         )
-        , color
         , 0.01 * object->width * line_length_n / line_length_i
+        , color
         );
     else
     {   struct E_window_Z_point points[2] =
@@ -283,7 +283,7 @@ void
 E_main_Q_timer_I_draw(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-){  E_window_Q_object_I_draw_P_color_( E_window_Z_color_M( 0xff, 0xff, 0xff ));
+){  E_window_Q_object_I_draw_P_color_( RGB( 0xff, 0xff, 0xff ));
     E_window_Q_object_I_draw_Z_rectangles_(
       (( struct E_window_Z_rectangle[] )
       { 0
@@ -293,31 +293,31 @@ E_main_Q_timer_I_draw(
       })
     );
     E_window_Q_object_I_draw_Z_font_Z_s_( 1, 1, 0, 0, "AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ\naąbcćdeęfghijklłmnńoópqrsśtuvwxyzźż\n0123456789\n!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\n′−¡‽²➪³№ ‒⁄÷°〃⇢×⁑⁂–—≈±⁃―‣•®℠©™µ❛❝❜❞⁅〈⁆〉 ¦‐՚‛‟‚„‘“’”⏎⁋✓·…‹«›» ¿€¢" );
-    E_window_Q_object_I_draw_P_color_( E_window_Z_color_M( 0, 0, 0x9f ));
+    E_window_Q_object_I_draw_P_color_( RGB( 0, 0, 0x9f ));
     E_main_I_draw_Z_angle_line_(
       E_main_Q_timer_S_hour
     , 12
     , 1
     , 2
-    , E_window_Z_color_M( 0, 0, 0x9f )
+    , RGB( 0, 0, 0x9f )
     );
-    E_window_Q_object_I_draw_P_color_( E_window_Z_color_M( 0, 0xbf, 0 ));
+    E_window_Q_object_I_draw_P_color_( RGB( 0, 0xbf, 0 ));
     E_main_I_draw_Z_angle_line_(
       E_main_Q_timer_S_minute
     , 60
     , 3
     , 4
-    , E_window_Z_color_M( 0, 0xbf, 0 )
+    , RGB( 0, 0xbf, 0 )
     );
-    E_window_Q_object_I_draw_P_color_( E_window_Z_color_M( 0, 0, 0 ));
+    E_window_Q_object_I_draw_P_color_( RGB( 0, 0, 0 ));
     E_main_I_draw_Z_angle_line_(
       E_main_Q_timer_S_second
     , 60
     , 1
     , 1
-    , E_window_Z_color_M( 0, 0, 0 )
+    , RGB( 0, 0, 0 )
     );
-    E_window_Q_object_I_draw_P_color_( E_window_Z_color_M( 0, 0, 0xff ));
+    E_window_Q_object_I_draw_P_color_( RGB( 0, 0, 0xff ));
     E_window_Q_object_I_fill_Z_arcs_(
       (( struct E_window_Z_arc[] )
       { 100

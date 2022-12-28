@@ -27,8 +27,8 @@ typedef long long           S64;
     #elif defined( __x86_64__ )
 typedef unsigned            N32;
 typedef int                 S32;
-typedef unsigned long       N64;
-typedef long                S64;
+typedef unsigned long long  N64;
+typedef long long           S64;
     #endif
 //------------------------------------------------------------------------------
 // Podstawowe typy danych:

@@ -3,31 +3,24 @@
 D( window, loop )
 {   X_M( window, loop );
     I_D
-    {   G_();
-        X_B( window, loop, 0 )
+    {   X_B( window, loop, 0 )
             break;
-        G_();
         MSG msg;
         N ret;
-        B was_wm_paint = no;
+        E_flow_Q_task_I_touch_stack();
         while( PeekMessage( &msg, 0, 0, 0, PM_REMOVE ))
         {   G_(); Gh( msg.message );
             switch(msg.message)
-            { case WM_PAINT:
-                    if( was_wm_paint )
-                        goto Cont;
-                    was_wm_paint = yes;
+            { case WM_QUIT:
+                    U_F( E_base_S->E_flow_S_signal, exit );
+                    break;
               default:
                     TranslateMessage( &msg );
                     DispatchMessage( &msg );
                     break;
-              case WM_QUIT:
-                    U_F( E_base_S->E_flow_S_signal, exit );
-                    break;
             }
-            G_();
         }
-Cont:   ;
+Cont:;
     }
     X_W( window, loop );
 }
@@ -41,13 +34,28 @@ E_window_Q_window_I_proc( HWND h_window
         if( window->handle == h_window )
         {   switch(msg)
             { case WM_DESTROY:
-                    PostQuitMessage(0);
+                {   PostQuitMessage(0);
                     break;
+                }
               case WM_PAINT:
                 {   G_(); Gs0_( "paint" );
-                    X_A( window, draw );
-                    U_F( window->req, draw );
-                    X_F( window, draw );
+                    E_window_S->draw_color = E_window_Q_theme.window_bg;
+                    E_window_Q_window_I_fill_Z_rectangles( window, 1, &( struct E_window_Z_rectangle ){ 0, 0, window->width, window->height } );
+                    for_n( i, window->width * window->height )
+                        window->object_mask[i] = ~0;
+                    for_each( object_id, window->object, E_mem_Q_tab ) //NDFN Zak³adana kolejnoœæ od na spodzie do na wierzchu. Nie wiadomo, czy “_q” jest konieczne.
+                    {   E_window_S->current_object = object_id;
+                        struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+                        if( U_R( object->mode, drag_src ))
+                            E_window_S->draw_color = E_window_Q_theme.current_brace;
+                        object->draw( window, object ); //NDFN Nieprzerysowywanie wszystkich obiektów dla ka¿dej klatki animacji.
+                    }
+                    PAINTSTRUCT ps;
+                    HDC dc = BeginPaint( window->handle, &ps );
+                    if( !BitBlt( dc, 0, 0, window->width, window->height, window->dc, 0, 0, SRCCOPY ))
+                    {   GV_(NA); _V();
+                    }
+                    EndPaint( window->handle, &ps );
                     break;
                 }
               case WM_SIZE:
@@ -57,12 +65,24 @@ E_window_Q_window_I_proc( HWND h_window
                     {   G_(); Gs0_( "size" );
                         window->width = LOWORD( l_param );
                         window->height = HIWORD( l_param );
-                        if( !E_mem_Q_blk_M_replace( &window->drawable, window->width * window->height * sizeof( *window->drawable )))
+                        DeleteObject( window->drawable );
+                        DeleteDC( window->dc );
+                        HDC dc = GetDC( window->handle );
+                        window->dc = CreateCompatibleDC(dc);
+                        if( !window->dc )
                         {   GV_(NA); _V();
                         }
+                        window->drawable = CreateCompatibleBitmap( dc, window->width, window->height );
+                        if( !window->drawable )
+                        {   GV_(NA); _V();
+                        }
+                        ReleaseDC( window->handle, dc );
+                        SelectObject( window->dc, window->drawable );
                         if( !E_mem_Q_blk_M_replace( &window->object_mask, window->width * window->height * sizeof( *window->object_mask )))
                         {   GV_(NA); _V();
                         }
+                        E_window_Q_object_I_lay(window);
+                        RedrawWindow( window->handle, 0, 0, RDW_INVALIDATE );
                     }
                     break;
               default:
@@ -73,106 +93,7 @@ E_window_Q_window_I_proc( HWND h_window
             return 0;
         }
     }
+    G_(); Gh( h_window ); Gh(msg);
     return DefWindowProc( h_window, msg, w_param, l_param );
-}
-D( window, draw )
-{   X_M( window, draw );
-    I_D
-    {   X_B( window, draw, 0 )
-            break;
-        for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
-        {   struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
-            if( U_E( window->req, draw ))
-            {   for_n( i, window->width * window->height )
-                    window->drawable[i] = E_window_Q_theme.window_bg;
-                for_n_( i, window->width * window->height )
-                    window->object_mask[i] = ~0;
-                for_each( object_id, window->object, E_mem_Q_tab ) //NDFN Zak³adana kolejnoœæ od na spodzie do na wierzchu. Nie wiadomo, czy “_q” jest konieczne.
-                {   E_window_S->current_object = object_id;
-                    struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
-                    if( U_R( object->mode, drag_src ))
-                        E_window_S->draw_color = E_window_Q_theme.current_brace;
-                    object->draw( window, object ); //NDFN Nieprzerysowywanie wszystkich obiektów dla ka¿dej klatki animacji.
-                }
-                BITMAPINFO bi;
-                bi.bmiHeader.biSize = sizeof( BITMAPINFOHEADER );
-                bi.bmiHeader.biWidth = window->width;
-                bi.bmiHeader.biHeight = -window->height;
-                bi.bmiHeader.biPlanes = 1;
-                bi.bmiHeader.biBitCount = 32;
-                bi.bmiHeader.biCompression = BI_RGB;
-                bi.bmiHeader.biSizeImage = 0;
-                bi.bmiHeader.biXPelsPerMeter = 100;
-                bi.bmiHeader.biYPelsPerMeter = 100;
-                bi.bmiHeader.biClrUsed = 0;
-                bi.bmiHeader.biClrImportant = 0;
-                PAINTSTRUCT pi;
-                HDC dc = BeginPaint( window->handle, &pi );
-                SetDIBitsToDevice( dc
-                , 0, 0
-                , window->width, window->height
-                , 0, 0
-                , 0
-                , window->height
-                , (P)window->drawable
-                , &bi
-                , DIB_RGB_COLORS
-                );
-                EndPaint( window->handle, &pi );
-            }
-        }
-    }
-    /*if( U_R( display->mode, drag ))
-    {   struct E_x_Q_screen_Z *screen = E_mem_Q_tab_R( display->screen, display->drag_S_dnd_window_screen_id );
-        struct E_x_Q_window_Z *window = &screen->dnd_window;
-        if( !U_R( window->mode, resize )
-        && U_E( window->req, draw )
-        )
-        {   for_n( i, window->width * window->height )
-                window->drawable[i] = E_x_Q_theme.window_bg;
-                #ifdef C_xcb_shape
-            xcb_poly_fill_rectangle( display->x_display
-            , screen->dnd_window_shape_pixmap
-            , screen->bitmask_0_gc
-            , 1
-            , ( xcb_rectangle_t [] )
-              { 0, 0
-              , window->width, window->height
-              }
-            );
-                #endif
-            U_F( screen->state, draw_object_drag_move );
-            for_each( object_id, window->object, E_mem_Q_tab )
-            {   struct E_x_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
-                object->draw( display, screen, window, object );
-            }
-            U_L( screen->state, draw_object_drag_move );
-                #ifdef C_xcb_shape
-            xcb_shape_mask( display->x_display
-            , XCB_SHAPE_SO_SET
-            , XCB_SHAPE_SK_BOUNDING
-            , window->x_window
-            , 0, 0
-            , screen->dnd_window_shape_pixmap
-            );
-                #endif
-            xcb_put_image( display->x_display
-            , XCB_IMAGE_FORMAT_Z_PIXMAP
-            , window->x_window
-            , screen->drawable_gc
-            , window->width, window->height
-            , 0, 0
-            , 0
-            , 24
-            , window->width * window->height * sizeof(N32)
-            , (P)window->drawable
-            );
-            U_F( display->req, flush );
-        }
-        U_L( display->mode, draw_simple );
-        }
-        X_U( window, flush );
-    }*/
-    X_W( window, draw );
 }
 //******************************************************************************
