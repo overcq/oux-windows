@@ -1,5 +1,3 @@
-*.exe
-*.dll
 *.o
 *.rc
 *.res
@@ -9,6 +7,7 @@
 *.def
 *.layout
 Makefile.win
+/make-oux/make-oux.exe
 !/compile/*.h
 !/make-oux/*.c
 !/module/*/dllmain.c
