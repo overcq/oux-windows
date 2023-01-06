@@ -215,8 +215,8 @@ E_main_I_draw_Z_angle_line(
 , N line_length_n
 , COLORREF color
 ){
-    S16 x = line_length_i * ( object->width / 2 - 1 ) / line_length_n;
-    S16 y = line_length_i * ( object->height / 2 - 1 ) / line_length_n;
+    LONG x = line_length_i * ( object->width / 2 - 1 ) / line_length_n;
+    LONG y = line_length_i * ( object->height / 2 - 1 ) / line_length_n;
     N l = 2 * ( object->width + object->height );
     N d = arc_i * l / arc_n;
     N a = d % ( l / 8 );
@@ -252,8 +252,7 @@ E_main_I_draw_Z_angle_line(
     }
     if( !U_R( E_window_S->mode, draw_simple ))
         E_window_Q_object_I_draw_aa_Z_lines( window, object
-        , 2
-        , (( struct E_window_Z_point[] )
+        , (( POINT[] )
           { { object->width / 2
             , object->height / 2
             }
@@ -262,11 +261,12 @@ E_main_I_draw_Z_angle_line(
             }
           }
         )
+        , 2
         , 0.01 * object->width * line_length_n / line_length_i
         , color
         );
     else
-    {   struct E_window_Z_point points[2] =
+    {   POINT points[2] =
         { { object->width / 2
           , object->height / 2
           }
@@ -274,7 +274,7 @@ E_main_I_draw_Z_angle_line(
           , object->height / 2 + y
           }
         };
-        E_window_Q_object_I_draw_P_color_(color);
+        E_window_Q_window_I_draw_P_pen( window, color );
         E_window_Q_object_I_draw_Z_lines_(points);
     }
 }
@@ -283,13 +283,11 @@ void
 E_main_Q_timer_I_draw(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-){  E_window_Q_object_I_draw_P_color_( RGB( 0xff, 0xff, 0xff ));
+){  E_window_Q_window_I_draw_P_color( RGB( 0xff, 0xff, 0xff ));
     E_window_Q_object_I_draw_Z_rectangles_(
-      (( struct E_window_Z_rectangle[] )
-      { 0
-      , 0
-      , object->width - 1
-      , object->height - 1
+      (( RECT[] )
+      { 0, 0
+      , object->width, object->height
       })
     );
     E_window_Q_object_I_draw_Z_font_Z_s_( 1, 1, 0, 0, "AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ\naąbcćdeęfghijklłmnńoópqrsśtuvwxyzźż\n0123456789\n!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\n′−¡‽²➪³№ ‒⁄÷°〃⇢×⁑⁂–—≈±⁃―‣•®℠©™µ❛❝❜❞⁅〈⁆〉 ¦‐՚‛‟‚„‘“’”⏎⁋✓·…‹«›» ¿€¢" );
@@ -317,13 +315,12 @@ E_main_Q_timer_I_draw(
     , 1
     , RGB( 0, 0, 0 )
     );
-    E_window_Q_object_I_draw_P_color_( RGB( 0, 0, 0xff ));
+    E_window_Q_window_I_draw_P_pen( window, RGB( 0, 0, 0xff ));
+    E_window_Q_window_I_draw_P_brush( window, RGB( 0, 0, 0xff ));
     E_window_Q_object_I_fill_Z_arcs_(
-      (( struct E_window_Z_arc[] )
-      { 100
-      , 100
-      , 50
-      , 100
+      (( RECT[] )
+      { 100, 100
+      , 150, 200
       })
     );
 }

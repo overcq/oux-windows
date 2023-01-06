@@ -6,7 +6,6 @@ D( window, loop )
     {   X_B( window, loop, 0 )
             break;
         MSG msg;
-        N ret;
         E_flow_Q_task_I_touch_stack();
         while( PeekMessage( &msg, 0, 0, 0, PM_REMOVE ))
         {   G_(); Gh( msg.message );
@@ -20,7 +19,6 @@ D( window, loop )
                     break;
             }
         }
-Cont:;
     }
     X_W( window, loop );
 }
@@ -39,8 +37,9 @@ E_window_Q_window_I_proc( HWND h_window
                 }
               case WM_PAINT:
                 {   G_(); Gs0_( "paint" );
-                    E_window_S->draw_color = E_window_Q_theme.window_bg;
-                    E_window_Q_window_I_fill_Z_rectangles( window, 1, &( struct E_window_Z_rectangle ){ 0, 0, window->width, window->height } );
+                    E_window_Q_window_I_draw_P_pen( window, E_window_Q_theme.window_bg );
+                    E_window_Q_window_I_draw_P_brush( window, E_window_Q_theme.window_bg );
+                    E_window_Q_window_I_fill_Z_rectangles( window, &( RECT ){ 0, 0, window->width, window->height }, 1 );
                     for_n( i, window->width * window->height )
                         window->object_mask[i] = ~0;
                     for_each( object_id, window->object, E_mem_Q_tab ) //NDFN Zak³adana kolejnoœæ od na spodzie do na wierzchu. Nie wiadomo, czy “_q” jest konieczne.
@@ -70,6 +69,9 @@ E_window_Q_window_I_proc( HWND h_window
                         HDC dc = GetDC( window->handle );
                         window->dc = CreateCompatibleDC(dc);
                         if( !window->dc )
+                        {   GV_(NA); _V();
+                        }
+                        if( !SetBkMode( window->dc, TRANSPARENT ))
                         {   GV_(NA); _V();
                         }
                         window->drawable = CreateCompatibleBitmap( dc, window->width, window->height );

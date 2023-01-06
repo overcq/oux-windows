@@ -35,8 +35,8 @@ struct E_window_Q_object_Z
   N child_n;
   I *child;
   P data;
-  S16 x, y;
-  N16 width, height; // Prostok¹t oczekiwanej widocznoœci obiektu.
+  LONG x, y;
+  LONG width, height; // Prostok¹t oczekiwanej widocznoœci obiektu.
   unsigned U_R( mode, lay_height )      :1;
   unsigned U_R( mode, draggable )       :1;
   unsigned U_R( mode, drag_src )        :1;
@@ -49,16 +49,16 @@ struct E_window_Q_object_Z_data_Z_entry
   unsigned U_R( state, cursor_visible_ ) :1;
 };
 //==============================================================================
-S16 E_window_Q_object_S_layout_dx = 4, E_window_Q_object_S_layout_dy = 4;
+LONG E_window_Q_object_S_layout_dx = 4, E_window_Q_object_S_layout_dy = 4;
 //==============================================================================
 I
 E_window_Q_object_M(
   struct E_window_Q_window_Z *window
 , N child_n
-, S16 x
-, S16 y
-, N16 width
-, N16 height
+, LONG x
+, LONG y
+, LONG width
+, LONG height
 , void
   (*clear_data)(P)
 , void
@@ -213,23 +213,12 @@ void
 E_window_Q_object_Z_button_I_draw(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-){  E_window_Q_object_I_draw_P_color_( E_window_Q_theme.line );
-    E_window_Q_object_I_draw_Z_rectangles_((
-      ( struct E_window_Z_rectangle[] )
-      { { .x = 0
-        , .y = 0
-        , .width = object->width
-        , .height = object->height
-        }
-      }
-    ));
-    E_window_Q_object_I_draw_P_color_( E_window_Q_theme.object_bg );
+){  E_window_Q_window_I_draw_P_pen( window, E_window_Q_theme.line );
+    E_window_Q_window_I_draw_P_brush( window, E_window_Q_theme.object_bg );
     E_window_Q_object_I_fill_Z_rectangles_((
-      ( struct E_window_Z_rectangle[] )
-      { { .x = 1
-        , .y = 1
-        , .width = object->width - 2
-        , .height = object->height - 2
+      ( RECT[] )
+      { { 0, 0
+        , object->width, object->height
         }
       }
     ));
@@ -288,19 +277,18 @@ void
 E_window_Q_object_Z_entry_I_draw(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-){  E_window_Q_object_I_draw_P_color_( E_window_Q_theme.window_bg );
+){  E_window_Q_window_I_draw_P_pen( window, E_window_Q_theme.window_bg );
+    E_window_Q_window_I_draw_P_brush( window, E_window_Q_theme.window_bg );
     E_window_Q_object_I_fill_Z_rectangles_((
-      ( struct E_window_Z_rectangle[] )
-      { { .x = 0
-        , .y = 0
-        , .width = object->width
-        , .height = object->height
+      ( RECT[] )
+      { { 0, 0
+        , object->width, object->height
         }
       }
     ));
     struct E_window_Q_object_Z_data_Z_entry *object_data = object->data;
     struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, object_data->font );
-    S16 x = 0;
+    LONG x = 0;
     Pc s = object_data->text;
     for_n( i, object_data->text_start )
     {   U u = ~0;
@@ -332,7 +320,7 @@ E_window_Q_object_Z_entry_I_draw(
     *s = c;
     if( U_R( object_data->state, cursor_visible_ ))
     {   struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, object_data->font );
-        S16 x = 0;
+        LONG x = 0;
         Pc s = object_data->text;
         for_n( i, object_data->text_start )
         {   U u = ~0;
@@ -357,14 +345,12 @@ E_window_Q_object_Z_entry_I_draw(
                 x += ( x != 0 ? 1 : 0 ) + font->bitmap[0].width;
             l--;
         }
-        E_window_Q_object_I_draw_P_color_( E_window_Q_theme.cursor );
-        struct E_window_Z_segment segments[1] =
-        { x
-        , 0
-        , x
-        , object->height - 1
+        E_window_Q_window_I_draw_P_pen( window, E_window_Q_theme.cursor );
+        POINT lines[2] =
+        { x, 0
+        , x, object->height - 1
         };
-        E_window_Q_object_I_draw_Z_segments_(segments);
+        E_window_Q_object_I_draw_Z_lines_(lines);
     }
 }
 //------------------------------------------------------------------------------
@@ -379,8 +365,8 @@ E_window_Q_object_Z_font_M(
 , I font_id
 , Pc label
 ){  struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, font_id );
-    N16 width = 2, width_ = 0;
-    N16 height = font->height;
+    LONG width = 2, width_ = 0;
+    LONG height = font->height;
     Pc s = label;
     while( *s )
     {   if( *s == '\n' )
@@ -457,13 +443,11 @@ void
 E_window_Q_object_Z_frame_I_draw(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-){  E_window_Q_object_I_draw_P_color_( E_window_Q_theme.line );
+){  E_window_Q_window_I_draw_P_color( E_window_Q_theme.line );
     E_window_Q_object_I_draw_Z_rectangles_((
-      ( struct E_window_Z_rectangle[] )
-      { { .x = 0
-        , .y = 0
-        , .width = object->width
-        , .height = object->height
+      ( RECT[] )
+      { { 0, 0
+        , object->width, object->height
         }
       }
     ));
@@ -489,10 +473,10 @@ Restart:;
         if( !stack )
             return ~0;
         N stack_i = ~0;
-        S16 next_x = E_window_Q_object_S_layout_dx;
-        S16 next_y = E_window_Q_object_S_layout_dy;
-        S16 after_x = E_window_Q_object_S_layout_dx;
-        S16 after_y = E_window_Q_object_S_layout_dy;
+        LONG next_x = E_window_Q_object_S_layout_dx;
+        LONG next_y = E_window_Q_object_S_layout_dy;
+        LONG after_x = E_window_Q_object_S_layout_dx;
+        LONG after_y = E_window_Q_object_S_layout_dy;
         O{  if( object->child_n )
             {   if( ~stack_i )
                     if( U_R( object->mode, lay_height ))
@@ -547,8 +531,8 @@ Restart:;
                     after_y = next_y + object->height + E_window_Q_object_S_layout_dy;
                 struct E_window_Q_object_Z *object_ = object;
                 N stack_i_ = stack_i;
-                N16 after_x_ = after_x;
-                N16 after_y_ = after_y;
+                LONG after_x_ = after_x;
+                LONG after_y_ = after_y;
                 do
                 {   object_ = stack[ stack_i_ ].object;
                     if( object_->width < after_x_ - object_->x )

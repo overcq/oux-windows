@@ -10,31 +10,11 @@ enum E_window_Z_aa_pixel
   E_window_Z_aa_pixel_S_n = 1 << 6,
   E_window_Z_aa_pixel_S_ne = 1 << 7
 };
-struct E_window_Z_point
-{ N16 x, y;
-};
-struct E_window_Z_segment
-{ N16 x1, y1, x2, y2;
-};
-struct E_window_Z_rectangle
-{ N16 x, y, width, height;
-};
 struct E_window_Z_arc
-{ N16 x, y, width, height, angle1, angle2;
+{ int left, top, right, bottom;
+  int angle_start_x, angle_start_y, angle_end_x, angle_end_y;
 };
 //==============================================================================
-N8
-E_window_Z_color_R_red( COLORREF color
-){  return color && 0xff;
-}
-N8
-E_window_Z_color_R_green( COLORREF color
-){  return ( color >> 8 ) & 0xff;
-}
-N8
-E_window_Z_color_R_blue( COLORREF color
-){  return ( color >> 16 ) & 0xff;
-}
 COLORREF
 E_window_Z_color_M_gray( N8 luminance
 ){  return RGB( luminance, luminance, luminance );
@@ -43,9 +23,9 @@ COLORREF
 E_window_Z_color_P_luminance( COLORREF color
 , F luminance
 ){  J_assert( luminance >= 0 && luminance <= 1 );
-    N8 red = E_window_Z_color_R_red(color);
-    N8 green = E_window_Z_color_R_green(color);
-    N8 blue = E_window_Z_color_R_blue(color);
+    N8 red = GetRValue(color);
+    N8 green = GetGValue(color);
+    N8 blue = GetBValue(color);
     F color_luminance = E_window_Z_color_R_luminance( color );
     if( luminance < color_luminance )
     {   red = lround( red * luminance / color_luminance );
@@ -61,23 +41,52 @@ E_window_Z_color_P_luminance( COLORREF color
 }
 F
 E_window_Z_color_R_luminance( COLORREF color
-){  return 0;//( display->red_luminance_ratio * E_window_Z_color_R_red(color) + display->green_luminance_ratio * E_window_Z_color_R_green(color) + display->blue_luminance_ratio * E_window_Z_color_R_blue(color) ) / 255;
+){  return 0;//( display->red_luminance_ratio * GetRValue(color) + display->green_luminance_ratio * GetGValue(color) + display->blue_luminance_ratio * GetBValue(color) ) / 255;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void
 E_window_Q_window_I_draw_P_color( COLORREF color
 ){  E_window_S->draw_color = color;
 }
+B
+E_window_Q_window_I_draw_P_pen( struct E_window_Q_window_Z *window
+, COLORREF color
+){  HPEN pen = CreatePen( PS_SOLID, 0, color );
+    if(pen)
+    {   HPEN old_pen = SelectObject( window->dc, pen );
+        if( !old_pen )
+        {   DeleteObject(pen);
+            return false;
+        }
+        DeleteObject( old_pen );
+    }
+    return pen;
+}
+B
+E_window_Q_window_I_draw_P_brush( struct E_window_Q_window_Z *window
+, COLORREF color
+){  HBRUSH brush = CreateSolidBrush(color);
+    if(brush)
+    {   HPEN old_brush = SelectObject( window->dc, brush );
+        if( !old_brush )
+        {   DeleteObject(brush);
+            return false;
+        }
+        DeleteObject( old_brush );
+    }
+    return brush;
+}
 //------------------------------------------------------------------------------
-void
+B
 E_window_Q_window_I_draw_Z_points(
   struct E_window_Q_window_Z *window
+, POINT *points
 , N n
-, struct E_window_Z_point *points
 ){  J_assert(n);
     for_n( i, n )
         if( points[i].x < window->width && points[i].y < window->height )
-        {   SetPixelV( window->dc, points[i].x, points[i].y, E_window_S->draw_color );
+        {   if( !SetPixelV( window->dc, points[i].x, points[i].y, E_window_S->draw_color ))
+                return false;
             //if( !U_R( screen->state, draw_object_drag_move ))
                 window->object_mask[ points[i].y * window->width + points[i].x ] = E_window_S->current_object;
             //else
@@ -92,415 +101,81 @@ E_window_Q_window_I_draw_Z_points(
         , n
         , points
         );*/
+    return true;
 
 }
-_internal
-N
-E_window_Q_window_I_draw_Z_segments_Z_low(
-  struct E_window_Q_window_Z *window
-, struct E_window_Z_segment segment
-){  S16 dx = segment.x2 - segment.x1;
-    S16 dy = segment.y2 - segment.y1;
-    S16 yi = 1;
-    if( dy < 0 )
-    {   yi = -yi;
-        dy = -dy;
-    }
-    S16 D = 2 * dy - dx;
-    S16 y = segment.y1;
-    struct E_window_Z_point *Mt_( points, dx + 1 );
-    if( !points )
-        return ~0;
-    for_n( j, dx + 1 )
-    {   points[j].x = segment.x1 + j;
-        points[j].y = y;
-        if( D > 0 )
-        {   y += yi;
-            D -= 2 * dx;
-        }
-        D += 2 * dy;
-    }
-    E_window_Q_window_I_draw_Z_points( window, dx + 1, points );
-    W(points);
-    return 0;
-}
-_internal
-N
-E_window_Q_window_I_draw_Z_segments_Z_high(
-  struct E_window_Q_window_Z *window
-, struct E_window_Z_segment segment
-){  S16 dx = segment.x2 - segment.x1;
-    S16 dy = segment.y2 - segment.y1;
-    S16 xi = 1;
-    if( dx < 0 )
-    {   xi = -xi;
-        dx = -dx;
-    }
-    S16 D = 2 * dx - dy;
-    S16 x = segment.x1;
-    struct E_window_Z_point *Mt_( points, dy + 1 );
-    if( !points )
-        return ~0;
-    for_n( j, dy + 1 )
-    {   points[j].x = x;
-        points[j].y = segment.y1 + j;
-        if( D > 0 )
-        {   x += xi;
-            D -= 2 * dy;
-        }
-        D += 2 * dx;
-    }
-    E_window_Q_window_I_draw_Z_points( window, dy + 1, points );
-    W(points);
-    return 0;
-}
-N
-E_window_Q_window_I_draw_Z_segments(
-  struct E_window_Q_window_Z *window
-, N n
-, struct E_window_Z_segment *segments
-){  J_assert(n);
-    for_n( i, n )
-        if( segments[i].x1 == segments[i].x2 )
-        {   struct E_window_Z_point *Mt_( points, J_abs( segments[i].y2 - segments[i].y1 ) + 1 );
-            if( !points )
-                return ~0;
-            for_n( j, J_abs( segments[i].y2 - segments[i].y1 ) + 1 )
-            {   points[j].x = segments[i].x1;
-                points[j].y = J_min( segments[i].y1, segments[i].y2 ) + j;
-            }
-            E_window_Q_window_I_draw_Z_points( window, J_abs( segments[i].y2 - segments[i].y1 ) + 1, points );
-            W(points);
-        }else if( segments[i].y1 == segments[i].y2 )
-        {   struct E_window_Z_point *Mt_( points, J_abs( segments[i].x2 - segments[i].x1 ) + 1 );
-            if( !points )
-                return ~0;
-            for_n( j, J_abs( segments[i].x2 - segments[i].x1 ) + 1 )
-            {   points[j].x = J_min( segments[i].x1, segments[i].x2 ) + j;
-                points[j].y = segments[i].y1;
-            }
-            E_window_Q_window_I_draw_Z_points( window, J_abs( segments[i].x2 - segments[i].x1 ) + 1, points );
-            W(points);
-        }else
-            if( J_abs( segments[i].y2 - segments[i].y1 ) < J_abs( segments[i].x2 - segments[i].x1 ))
-                if( segments[i].x1 > segments[i].x2 )
-                {   if( !~E_window_Q_window_I_draw_Z_segments_Z_low( window
-                    , ( struct E_window_Z_segment ){ segments[i].x2, segments[i].y2, segments[i].x1, segments[i].y1 }))
-                        return ~0;
-                }else
-                {   if( !~E_window_Q_window_I_draw_Z_segments_Z_low( window
-                    , ( struct E_window_Z_segment ){ segments[i].x1, segments[i].y1, segments[i].x2, segments[i].y2 }))
-                        return ~0;
-                }
-            else
-                if( segments[i].y1 > segments[i].y2 )
-                {   if( !~E_window_Q_window_I_draw_Z_segments_Z_high( window
-                    , ( struct E_window_Z_segment ){ segments[i].x2, segments[i].y2, segments[i].x1, segments[i].y1 }))
-                        return ~0;
-                }else
-                {   if( !~E_window_Q_window_I_draw_Z_segments_Z_high( window
-                    , ( struct E_window_Z_segment ){ segments[i].x1, segments[i].y1, segments[i].x2, segments[i].y2 }))
-                        return ~0;
-                }
-    return 0;
-}
-N
+
+B
 E_window_Q_window_I_draw_Z_lines(
   struct E_window_Q_window_Z *window
+, POINT *points
 , N n
-, struct E_window_Z_point *points
 ){  J_assert( n > 1 );
-    struct E_window_Z_segment *Mt_( segments, n - 1 );
-    if( !segments )
-        return ~0;
-    for_n( i, n - 1 )
-        segments[i] = ( struct E_window_Z_segment )
-        { .x1 = points[i].x
-        , .y1 = points[i].y
-        , .x2 = points[ i + 1 ].x
-        , .y2 = points[ i + 1 ].y
-        };
-    if( !~E_window_Q_window_I_draw_Z_segments( window
-    , n - 1
-    , segments
-    ))
-    {   W(segments);
-        return ~0;
-    }
-    W(segments);
-    return 0;
+    return Polyline( window->dc, points, n );
 }
-N
+B
 E_window_Q_window_I_draw_Z_rectangles(
   struct E_window_Q_window_Z *window
+, RECT *rectangles
 , N n
-, struct E_window_Z_rectangle *rectangles
 ){  J_assert(n);
-    struct E_window_Z_segment *Mt_( segments, n * 4 );
-    if( !segments )
-        return ~0;
+    HBRUSH brush = CreateSolidBrush( E_window_S->draw_color );
     for_n( i, n )
-    {   segments[ 4 * i ] = ( struct E_window_Z_segment )
-        { .x1 = rectangles[i].x
-        , .y1 = rectangles[i].y
-        , .x2 = rectangles[i].x + rectangles[i].width - 1 - ( rectangles[i].width ? 1 : 0 )
-        , .y2 = rectangles[i].y
-        };
-        segments[ 4 * i + 1 ] = ( struct E_window_Z_segment )
-        { .x1 = rectangles[i].x + rectangles[i].width - 1
-        , .y1 = rectangles[i].y
-        , .x2 = rectangles[i].x + rectangles[i].width - 1
-        , .y2 = rectangles[i].y + rectangles[i].height - 1 - ( rectangles[i].height ? 1 : 0 )
-        };
-        segments[ 4 * i + 2 ] = ( struct E_window_Z_segment )
-        { .x1 = rectangles[i].x + ( rectangles[i].width ? 1 : 0 )
-        , .y1 = rectangles[i].y + rectangles[i].height - 1
-        , .x2 = rectangles[i].x + rectangles[i].width - 1
-        , .y2 = rectangles[i].y + rectangles[i].height - 1
-        };
-        segments[ 4 * i + 3 ] = ( struct E_window_Z_segment )
-        { .x1 = rectangles[i].x
-        , .y1 = rectangles[i].y + ( rectangles[i].height ? 1 : 0 )
-        , .x2 = rectangles[i].x
-        , .y2 = rectangles[i].y + rectangles[i].height - 1
-        };
+    {   if( !FrameRect( window->dc, &rectangles[i], brush ))
+        {   DeleteObject(brush);
+            return false;
+        }
     }
-    if( !~E_window_Q_window_I_draw_Z_segments( window
-    , n * 4
-    , segments
-    ))
-    {   W(segments);
-        return ~0;
-    }
-    W(segments);
-    return 0;
+    DeleteObject(brush);
+    return true;
 }
-_internal
-N
-E_window_Q_window_I_draw_Z_arcs_I_8points_a( struct E_window_Z_arc arc
-, struct E_window_Z_point point
-, N *points_n
-, struct E_window_Z_point **points
-){  if( !E_mem_Q_blk_I_append( points, 8 ))
-        return ~0;
-    (*points)[ *points_n ].x = arc.x + point.x;
-    (*points)[ *points_n ].y = arc.y + (N)point.y * arc.height / arc.width;
-    (*points)[ *points_n + 1 ].x = arc.x - point.x;
-    (*points)[ *points_n + 1 ].y = arc.y + (N)point.y * arc.height / arc.width;
-    (*points)[ *points_n + 2 ].x = arc.x - point.x;
-    (*points)[ *points_n + 2 ].y = arc.y - (N)point.y * arc.height / arc.width;
-    (*points)[ *points_n + 3 ].x = arc.x + point.x;
-    (*points)[ *points_n + 3 ].y = arc.y - (N)point.y * arc.height / arc.width;
-    (*points)[ *points_n + 4 ].x = arc.x + point.y;
-    (*points)[ *points_n + 4 ].y = arc.y + (N)point.x * arc.height / arc.width;
-    (*points)[ *points_n + 5 ].x = arc.x - point.y;
-    (*points)[ *points_n + 5 ].y = arc.y + (N)point.x * arc.height / arc.width;
-    (*points)[ *points_n + 6 ].x = arc.x - point.y;
-    (*points)[ *points_n + 6 ].y = arc.y - (N)point.x * arc.height / arc.width;
-    (*points)[ *points_n + 7 ].x = arc.x + point.y;
-    (*points)[ *points_n + 7 ].y = arc.y - (N)point.x * arc.height / arc.width;
-    *points_n += 8;
-    return 0;
-}
-_internal
-N
-E_window_Q_window_I_draw_Z_arcs_I_8points_b( struct E_window_Z_arc arc
-, struct E_window_Z_point point
-, N *points_n
-, struct E_window_Z_point **points
-){  if( !E_mem_Q_blk_I_append( points, 8 ))
-        return ~0;
-    (*points)[ *points_n ].x = arc.x + (N)point.x * arc.width / arc.height;
-    (*points)[ *points_n ].y = arc.y + point.y;
-    (*points)[ *points_n + 1 ].x = arc.x - (N)point.x * arc.width / arc.height;
-    (*points)[ *points_n + 1 ].y = arc.y + point.y;
-    (*points)[ *points_n + 2 ].x = arc.x - (N)point.x * arc.width / arc.height;
-    (*points)[ *points_n + 2 ].y = arc.y - point.y;
-    (*points)[ *points_n + 3 ].x = arc.x + (N)point.x * arc.width / arc.height;
-    (*points)[ *points_n + 3 ].y = arc.y - point.y;
-    (*points)[ *points_n + 4 ].x = arc.x + (N)point.y * arc.width / arc.height;
-    (*points)[ *points_n + 4 ].y = arc.y + point.x;
-    (*points)[ *points_n + 5 ].x = arc.x - (N)point.y * arc.width / arc.height;
-    (*points)[ *points_n + 5 ].y = arc.y + point.x;
-    (*points)[ *points_n + 6 ].x = arc.x - (N)point.y * arc.width / arc.height;
-    (*points)[ *points_n + 6 ].y = arc.y - point.x;
-    (*points)[ *points_n + 7 ].x = arc.x + (N)point.y * arc.width / arc.height;
-    (*points)[ *points_n + 7 ].y = arc.y - point.x;
-    *points_n += 8;
-    return 0;
-}
-N
+B
 E_window_Q_window_I_draw_Z_arcs(
   struct E_window_Q_window_Z *window
-, N n
 , struct E_window_Z_arc *arcs
+, N n
 ){  J_assert(n);
-    N points_n = 0;
-    struct E_window_Z_point *Mt_( points, points_n );
-    if( !points )
-        return ~0;
     for_n( i, n )
-    {   N (*I_8points)( struct E_window_Z_arc, struct E_window_Z_point, N *, struct E_window_Z_point ** ) = arcs[i].height > arcs[i].width
-        ? &E_window_Q_window_I_draw_Z_arcs_I_8points_b
-        : &E_window_Q_window_I_draw_Z_arcs_I_8points_a;
-        S x = 0;
-        S y = J_max( arcs[i].width, arcs[i].height ) / 2;
-        S c = 2 * ( 1 - J_max( arcs[i].width, arcs[i].height ) / 2 );
-        while( x <= y )
-        {   if( (*I_8points)( arcs[i]
-            , ( struct E_window_Z_point ){ x, y }
-            , &points_n
-            , &points
-            ))
-            {   W(points);
-                return ~0;
-            }
-            if( 2 * c > 1 - 2 * y )
-            {   y--;
-                c -= 2 * y - 1;
-            }
-            x++;
-            c += 2 * x + 1;
-        }
+    {   if( !Arc( window->dc
+        , arcs[i].left, arcs[i].top, arcs[i].right, arcs[i].bottom
+        , arcs[i].angle_start_x, arcs[i].angle_start_y
+        , arcs[i].angle_end_x, arcs[i].angle_end_y
+        ))
+            return false;
     }
-    E_window_Q_window_I_draw_Z_points( window, points_n, points );
-    W(points);
-    return 0;
+    return true;
 }
-void
+B
 E_window_Q_window_I_fill_Z_points(
   struct E_window_Q_window_Z *window
+, POINT *points
 , N n
-, struct E_window_Z_point *points
 ){  J_assert( n > 2 );
-    //TODO
-
+    return Polygon( window->dc, points, n );
 }
-N
+B
 E_window_Q_window_I_fill_Z_rectangles(
   struct E_window_Q_window_Z *window
+, RECT *rectangles
 , N n
-, struct E_window_Z_rectangle *rectangles
 ){  J_assert(n);
-    struct E_window_Z_segment *Mt_( segments, 0 );
-    if( !segments )
-        return ~0;
-    N segment_n = 0;
     for_n( i, n )
-    {   if( !E_mem_Q_blk_I_append( &segments, rectangles[i].height ))
-        {   W(segments);
-            return ~0;
-        }
-        for_n( dy, rectangles[i].height )
-        {   segments[ segment_n++ ] = ( struct E_window_Z_segment )
-            { .x1 = rectangles[i].x
-            , .y1 = rectangles[i].y + dy
-            , .x2 = rectangles[i].x + rectangles[i].width - 1
-            , .y2 = rectangles[i].y + dy
-            };
-        }
+    {   if( !Rectangle( window->dc, rectangles[i].left, rectangles[i].top, rectangles[i].right, rectangles[i].bottom ))
+            return false;
     }
-    if( !~E_window_Q_window_I_draw_Z_segments( window
-    , segment_n
-    , segments
-    ))
-    {   W(segments);
-        return ~0;
-    }
-    W(segments);
-    return 0;
+    return true;
 }
-_internal
-N
-E_window_Q_window_I_fill_Z_arcs_I_4segments_a( struct E_window_Z_arc arc
-, struct E_window_Z_point point
-, N *segments_n
-, struct E_window_Z_segment **segments
-){  if( !E_mem_Q_blk_I_append( segments, 4 ))
-        return ~0;
-    (*segments)[ *segments_n ].x1 = arc.x + point.x;
-    (*segments)[ *segments_n ].y1 = arc.y + (N)point.y * arc.height / arc.width;
-    (*segments)[ *segments_n ].x2 = arc.x - point.x;
-    (*segments)[ *segments_n ].y2 = arc.y + (N)point.y * arc.height / arc.width;
-    (*segments)[ *segments_n + 1 ].x1 = arc.x - point.x;
-    (*segments)[ *segments_n + 1 ].y1 = arc.y - (N)point.y * arc.height / arc.width;
-    (*segments)[ *segments_n + 1 ].x2 = arc.x + point.x;
-    (*segments)[ *segments_n + 1 ].y2 = arc.y - (N)point.y * arc.height / arc.width;
-    (*segments)[ *segments_n + 2 ].x1 = arc.x + point.y;
-    (*segments)[ *segments_n + 2 ].y1 = arc.y + (N)point.x * arc.height / arc.width;
-    (*segments)[ *segments_n + 2 ].x2 = arc.x - point.y;
-    (*segments)[ *segments_n + 2 ].y2 = arc.y + (N)point.x * arc.height / arc.width;
-    (*segments)[ *segments_n + 3 ].x1 = arc.x - point.y;
-    (*segments)[ *segments_n + 3 ].y1 = arc.y - (N)point.x * arc.height / arc.width;
-    (*segments)[ *segments_n + 3 ].x2 = arc.x + point.y;
-    (*segments)[ *segments_n + 3 ].y2 = arc.y - (N)point.x * arc.height / arc.width;
-    *segments_n += 4;
-    return 0;
-}
-_internal
-N
-E_window_Q_window_I_fill_Z_arcs_I_4segments_b( struct E_window_Z_arc arc
-, struct E_window_Z_point point
-, N *segments_n
-, struct E_window_Z_segment **segments
-){  if( !E_mem_Q_blk_I_append( segments, 4 ))
-        return ~0;
-    (*segments)[ *segments_n ].x1 = arc.x + (N)point.x * arc.width / arc.height;
-    (*segments)[ *segments_n ].y1 = arc.y + point.y;
-    (*segments)[ *segments_n ].x2 = arc.x - (N)point.x * arc.width / arc.height;
-    (*segments)[ *segments_n ].y2 = arc.y + point.y;
-    (*segments)[ *segments_n + 1 ].x1 = arc.x - (N)point.x * arc.width / arc.height;
-    (*segments)[ *segments_n + 1 ].y1 = arc.y - point.y;
-    (*segments)[ *segments_n + 1 ].x2 = arc.x + (N)point.x * arc.width / arc.height;
-    (*segments)[ *segments_n + 1 ].y2 = arc.y - point.y;
-    (*segments)[ *segments_n + 2 ].x1 = arc.x + (N)point.y * arc.width / arc.height;
-    (*segments)[ *segments_n + 2 ].y1 = arc.y + point.x;
-    (*segments)[ *segments_n + 2 ].x2 = arc.x - (N)point.y * arc.width / arc.height;
-    (*segments)[ *segments_n + 2 ].y2 = arc.y + point.x;
-    (*segments)[ *segments_n + 3 ].x1 = arc.x - (N)point.y * arc.width / arc.height;
-    (*segments)[ *segments_n + 3 ].y1 = arc.y - point.x;
-    (*segments)[ *segments_n + 3 ].x2 = arc.x + (N)point.y * arc.width / arc.height;
-    (*segments)[ *segments_n + 3 ].y2 = arc.y - point.x;
-    *segments_n += 4;
-    return 0;
-}
-N
+B
 E_window_Q_window_I_fill_Z_arcs(
   struct E_window_Q_window_Z *window
+, RECT *arcs
 , N n
-, struct E_window_Z_arc *arcs
 ){  J_assert(n);
-    N segments_n = 0;
-    struct E_window_Z_segment *Mt_( segments, segments_n );
-    if( !segments )
-        return ~0;
     for_n( i, n )
-    {   N (*I_4segments)( struct E_window_Z_arc, struct E_window_Z_point, N *, struct E_window_Z_segment ** ) = arcs[i].height > arcs[i].width
-        ? &E_window_Q_window_I_fill_Z_arcs_I_4segments_b
-        : &E_window_Q_window_I_fill_Z_arcs_I_4segments_a;
-        S x = 0;
-        S y = J_max( arcs[i].width, arcs[i].height ) / 2;
-        S c = 2 * ( 1 - J_max( arcs[i].width, arcs[i].height ) / 2 );
-        while( x <= y )
-        {   if( (*I_4segments)( arcs[i]
-            , ( struct E_window_Z_point ){ x, y }
-            , &segments_n
-            , &segments
-            ))
-            {   W(segments);
-                return ~0;
-            }
-            if( 2 * c > 1 - 2 * y )
-            {   y--;
-                c -= 2 * y - 1;
-            }
-            x++;
-            c += 2 * x + 1;
-        }
+    {   if( !Ellipse( window->dc, arcs[i].left, arcs[i].top, arcs[i].right, arcs[i].bottom ))
+            return false;
     }
-    E_window_Q_window_I_draw_Z_segments( window, segments_n, segments );
-    W(segments);
-    return 0;
+    return true;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 struct E_window_Z_points
@@ -520,8 +195,8 @@ E_window_I_pole_wielokata(
 void
 E_window_Q_window_I_draw_aa_Z_pixel(
   struct E_window_Q_window_Z *window
-, S16 x
-, S16 y
+, LONG x
+, LONG y
 , COLORREF color
 , F brightness
 , N get_pixel
@@ -541,9 +216,9 @@ E_window_Q_window_I_draw_aa_Z_pixel(
         background_red = background_green = background_blue = 0;
         for_n( i, 8 )
             if( p[i] != color )
-            {   background_red += E_window_Z_color_R_red( p[i] );
-                background_green += E_window_Z_color_R_green( p[i] );
-                background_blue += E_window_Z_color_R_blue( p[i] );
+            {   background_red += GetRValue( p[i] );
+                background_green += GetGValue( p[i] );
+                background_blue += GetBValue( p[i] );
                 n++;
             }
     }
@@ -552,13 +227,13 @@ E_window_Q_window_I_draw_aa_Z_pixel(
         background_green /= n;
         background_blue /= n;
     }else
-    {   background_red = E_window_Z_color_R_red( E_window_Q_theme.window_bg );
-        background_green = E_window_Z_color_R_green( E_window_Q_theme.window_bg );
-        background_blue = E_window_Z_color_R_blue( E_window_Q_theme.window_bg );
+    {   background_red = GetRValue( E_window_Q_theme.window_bg );
+        background_green = GetGValue( E_window_Q_theme.window_bg );
+        background_blue = GetBValue( E_window_Q_theme.window_bg );
     }
-    N red = E_window_Z_color_R_red(color);
-    N green = E_window_Z_color_R_green(color);
-    N blue = E_window_Z_color_R_blue(color);
+    N red = GetRValue(color);
+    N green = GetGValue(color);
+    N blue = GetBValue(color);
     if( red > background_red )
         red = background_red + ( red - background_red ) * brightness;
     else
@@ -573,7 +248,7 @@ E_window_Q_window_I_draw_aa_Z_pixel(
         blue = background_blue - ( background_blue - blue ) * brightness;
     E_window_Q_window_I_draw_P_color_( RGB( red, green, blue ));
     E_window_Q_window_I_draw_Z_points_(
-      (( struct E_window_Z_point[] )
+      (( POINT[] )
       { x, y
       })
     );
@@ -581,11 +256,13 @@ E_window_Q_window_I_draw_aa_Z_pixel(
 N
 E_window_Q_window_I_draw_aa_Z_lines(
   struct E_window_Q_window_Z *window
+, POINT *points
 , N n
-, struct E_window_Z_point *points
 , F thickness
 , COLORREF color
 ){  J_assert( n > 1 );
+    E_window_Q_window_I_draw_P_pen( window, color );
+    E_window_Q_window_I_draw_P_brush( window, color );
     F a = E_window_S->pixel_width;
     F b = E_window_S->pixel_height;
     F pole_pixela = a * b;
@@ -595,66 +272,64 @@ E_window_Q_window_I_draw_aa_Z_lines(
         {   if( points[ i + 1 ].y < points[i].y )
                 alfa += M_PI_2;
             else if( points[i].y == points[ i + 1 ].y )
-            {   struct E_window_Z_rectangle rectangle[1];
-                rectangle[0].x = points[i].x;
-                rectangle[0].y = points[i].y - (S16)( 0.5 * thickness / b );
-                rectangle[0].width = points[ i + 1 ].x - points[i].x + 1;
-                rectangle[0].height = (N16)( thickness / b );
+            {   RECT rectangle[1];
+                rectangle[0].left = points[i].x;
+                rectangle[0].top = points[i].y - (LONG)( 0.5 * thickness / b );
+                rectangle[0].right = rectangle[0].left + points[ i + 1 ].x - points[i].x + 1;
+                rectangle[0].bottom = rectangle[0].top + (LONG)( thickness / b );
                 F pole = fmod( 0.5 * thickness, b );
                 if(pole)
                 {   pole *= a;
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x, rectangle[0].y - 1
+                      rectangle[0].left, rectangle[0].top - 1
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_nw | E_window_Z_aa_pixel_S_n
                     );
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x + rectangle[0].width - 1, rectangle[0].y - 1
+                      rectangle[0].right - 1, rectangle[0].top - 1
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_n | E_window_Z_aa_pixel_S_ne | E_window_Z_aa_pixel_S_e
                     );
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x, rectangle[0].y + rectangle[0].height
+                      rectangle[0].left, rectangle[0].bottom
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_se | E_window_Z_aa_pixel_S_s
                     );
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x + rectangle[0].width - 1, rectangle[0].y + rectangle[0].height
+                      rectangle[0].right - 1, rectangle[0].bottom
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_s | E_window_Z_aa_pixel_S_se | E_window_Z_aa_pixel_S_e
                     );
                     if( points[i].x + 1 < points[ i + 1 ].x )
-                        for( S16 x = points[i].x + 1; x != points[ i + 1 ].x; x++ )
+                        for( LONG x = points[i].x + 1; x != points[ i + 1 ].x; x++ )
                         {   E_window_Q_window_I_draw_aa_Z_pixel_(
-                              x, rectangle[0].y - 1
+                              x, rectangle[0].top - 1
                             , color
                             , pole / pole_pixela
                             , E_window_Z_aa_pixel_S_n
                             );
                             E_window_Q_window_I_draw_aa_Z_pixel_(
-                              x, rectangle[0].y + rectangle[0].height
+                              x, rectangle[0].bottom
                             , color
                             , pole / pole_pixela
                             , E_window_Z_aa_pixel_S_s
                             );
                         }
                 }
-                if( rectangle[0].height )
-                {   E_window_Q_window_I_draw_P_color_(color);
-                    E_window_Q_window_I_fill_Z_rectangles_(rectangle);
+                LONG height = rectangle[0].bottom - rectangle[0].top;
+                if(height)
+                {   E_window_Q_window_I_fill_Z_rectangles_(rectangle);
                     if(i)
                     {   struct E_window_Z_arc arcs[2] =
-                        { { points[i].x - rectangle[0].height / 2, points[i].y - rectangle[0].height / 2
-                          , rectangle[0].height, rectangle[0].height
-                          , 0, 24000
+                        { { points[i].x - height / 2, points[i].y - height / 2
+                          , points[i].x + height / 2, points[i].y + height / 2
                           }
-                        , { points[ i + 1 ].x - rectangle[0].height / 2, points[ i + 1 ].y - rectangle[0].height / 2
-                          , rectangle[0].height, rectangle[0].height
-                          , 0, 24000
+                        , { points[ i + 1 ].x - height / 2, points[ i + 1 ].y - height / 2
+                          , points[ i + 1 ].x + height / 2, points[ i + 1 ].y + height / 2
                           }
                         };
                         E_window_Q_window_I_fill_Z_arcs_(arcs);
@@ -666,66 +341,64 @@ E_window_Q_window_I_draw_aa_Z_lines(
         {   if( points[ i + 1 ].y > points[i].y )
                 alfa += M_PI_2;
             else if( points[i].y == points[ i + 1 ].y )
-            {   struct E_window_Z_rectangle rectangle[1];
-                rectangle[0].x = points[ i + 1 ].x;
-                rectangle[0].y = points[i].y - (S16)( 0.5 * thickness / b );
-                rectangle[0].width = points[i].x - points[ i + 1 ].x + 1;
-                rectangle[0].height = (N16)( thickness / b );
+            {   RECT rectangle[1];
+                rectangle[0].left = points[ i + 1 ].x;
+                rectangle[0].top = points[i].y - (LONG)( 0.5 * thickness / b );
+                rectangle[0].right = rectangle[0].left + points[i].x - points[ i + 1 ].x + 1;
+                rectangle[0].bottom = rectangle[0].top + (LONG)( thickness / b );
                 F pole = fmod( 0.5 * thickness, b );
                 if(pole)
                 {   pole *= a;
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x, rectangle[0].y - 1
+                      rectangle[0].left, rectangle[0].top - 1
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_nw | E_window_Z_aa_pixel_S_n
                     );
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x + rectangle[0].width - 1, rectangle[0].y - 1
+                      rectangle[0].right - 1, rectangle[0].top - 1
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_n | E_window_Z_aa_pixel_S_ne | E_window_Z_aa_pixel_S_e
                     );
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x, rectangle[0].y + rectangle[0].height
+                      rectangle[0].left, rectangle[0].bottom
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_sw | E_window_Z_aa_pixel_S_s
                     );
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x + rectangle[0].width - 1, rectangle[0].y + rectangle[0].height
+                      rectangle[0].right - 1, rectangle[0].bottom
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_s | E_window_Z_aa_pixel_S_se | E_window_Z_aa_pixel_S_e
                     );
                     if( points[ i + 1 ].x + 1 < points[i].x )
-                        for( S16 x = points[ i + 1 ].x + 1; x != points[i].x; x++ )
+                        for( LONG x = points[ i + 1 ].x + 1; x != points[i].x; x++ )
                         {   E_window_Q_window_I_draw_aa_Z_pixel_(
-                              x, rectangle[0].y - 1
+                              x, rectangle[0].top - 1
                             , color
                             , pole / pole_pixela
                             , E_window_Z_aa_pixel_S_n
                             );
                             E_window_Q_window_I_draw_aa_Z_pixel_(
-                             x, rectangle[0].y + rectangle[0].height
+                             x, rectangle[0].bottom
                             , color
                             , pole / pole_pixela
                             , E_window_Z_aa_pixel_S_s
                             );
                         }
                 }
-                if( rectangle[0].height )
-                {   E_window_Q_window_I_draw_P_color_(color);
-                    E_window_Q_window_I_fill_Z_rectangles_(rectangle);
+                LONG height = rectangle[0].bottom - rectangle[0].top;
+                if(height)
+                {   E_window_Q_window_I_fill_Z_rectangles_(rectangle);
                     if(i)
                     {   struct E_window_Z_arc arcs[2] =
-                        { { points[i].x - rectangle[0].height / 2, points[i].y - rectangle[0].height / 2
-                          , rectangle[0].height, rectangle[0].height
-                          , 0, 24000
+                        { { points[i].x - height / 2, points[i].y - height / 2
+                          , points[i].x + height / 2, points[i].y + height / 2
                           }
-                        , { points[ i + 1 ].x - rectangle[0].height / 2, points[ i + 1 ].y - rectangle[0].height / 2
-                          , rectangle[0].height, rectangle[0].height
-                          , 0, 24000
+                        , { points[ i + 1 ].x - height / 2, points[ i + 1 ].y - height / 2
+                          , points[ i + 1 ].x + height / 2, points[ i + 1 ].y + height / 2
                           }
                         };
                         E_window_Q_window_I_fill_Z_arcs_(arcs);
@@ -735,132 +408,128 @@ E_window_Q_window_I_draw_aa_Z_lines(
             }
         }else
         {   if( points[ i + 1 ].y > points[i].y )
-            {   struct E_window_Z_rectangle rectangle[1];
-                rectangle[0].x = points[i].x - (S16)( 0.5 * thickness / a );
-                rectangle[0].y = points[i].y;
-                rectangle[0].width = (N16)( thickness / a );
-                rectangle[0].height = points[ i + 1 ].y - points[i].y + 1;
+            {   RECT rectangle[1];
+                rectangle[0].left = points[i].x - (LONG)( 0.5 * thickness / a );
+                rectangle[0].top = points[i].y;
+                rectangle[0].right = rectangle[0].left + (LONG)( thickness / a );
+                rectangle[0].bottom = rectangle[0].top + points[ i + 1 ].y - points[i].y + 1;
                 F pole = fmod( 0.5 * thickness, a );
                 if(pole)
                 {   pole *= b;
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x - 1, rectangle[0].y
+                      rectangle[0].left - 1, rectangle[0].top
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_nw | E_window_Z_aa_pixel_S_n
                     );
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x + rectangle[0].width, rectangle[0].y
+                      rectangle[0].right, rectangle[0].top
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_n | E_window_Z_aa_pixel_S_ne | E_window_Z_aa_pixel_S_e
                     );
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x - 1, rectangle[0].y + rectangle[0].height - 1
+                      rectangle[0].left - 1, rectangle[0].bottom - 1
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_sw | E_window_Z_aa_pixel_S_s
                     );
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x + rectangle[0].width, rectangle[0].y + rectangle[0].height - 1
+                      rectangle[0].right, rectangle[0].bottom - 1
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_s | E_window_Z_aa_pixel_S_se | E_window_Z_aa_pixel_S_e
                     );
                     if( points[i].y + 1 < points[ i + 1 ].y )
-                        for( S16 y = points[i].y + 1; y != points[ i + 1 ].y; y++ )
+                        for( LONG y = points[i].y + 1; y != points[ i + 1 ].y; y++ )
                         {   E_window_Q_window_I_draw_aa_Z_pixel_(
-                              rectangle[0].x - 1, y
+                              rectangle[0].left - 1, y
                             , color
                             , pole / pole_pixela
                             , E_window_Z_aa_pixel_S_w
                             );
                             E_window_Q_window_I_draw_aa_Z_pixel_(
-                              rectangle[0].x + rectangle[0].width, y
+                              rectangle[0].right, y
                             , color
                             , pole / pole_pixela
                             , E_window_Z_aa_pixel_S_e
                             );
                         }
                 }
-                if( rectangle[0].width )
-                {   E_window_Q_window_I_draw_P_color_(color);
-                    E_window_Q_window_I_fill_Z_rectangles_(rectangle);
+                LONG width = rectangle[0].right - rectangle[0].left;
+                if(width)
+                {   E_window_Q_window_I_fill_Z_rectangles_(rectangle);
                     if(i)
                     {   struct E_window_Z_arc arcs[2] =
-                        { { points[i].x - rectangle[0].width / 2, points[i].y - rectangle[0].width / 2
-                          , rectangle[0].width, rectangle[0].width
-                          , 0, 24000
+                        { { points[i].x - width / 2, points[i].y - width / 2
+                          , points[i].x + width / 2, points[i].y + width / 2
                           }
-                        , { points[ i + 1 ].x - rectangle[0].width / 2, points[ i + 1 ].y - rectangle[0].width / 2
-                          , rectangle[0].width, rectangle[0].width
-                          , 0, 24000
+                        , { points[ i + 1 ].x - width / 2, points[ i + 1 ].y - width / 2
+                          , points[ i + 1 ].x + width / 2, points[ i + 1 ].y + width / 2
                           }
                         };
                         E_window_Q_window_I_fill_Z_arcs_(arcs);
                     }
                 }
             }else if( points[ i + 1 ].y < points[i].y )
-            {   struct E_window_Z_rectangle rectangle[1];
-                rectangle[0].x = points[i].x - (S16)( 0.5 * thickness / a );
-                rectangle[0].y = points[ i + 1 ].y;
-                rectangle[0].width = (N16)( thickness / a );
-                rectangle[0].height = points[i].y - points[ i + 1 ].y + 1;
+            {   RECT rectangle[1];
+                rectangle[0].left = points[i].x - (LONG)( 0.5 * thickness / a );
+                rectangle[0].top = points[ i + 1 ].y;
+                rectangle[0].right = rectangle[0].left + (LONG)( thickness / a );
+                rectangle[0].bottom = rectangle[0].top + points[i].y - points[ i + 1 ].y + 1;
                 F pole = fmod( 0.5 * thickness, a );
                 if(pole)
                 {   pole *= b;
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x - 1, rectangle[0].y
+                      rectangle[0].left - 1, rectangle[0].top
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_nw | E_window_Z_aa_pixel_S_n
                     );
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x + rectangle[0].width, rectangle[0].y
+                      rectangle[0].right, rectangle[0].top
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_n | E_window_Z_aa_pixel_S_ne | E_window_Z_aa_pixel_S_e
                     );
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x - 1, rectangle[0].y + rectangle[0].height - 1
+                      rectangle[0].left - 1, rectangle[0].bottom - 1
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_sw | E_window_Z_aa_pixel_S_s
                     );
                     E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].x + rectangle[0].width, rectangle[0].y + rectangle[0].height - 1
+                      rectangle[0].right, rectangle[0].bottom - 1
                     , color
                     , pole / pole_pixela
                     , E_window_Z_aa_pixel_S_s | E_window_Z_aa_pixel_S_se | E_window_Z_aa_pixel_S_e
                     );
                     if( points[ i + 1 ].y + 1 < points[i].y )
-                        for( S16 y = points[ i + 1 ].y + 1; y != points[i].y; y++ )
+                        for( LONG y = points[ i + 1 ].y + 1; y != points[i].y; y++ )
                         {   E_window_Q_window_I_draw_aa_Z_pixel_(
-                              rectangle[0].x - 1, y
+                              rectangle[0].left - 1, y
                             , color
                             , pole / pole_pixela
                             , E_window_Z_aa_pixel_S_w
                             );
                             E_window_Q_window_I_draw_aa_Z_pixel_(
-                              rectangle[0].x + rectangle[0].width, y
+                              rectangle[0].right, y
                             , color
                             , pole / pole_pixela
                             , E_window_Z_aa_pixel_S_e
                             );
                         }
                 }
-                if( rectangle[0].width )
-                {   E_window_Q_window_I_draw_P_color_(color);
-                    E_window_Q_window_I_fill_Z_rectangles_(rectangle);
+                LONG width = rectangle[0].right - rectangle[0].left;
+                if(width)
+                {   E_window_Q_window_I_fill_Z_rectangles_(rectangle);
                     if(i)
                     {   struct E_window_Z_arc arcs[2] =
-                        { { points[i].x - rectangle[0].width / 2, points[i].y - rectangle[0].width / 2
-                          , rectangle[0].width, rectangle[0].width
-                          , 0, 24000
+                        { { points[i].x - width / 2, points[i].y - width / 2
+                          , points[i].x + width / 2, points[i].y + width / 2
                           }
-                        , { points[ i + 1 ].x - rectangle[0].width / 2, points[ i + 1 ].y - rectangle[0].width / 2
-                          , rectangle[0].width, rectangle[0].width
-                          , 0, 24000
+                        , { points[ i + 1 ].x - width / 2, points[ i + 1 ].y - width / 2
+                          , points[ i + 1 ].x + width / 2, points[ i + 1 ].y + width / 2
                           }
                         };
                         E_window_Q_window_I_fill_Z_arcs_(arcs);
@@ -872,18 +541,18 @@ E_window_Q_window_I_draw_aa_Z_lines(
             continue;
         }
         F sin_alfa, cos_alfa, tan_alfa;
-        S16 dx_direction, dy_direction;
+        LONG dx_direction, dy_direction;
         F pixel_dx, pixel_dy;
         B prawoskretny;
         struct
-        { S16 dx, dy;
+        { LONG dx, dy;
         } *Mt_( dx_dy, 0 );
         if( !dx_dy )
             return ~0;
         N dx_dy_n = 0;
         for_n( j, 6 )
         {   F length;
-            S16 x, y;
+            LONG x, y;
             B U_R( first_pixel, overdrawn );
             switch(j)
             { case 0:
@@ -1019,11 +688,11 @@ E_window_Q_window_I_draw_aa_Z_lines(
             {   J_swap( F, a, b );
                 J_swap( F, pixel_dx, pixel_dy );
             }
-            S16 dx, dy;
+            LONG dx, dy;
             B U_F( first_pixel, computed );
             while( length > 0 )
             {   F alfa_przekatnej = atan(( b - pixel_dy ) / ( a - pixel_dx ));
-                S16 prev_dx, prev_dy;
+                LONG prev_dx, prev_dy;
                 if( !U_R( first_pixel, computed ))
                 {   prev_dx = dx;
                     prev_dy = dy;
@@ -1186,7 +855,7 @@ E_window_Q_window_I_draw_aa_Z_lines(
                 {   if( !U_R( first_pixel, computed )
                     && length > 0
                     ){  E_window_Q_window_I_draw_P_color_(color);
-                        S16 x_ = x, y_ = y;
+                        LONG x_ = x, y_ = y;
                         for_n_rev( i, dx_dy_n )
                         {   x_ -= dx_dy[i].dx;
                             y_ -= dx_dy[i].dy;
@@ -1195,8 +864,8 @@ E_window_Q_window_I_draw_aa_Z_lines(
                               || ( dx_dy[i].dy && prev_dy )
                             ))
                                 continue;
-                            struct E_window_Z_point point = { x_, y_ };
-                            E_window_Q_window_I_draw_Z_points( window, 1, &point );
+                            POINT point = { x_, y_ };
+                            E_window_Q_window_I_draw_Z_points( window, &point, 1 );
                         }
                     }
                 }else if( j == 2 )
@@ -1269,12 +938,12 @@ E_window_Q_window_I_draw_aa_Z_lines(
         }
         W( dx_dy );
         if( i && dx_dy_n )
-        {   struct E_window_Z_arc arcs[1] =
+        {   RECT arcs[1] =
             { points[i].x - dx_dy_n, points[i].y - dx_dy_n
-            , dx_dy_n * 2, dx_dy_n * 2
-            , 0, 24000
+            , points[i].x + dx_dy_n, points[i].x + dx_dy_n
             };
-            E_window_Q_window_I_draw_P_color_(color);
+            E_window_Q_window_I_draw_P_pen( window, color );
+            E_window_Q_window_I_draw_P_brush( window, color );
             E_window_Q_window_I_fill_Z_arcs_(arcs);
         }
     }
@@ -1289,111 +958,105 @@ E_window_Q_object_I_draw_P_color(
         E_window_Q_window_I_draw_P_color_(color);
 }
 //------------------------------------------------------------------------------
-void
+B
 E_window_Q_object_I_draw_Z_points(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
+, POINT *points
 , N n
-, struct E_window_Z_point *points
 ){  for_n( i, n )
     {   points[i].x += object->x;
         points[i].y += object->y;
     }
-    E_window_Q_window_I_draw_Z_points( window, n, points );
-}
-void
-E_window_Q_object_I_draw_Z_segments(
-  struct E_window_Q_window_Z *window
-, struct E_window_Q_object_Z *object
-, N n
-, struct E_window_Z_segment *segments
-){  for_n( i, n )
-    {   segments[i].x1 += object->x;
-        segments[i].y1 += object->y;
-        segments[i].x2 += object->x;
-        segments[i].y2 += object->y;
-    }
-    E_window_Q_window_I_draw_Z_segments( window, n, segments );
+    return E_window_Q_window_I_draw_Z_points( window, n, points );
 }
 void
 E_window_Q_object_I_draw_Z_lines(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
+, POINT *points
 , N n
-, struct E_window_Z_point *points
 ){  for_n( i, n )
     {   points[i].x += object->x;
         points[i].y += object->y;
     }
-    E_window_Q_window_I_draw_Z_lines( window, n, points );
+    E_window_Q_window_I_draw_Z_lines( window, points, n );
 }
-void
+B
 E_window_Q_object_I_draw_Z_rectangles(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
+, RECT *rectangles
 , N n
-, struct E_window_Z_rectangle *rectangles
 ){  for_n( i, n )
-    {   rectangles[i].x += object->x;
-        rectangles[i].y += object->y;
+    {   rectangles[i].left += object->x;
+        rectangles[i].top += object->y;
+        rectangles[i].right += object->x;
+        rectangles[i].bottom += object->y;
     }
-    E_window_Q_window_I_draw_Z_rectangles( window, n, rectangles );
+    return E_window_Q_window_I_draw_Z_rectangles( window, rectangles, n );
 }
-void
+B
 E_window_Q_object_I_draw_Z_arcs(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
+, RECT *arcs
 , N n
-, struct E_window_Z_arc *arcs
 ){  for_n( i, n )
-    {   arcs[i].x += object->x;
-        arcs[i].y += object->y;
+    {   arcs[i].left += object->x;
+        arcs[i].top += object->y;
+        arcs[i].right += object->x;
+        arcs[i].bottom += object->y;
     }
-    E_window_Q_window_I_draw_Z_arcs( window, n, arcs );
+    return E_window_Q_window_I_draw_Z_arcs( window, arcs, n );
 }
-void
+B
 E_window_Q_object_I_fill_Z_points(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
+, POINT *points
 , N n
-, struct E_window_Z_point *points
 ){  for_n( i, n )
     {   points[i].x += object->x;
         points[i].y += object->y;
     }
-    E_window_Q_window_I_fill_Z_points( window, n, points );
+    return E_window_Q_window_I_fill_Z_points( window, points, n );
 }
-void
+B
 E_window_Q_object_I_fill_Z_rectangles(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
+, RECT *rectangles
 , N n
-, struct E_window_Z_rectangle *rectangles
 ){  for_n( i, n )
-    {   rectangles[i].x += object->x;
-        rectangles[i].y += object->y;
+    {   rectangles[i].left += object->x;
+        rectangles[i].top += object->y;
+        rectangles[i].right += object->x;
+        rectangles[i].bottom += object->y;
     }
-    E_window_Q_window_I_fill_Z_rectangles( window, n, rectangles );
+    return E_window_Q_window_I_fill_Z_rectangles( window, rectangles, n );
 }
-void
+B
 E_window_Q_object_I_fill_Z_arcs(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
+, RECT *arcs
 , N n
-, struct E_window_Z_arc *arcs
 ){  for_n( i, n )
-    {   arcs[i].x += object->x;
-        arcs[i].y += object->y;
+    {   arcs[i].left += object->x;
+        arcs[i].top += object->y;
+        arcs[i].right += object->x;
+        arcs[i].bottom += object->y;
     }
-    E_window_Q_window_I_fill_Z_arcs( window, n, arcs );
+    return E_window_Q_window_I_fill_Z_arcs( window, arcs, n );
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void
 E_window_Q_object_I_draw_aa_Z_pixel(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, S16 x
-, S16 y
+, LONG x
+, LONG y
 , COLORREF color
 , F brightness
 , N get_pixel
@@ -1409,8 +1072,8 @@ void
 E_window_Q_object_I_draw_aa_Z_lines(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
+, POINT *points
 , N n
-, struct E_window_Z_point *points
 , F thickness
 , COLORREF color
 ){  for_n( i, n )
@@ -1418,8 +1081,8 @@ E_window_Q_object_I_draw_aa_Z_lines(
         points[i].y += object->y;
     }
     E_window_Q_window_I_draw_aa_Z_lines_(
-      n
-    , points
+      points
+    , n
     , thickness
     , !U_R( object->mode, drag_src ) ? color : E_window_Q_theme.current_brace
     );

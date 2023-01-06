@@ -12,8 +12,7 @@ struct E_window_Q_window_Z
   HDC dc;
   HBITMAP drawable;
   I *object_mask;
-  S16 x, y; //NDFN niekoniecznie jest poprawne, bo “configure_notify” wzglêdem “root” nie musz¹ byæ przysy³ane. Ale narazie nie jest niezbêdne.
-  N16 width, height;
+  LONG width, height;
   unsigned U_R( req, draw ) :1;
 };
 //------------------------------------------------------------------------------
@@ -32,7 +31,6 @@ E_window_Q_window_M(
     if( !~window_id )
         return ~0;
     struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
-    window->x = window->y = 0;
     window->width = window->height = 0;
     U_L( window->req, draw );
     window->dc = 0;
@@ -104,8 +102,8 @@ E_window_Q_window_W( I window_id
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 COLORREF
 E_window_R_pixel( struct E_window_Q_window_Z *window
-, S16 x
-, S16 y
+, LONG x
+, LONG y
 ){  J_assert( x >= 0 );
     J_assert( y >= 0 );
     return GetPixel( window->dc, x, y );
