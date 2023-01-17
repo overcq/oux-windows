@@ -76,6 +76,38 @@ E_window_Q_window_I_draw_P_brush( struct E_window_Q_window_Z *window
     }
     return brush;
 }
+void
+E_window_Q_object_mask_I_draw_P_color( I object_id
+){  E_window_S->current_object = object_id;
+}
+B
+E_window_Q_object_mask_I_draw_P_pen( struct E_window_Q_window_Z *window
+, I object_id
+){  HPEN pen = CreatePen( PS_SOLID, 0, object_id );
+    if(pen)
+    {   HPEN old_pen = SelectObject( window->dc_object_mask, pen );
+        if( !old_pen )
+        {   DeleteObject(pen);
+            return false;
+        }
+        DeleteObject( old_pen );
+    }
+    return pen;
+}
+B
+E_window_Q_object_mask_I_draw_P_brush( struct E_window_Q_window_Z *window
+, I object_id
+){  HBRUSH brush = CreateSolidBrush( object_id );
+    if(brush)
+    {   HPEN old_brush = SelectObject( window->dc_object_mask, brush );
+        if( !old_brush )
+        {   DeleteObject(brush);
+            return false;
+        }
+        DeleteObject( old_brush );
+    }
+    return brush;
+}
 //------------------------------------------------------------------------------
 B
 E_window_Q_window_I_draw_Z_points(
@@ -85,33 +117,60 @@ E_window_Q_window_I_draw_Z_points(
 ){  J_assert(n);
     for_n( i, n )
         if( points[i].x < window->width && points[i].y < window->height )
-        {   if( !SetPixelV( window->dc, points[i].x, points[i].y, E_window_S->draw_color ))
+        {   if( U_R( E_window_S->state, draw_object_drag_move ))
+            {   HRGN res = CreateRectRgn( 0, 0, 0, 0 );
+                if( !res )
+                    return false;
+                HRGN combine = CreateRectRgn( points[i].x, points[i].y, points[i].x + 1, points[i].y + 1 );
+                if( !combine )
+                {   DeleteObject(res);
+                    return false;
+                }
+                if( CombineRgn( res, E_window_S->region, combine, RGN_OR ) == ERROR )
+                {   DeleteObject(combine);
+                    DeleteObject(res);
+                    return false;
+                }
+                DeleteObject( E_window_S->region );
+                DeleteObject(combine);
+                E_window_S->region = res;
+            }
+            if( !SetPixelV( window->dc, points[i].x, points[i].y, E_window_S->draw_color )
+            || ( !U_R( E_window_S->state, draw_object_drag_move ) && !SetPixelV( window->dc_object_mask, points[i].x, points[i].y, E_window_S->current_object ))
+            )
                 return false;
-            //if( !U_R( screen->state, draw_object_drag_move ))
-                window->object_mask[ points[i].y * window->width + points[i].x ] = E_window_S->current_object;
-            //else
-
-                //screen->dnd_window_shape_pixmap[ ( points[i].x + points[i].y * window->width ) / 8 ] |= 1 << (( points[i].x + points[i].y * window->width ) % 8 );
         }
-/*    if( U_R( screen->state, draw_object_drag_move ))
-        xcb_poly_point( display->x_display
-        , XCB_COORD_MODE_ORIGIN
-        , screen->dnd_window_shape_pixmap
-        , screen->bitmask_1_gc
-        , n
-        , points
-        );*/
     return true;
-
 }
-
 B
 E_window_Q_window_I_draw_Z_lines(
   struct E_window_Q_window_Z *window
 , POINT *points
 , N n
 ){  J_assert( n > 1 );
-    return Polyline( window->dc, points, n );
+    if( U_R( E_window_S->state, draw_object_drag_move ))
+    {   for_n( i, n - 1 )
+        {   HRGN res = CreateRectRgn( 0, 0, 0, 0 );
+            if( !res )
+                return false;
+            POINT p[2] = { points[i].x, points[i].y, points[ i + 1 ].x, points[ i + 1 ].y };
+            HRGN combine = CreatePolygonRgn( &p[0], 2, WINDING );
+            if( !combine )
+            {   DeleteObject(res);
+                return false;
+            }
+            if( CombineRgn( res, E_window_S->region, combine, RGN_OR ) == ERROR )
+            {   DeleteObject(combine);
+                DeleteObject(res);
+                return false;
+            }
+            DeleteObject( E_window_S->region );
+            DeleteObject(combine);
+            E_window_S->region = res;
+        }
+    }
+    return Polyline( window->dc, points, n )
+    && ( U_R( E_window_S->state, draw_object_drag_move ) || Polyline( window->dc_object_mask, points, n ));
 }
 B
 E_window_Q_window_I_draw_Z_rectangles(
@@ -119,13 +178,82 @@ E_window_Q_window_I_draw_Z_rectangles(
 , RECT *rectangles
 , N n
 ){  J_assert(n);
+    if( U_R( E_window_S->state, draw_object_drag_move ))
+    {   for_n( i, n )
+        {   HRGN res = CreateRectRgn( 0, 0, 0, 0 );
+            if( !res )
+                return false;
+            HRGN combine = CreateRectRgn( rectangles[i].left, rectangles[i].top, rectangles[i].right, rectangles[i].top + 1 );
+            if( !combine )
+            {   DeleteObject(res);
+                return false;
+            }
+            if( CombineRgn( res, E_window_S->region, combine, RGN_OR ) == ERROR )
+            {   DeleteObject(combine);
+                DeleteObject(res);
+                return false;
+            }
+            DeleteObject( E_window_S->region );
+            DeleteObject(combine);
+            E_window_S->region = CreateRectRgn( 0, 0, 0, 0 );
+            if( !E_window_S->region )
+                return false;
+            combine = CreateRectRgn( rectangles[i].right - 1, rectangles[i].top, rectangles[i].right, rectangles[i].bottom );
+            if( !combine )
+            {   DeleteObject(res);
+                return false;
+            }
+            if( CombineRgn( E_window_S->region, res, combine, RGN_OR ) == ERROR )
+            {   DeleteObject(combine);
+                DeleteObject(res);
+                return false;
+            }
+            DeleteObject(res);
+            DeleteObject(combine);
+            res = CreateRectRgn( 0, 0, 0, 0 );
+            if( !res )
+                return false;
+            combine = CreateRectRgn( rectangles[i].left, rectangles[i].bottom - 1, rectangles[i].right, rectangles[i].bottom );
+            if( !combine )
+            {   DeleteObject(res);
+                return false;
+            }
+            if( CombineRgn( res, E_window_S->region, combine, RGN_OR ) == ERROR )
+            {   DeleteObject(combine);
+                DeleteObject(res);
+                return false;
+            }
+            DeleteObject( E_window_S->region );
+            DeleteObject(combine);
+            E_window_S->region = CreateRectRgn( 0, 0, 0, 0 );
+            if( !E_window_S->region )
+                return false;
+            combine = CreateRectRgn( rectangles[i].left, rectangles[i].top, rectangles[i].left + 1, rectangles[i].bottom );
+            if( !combine )
+            {   DeleteObject(res);
+                return false;
+            }
+            if( CombineRgn( E_window_S->region, res, combine, RGN_OR ) == ERROR )
+            {   DeleteObject(combine);
+                DeleteObject(res);
+                return false;
+            }
+            DeleteObject(res);
+            DeleteObject(combine);
+        }
+    }
     HBRUSH brush = CreateSolidBrush( E_window_S->draw_color );
+    HBRUSH brush_object_mask = CreateSolidBrush( E_window_S->current_object );
     for_n( i, n )
-    {   if( !FrameRect( window->dc, &rectangles[i], brush ))
-        {   DeleteObject(brush);
+    {   if( !FrameRect( window->dc, &rectangles[i], brush )
+        || ( !U_R( E_window_S->state, draw_object_drag_move ) && !FrameRect( window->dc_object_mask, &rectangles[i], brush_object_mask ))
+        )
+        {   DeleteObject( brush_object_mask );
+            DeleteObject(brush);
             return false;
         }
     }
+    DeleteObject( brush_object_mask );
     DeleteObject(brush);
     return true;
 }
@@ -135,12 +263,19 @@ E_window_Q_window_I_draw_Z_arcs(
 , struct E_window_Z_arc *arcs
 , N n
 ){  J_assert(n);
+    if( U_R( E_window_S->state, draw_object_drag_move ))
+        ; //NDFN Brak procedury rysowania 'regionu' dla "drag & drop".
     for_n( i, n )
     {   if( !Arc( window->dc
         , arcs[i].left, arcs[i].top, arcs[i].right, arcs[i].bottom
         , arcs[i].angle_start_x, arcs[i].angle_start_y
         , arcs[i].angle_end_x, arcs[i].angle_end_y
-        ))
+        )
+        || ( !U_R( E_window_S->state, draw_object_drag_move ) && !Arc( window->dc_object_mask
+        , arcs[i].left, arcs[i].top, arcs[i].right, arcs[i].bottom
+        , arcs[i].angle_start_x, arcs[i].angle_start_y
+        , arcs[i].angle_end_x, arcs[i].angle_end_y
+        )))
             return false;
     }
     return true;
@@ -151,7 +286,27 @@ E_window_Q_window_I_fill_Z_points(
 , POINT *points
 , N n
 ){  J_assert( n > 2 );
-    return Polygon( window->dc, points, n );
+    if( U_R( E_window_S->state, draw_object_drag_move ))
+    {   //NDFN Brak procedury rysowania 'regionu' dla "drag & drop".
+        HRGN res = CreateRectRgn( 0, 0, 0, 0 );
+        if( !res )
+            return false;
+        HRGN combine = CreatePolygonRgn( points, n, WINDING );
+        if( !combine )
+        {   DeleteObject(res);
+            return false;
+        }
+        if( CombineRgn( res, E_window_S->region, combine, RGN_OR ) == ERROR )
+        {   DeleteObject(combine);
+            DeleteObject(res);
+            return false;
+        }
+        DeleteObject( E_window_S->region );
+        DeleteObject(combine);
+        E_window_S->region = res;
+    }
+    return Polygon( window->dc, points, n )
+    && ( U_R( E_window_S->state, draw_object_drag_move ) || Polygon( window->dc_object_mask, points, n ));
 }
 B
 E_window_Q_window_I_fill_Z_rectangles(
@@ -159,8 +314,30 @@ E_window_Q_window_I_fill_Z_rectangles(
 , RECT *rectangles
 , N n
 ){  J_assert(n);
+    if( U_R( E_window_S->state, draw_object_drag_move ))
+    {   for_n( i, n )
+        {   HRGN res = CreateRectRgn( 0, 0, 0, 0 );
+            if( !res )
+                return false;
+            HRGN combine = CreateRectRgnIndirect( &rectangles[i] );
+            if( !combine )
+            {   DeleteObject(res);
+                return false;
+            }
+            if( CombineRgn( res, E_window_S->region, combine, RGN_OR ) == ERROR )
+            {   DeleteObject(combine);
+                DeleteObject(res);
+                return false;
+            }
+            DeleteObject( E_window_S->region );
+            DeleteObject(combine);
+            E_window_S->region = res;
+        }
+    }
     for_n( i, n )
-    {   if( !Rectangle( window->dc, rectangles[i].left, rectangles[i].top, rectangles[i].right, rectangles[i].bottom ))
+    {   if( !Rectangle( window->dc, rectangles[i].left, rectangles[i].top, rectangles[i].right, rectangles[i].bottom )
+        || ( !U_R( E_window_S->state, draw_object_drag_move ) && !Rectangle( window->dc_object_mask, rectangles[i].left, rectangles[i].top, rectangles[i].right, rectangles[i].bottom ))
+        )
             return false;
     }
     return true;
@@ -171,8 +348,30 @@ E_window_Q_window_I_fill_Z_arcs(
 , RECT *arcs
 , N n
 ){  J_assert(n);
+    if( U_R( E_window_S->state, draw_object_drag_move ))
+    {   for_n( i, n )
+        {   HRGN res = CreateRectRgn( 0, 0, 0, 0 );
+            if( !res )
+                return false;
+            HRGN combine = CreateEllipticRgnIndirect( &arcs[i] );
+            if( !combine )
+            {   DeleteObject(res);
+                return false;
+            }
+            if( CombineRgn( res, E_window_S->region, combine, RGN_OR ) == ERROR )
+            {   DeleteObject(combine);
+                DeleteObject(res);
+                return false;
+            }
+            DeleteObject( E_window_S->region );
+            DeleteObject(combine);
+            E_window_S->region = res;
+        }
+    }
     for_n( i, n )
-    {   if( !Ellipse( window->dc, arcs[i].left, arcs[i].top, arcs[i].right, arcs[i].bottom ))
+    {   if( !Ellipse( window->dc, arcs[i].left, arcs[i].top, arcs[i].right, arcs[i].bottom )
+        || ( !U_R( E_window_S->state, draw_object_drag_move ) && !Ellipse( window->dc_object_mask, arcs[i].left, arcs[i].top, arcs[i].right, arcs[i].bottom ))
+        )
             return false;
     }
     return true;
@@ -954,7 +1153,7 @@ void
 E_window_Q_object_I_draw_P_color(
   struct E_window_Q_object_Z *object
 , COLORREF color
-){  if( !U_R( object->mode, drag_src ))
+){  if( !U_R( object->state, drag_src ))
         E_window_Q_window_I_draw_P_color_(color);
 }
 //------------------------------------------------------------------------------
@@ -1063,7 +1262,7 @@ E_window_Q_object_I_draw_aa_Z_pixel(
 ){  E_window_Q_window_I_draw_aa_Z_pixel_(
       object->x + x
     , object->y + y
-    , !U_R( object->mode, drag_src ) ? color : E_window_Q_theme.current_brace
+    , !U_R( object->state, drag_src ) ? color : E_window_Q_theme.current_brace
     , brightness
     , get_pixel
     );
@@ -1084,7 +1283,7 @@ E_window_Q_object_I_draw_aa_Z_lines(
       points
     , n
     , thickness
-    , !U_R( object->mode, drag_src ) ? color : E_window_Q_theme.current_brace
+    , !U_R( object->state, drag_src ) ? color : E_window_Q_theme.current_brace
     );
 }
 //******************************************************************************

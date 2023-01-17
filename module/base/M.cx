@@ -136,7 +136,7 @@ E_base_M( HINSTANCE h_instance
     if( !E_mem_Q_blk_I_remove( &s, l + 1, 4096 - ( l + 1 )))
     {   GV_(NA); _V();
     }
-    Pc s_ = E_text_Z_s0_R_c_search_last_( E_text_Z_s0_R_end(s), E_mem_Q_file_S_filename_separator );
+    Pc s_ = E_text_Z_s0_R_search_last_c_( E_text_Z_s0_R_end(s), E_mem_Q_file_S_filename_separator );
     if( !E_mem_Q_blk_I_remove( &s, 0, s_ + 1 - s ))
     {   GV_(NA); _V();
     }
@@ -147,7 +147,7 @@ E_base_M( HINSTANCE h_instance
     {   GV_(NA); _V();
     }
     V_( GetCurrentDirectory( l, s ) == l - 1 );
-    if( !E_text_Z_s0_T_s0_eq( s, E_mem_Q_file_S_filename_separator_s ))
+    if( !E_text_Z_s0_T_eq_s0( s, E_mem_Q_file_S_filename_separator_s ))
         E_base_S->E_flow_S_cwd = s;
     else
         W(s);

@@ -11,7 +11,14 @@ E_window_W( void
     {   E_window_Q_window_W( window_id );
     }
     E_mem_Q_tab_W( E_window_Q_window_S );
+    DestroyWindow( E_window_S->dnd_window->handle );
+    DeleteDC( E_window_S->dnd_window->dc );
+    DeleteObject( E_window_S->dnd_window->drawable );
+    E_mem_Q_tab_W( E_window_S->dnd_window->object );
     if( !UnregisterClass( "main_window", E_base_S->E_flow_S_h_instance ))
+    {   GV(NA); _V();
+    }
+    if( !UnregisterClass( "dnd_window", E_base_S->E_flow_S_h_instance ))
     {   GV(NA); _V();
     }
     E_window_font_W();

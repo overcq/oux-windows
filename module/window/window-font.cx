@@ -21,8 +21,8 @@ struct E_mem_Q_tab_Z *E_window_Q_font_S;
 N
 E_window_Q_window_I_draw_Z_font(
   struct E_window_Q_window_Z *window
-, S16 x
-, S16 y
+, int x
+, int y
 , N color
 , I font_id
 , U u
@@ -72,14 +72,14 @@ E_window_Q_window_I_draw_Z_font(
 N
 E_window_Q_window_I_draw_Z_font_Z_s(
   struct E_window_Q_window_Z *window
-, S16 x
-, S16 y
+, int x
+, int y
 , N color
 , I font_id
 , Pc s
 ){  struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, font_id );
     U u;
-    S16 x_ = x;
+    int x_ = x;
     while( *s )
     {   u = ~0;
         Pc s_ = E_text_Z_su_R_u( s, &u );
@@ -111,15 +111,15 @@ N
 E_window_Q_object_I_draw_Z_font(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, S16 x
-, S16 y
+, int x
+, int y
 , N color
 , I font_id
 , U u
 ){  return E_window_Q_window_I_draw_Z_font_(
       object->x + x
     , object->y + y
-    , !U_R( object->mode, drag_src ) ? color : E_window_Q_theme.inactive_text
+    , !U_R( object->state, drag_src ) ? color : E_window_Q_theme.inactive_text
     , font_id, u
     );
 }
@@ -127,15 +127,15 @@ N
 E_window_Q_object_I_draw_Z_font_Z_s(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, S16 x
-, S16 y
+, int x
+, int y
 , N color
 , I font_id
 , Pc s
 ){  return E_window_Q_window_I_draw_Z_font_Z_s_(
       object->x + x
     , object->y + y
-    , !U_R( object->mode, drag_src ) ? color : E_window_Q_theme.inactive_text
+    , !U_R( object->state, drag_src ) ? color : E_window_Q_theme.inactive_text
     , font_id, s
     );
 }

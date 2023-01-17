@@ -39,7 +39,7 @@ struct E_window_Q_object_Z
   LONG width, height; // Prostok¹t oczekiwanej widocznoœci obiektu.
   unsigned U_R( mode, lay_height )      :1;
   unsigned U_R( mode, draggable )       :1;
-  unsigned U_R( mode, drag_src )        :1;
+  unsigned U_R( state, drag_src )       :1;
 };
 struct E_window_Q_object_Z_data_Z_entry
 { I font;
@@ -93,7 +93,7 @@ E_window_Q_object_M(
     object->height = height;
     U_L( object->mode, lay_height );
     U_L( object->mode, draggable );
-    U_L( object->mode, drag_src );
+    U_L( object->state, drag_src );
     return object_id;
 }
 void
@@ -106,6 +106,14 @@ E_window_Q_object_W(
             object->clear_data( object->data );
         W( object->data );
     }
+    W( object->child );
+    E_mem_Q_tab_I_remove( window->object, object_id );
+}
+void
+E_window_Q_object_W_(
+  struct E_window_Q_window_Z *window
+, I object_id
+){  struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
     W( object->child );
     E_mem_Q_tab_I_remove( window->object, object_id );
 }
@@ -143,7 +151,7 @@ E_window_Q_object_I_add( struct E_window_Q_window_Z *window
 }
 //------------------------------------------------------------------------------
 N
-E_window_Q_object_I_rem( struct E_window_Q_window_Z *window
+E_window_Q_object_I_remove( struct E_window_Q_window_Z *window
 , I id
 ){  for_each( object_id, window->object, E_mem_Q_tab )
     {   struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
@@ -213,7 +221,7 @@ void
 E_window_Q_object_Z_button_I_draw(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-){  E_window_Q_window_I_draw_P_pen( window, E_window_Q_theme.line );
+){  E_window_Q_window_I_draw_P_pen( window, U_R( object->state, drag_src ) ? E_window_S->draw_color : E_window_Q_theme.line );
     E_window_Q_window_I_draw_P_brush( window, E_window_Q_theme.object_bg );
     E_window_Q_object_I_fill_Z_rectangles_((
       ( RECT[] )
@@ -261,7 +269,7 @@ E_window_Q_object_Z_entry_M(
         return ~0;
     }
     object_data->font = font_id;
-    object_data->text = M( E_text_Z_s0_R_0_l(text) );
+    object_data->text = M( E_text_Z_s0_R_l_0(text) );
     object_data->text_start = 0;
     if( !object_data->text )
     {   E_window_Q_object_W( window, object_id );
@@ -277,7 +285,7 @@ void
 E_window_Q_object_Z_entry_I_draw(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-){  E_window_Q_window_I_draw_P_pen( window, E_window_Q_theme.window_bg );
+){  E_window_Q_window_I_draw_P_pen( window, U_R( object->state, drag_src ) ? E_window_S->draw_color : E_window_Q_theme.window_bg );
     E_window_Q_window_I_draw_P_brush( window, E_window_Q_theme.window_bg );
     E_window_Q_object_I_fill_Z_rectangles_((
       ( RECT[] )
@@ -407,7 +415,7 @@ E_window_Q_object_Z_font_M(
         return ~0;
     }
     object_data->font = font_id;
-    object_data->label = M( E_text_Z_s0_R_0_l(label) );
+    object_data->label = M( E_text_Z_s0_R_l_0(label) );
     if( !object_data->label )
     {   E_window_Q_object_W( window, object_id );
         return ~0;
@@ -443,7 +451,7 @@ void
 E_window_Q_object_Z_frame_I_draw(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-){  E_window_Q_window_I_draw_P_color( E_window_Q_theme.line );
+){  E_window_Q_window_I_draw_P_color( U_R( object->state, drag_src ) ? E_window_S->draw_color : E_window_Q_theme.line );
     E_window_Q_object_I_draw_Z_rectangles_((
       ( RECT[] )
       { { 0, 0
@@ -642,35 +650,30 @@ E_window_Q_object_I_draw_Z_draw_proc( void (*draw_object_proc)( struct E_window_
             }
         }
     }
-    /*if( U_R( display->mode, drag ))
-    {   struct E_window_Q_screen_Z *screen = E_mem_Q_tab_R( display->screen, display->drag_S_dnd_window_screen_id );
-        struct E_window_Q_window_Z *window = &screen->dnd_window;
-        for_each( object_id, window->object, E_mem_Q_tab )
-        {   struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+    if( U_R( E_window_S->mode, drag ))
+    {   for_each( object_id, E_window_S->dnd_window->object, E_mem_Q_tab )
+        {   struct E_window_Q_object_Z *object = E_mem_Q_tab_R( E_window_S->dnd_window->object, object_id );
             if( object->draw == draw_object_proc )
-            {   U_F( window->req, draw );
+            {   U_R( E_window_S->mode, draw_simple ) = draw_simple;
+                RedrawWindow( E_window_S->dnd_window->handle, 0, 0, RDW_INVALIDATE );
                 break;
             }
         }
-    }*/
+    }
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void
 E_window_Q_object_I_draw( struct E_window_Q_window_Z *window_
 ){  for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
     {   struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
-        if( window != window_ )
+        if( window == window_ )
         {   RedrawWindow( window->handle, 0, 0, RDW_INVALIDATE );
-            break;
+            return;
         }
     }
-    /*if( !U_R( display->mode, drag ))
-    {   struct E_window_Q_screen_Z *screen = E_mem_Q_tab_R( display->screen, display->drag_S_dnd_window_screen_id );
-        struct E_window_Q_window_Z *window = &screen->dnd_window;
-        if( window != window_ )
-        {   U_F( window->req, draw );
-            U_F( display->req, draw );
-        }
-    }*/
+    if( U_R( E_window_S->mode, drag ))
+    {   if( E_window_S->dnd_window == window_ )
+            RedrawWindow( E_window_S->dnd_window->handle, 0, 0, RDW_INVALIDATE );
+    }
 }
 //******************************************************************************

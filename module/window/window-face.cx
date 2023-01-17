@@ -9,11 +9,12 @@
 struct E_window_Q_window_Z
 { struct E_mem_Q_tab_Z *object;
   HWND handle;
-  HDC dc;
+  HDC dc, dc_object_mask;
   HBITMAP drawable;
-  I *object_mask;
-  LONG width, height;
-  unsigned U_R( req, draw ) :1;
+  HBITMAP object_mask;
+  int x, y;
+  int width, height;
+  RECT border;
 };
 //------------------------------------------------------------------------------
 struct E_window_Z_drag_object_src
@@ -31,8 +32,8 @@ E_window_Q_window_M(
     if( !~window_id )
         return ~0;
     struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
+    window->x = window->y = 0;
     window->width = window->height = 0;
-    U_L( window->req, draw );
     window->dc = 0;
     window->drawable = 0;
     window->object = E_mem_Q_tab_M( sizeof( struct E_window_Q_object_Z ), 0 );
@@ -43,15 +44,7 @@ E_window_Q_window_M(
         }
         return ~0;
     }
-    Mt_( window->object_mask, 0 );
-    if( !window->object_mask )
-    {   GV_(NA);
-        E_mem_Q_tab_W( window->object );
-        if( !~E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
-        {   GV_(NA);
-        }
-        return ~0;
-    }
+    window->object_mask = 0;
     window->handle = CreateWindowEx(
       WS_EX_ACCEPTFILES
     , "main_window"
@@ -68,7 +61,6 @@ E_window_Q_window_M(
     );
     if( !window->handle )
     {   GV_(NA);
-        W( window->object_mask );
         E_mem_Q_tab_W( window->object );
         if( !~E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
         {   GV_(NA);
@@ -83,29 +75,28 @@ void
 E_window_Q_window_W( I window_id
 ){  struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
     DestroyWindow( window->handle );
-    W( window->object_mask );
-    DeleteObject( window->drawable );
+    DeleteDC( window->dc_object_mask );
     DeleteDC( window->dc );
+    DeleteObject( window->object_mask );
+    DeleteObject( window->drawable );
     E_mem_Q_tab_W( window->object );
     E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id );
-    /*if( U_R( display->mode, drag ))
-    {   for_n( i, display->drag_S_object_src_n )
-            if( display->drag_S_object_src[i].window_id == window_id )
-            {   U_F( display->mode, drag_stop );
-                    #ifdef E_flow_C_thread_system_unblock_reports
-                E_flow_Q_thread_system_unblock_report_I_unblock( D_id(x_window,events), display_id );
-                    #endif
-                break;
-            }
-    }*/
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 COLORREF
 E_window_R_pixel( struct E_window_Q_window_Z *window
-, LONG x
-, LONG y
+, int x
+, int y
 ){  J_assert( x >= 0 );
     J_assert( y >= 0 );
     return GetPixel( window->dc, x, y );
+}
+I
+E_window_Q_object_mask_R_object_id( struct E_window_Q_window_Z *window
+, int x
+, int y
+){  J_assert( x >= 0 );
+    J_assert( y >= 0 );
+    return GetPixel( window->dc_object_mask, x, y );
 }
 //******************************************************************************
