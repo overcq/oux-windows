@@ -275,11 +275,6 @@ E_flow_Q_task_M( I *uid
         //NKN Pozostaje zagwarantowanie, ¿e procedura ‹zadania› nie bêdzie nigdy oczekiwaæ (ze wzglêdu na ‘abi’) niczego tutaj nie zapewnianego przez ‘callera’ (m.in. rezerwacji obszaru na stosie, gdy argumentów i tak nie ma przekazywanych).
         :
         : "r" (p), "r" ( task_proc )
-            #if defined( __i386__ )
-        : "esp"
-            #else
-        : "rsp"
-            #endif
         #else
 #error not implemented
         #endif

@@ -134,6 +134,19 @@ E_mem_Q_file_M( Pc path
 ){  HANDLE handle = CreateFile( path, GENERIC_READ | ( !readonly ? GENERIC_WRITE : 0 ), FILE_SHARE_READ, 0, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_NO_BUFFERING, 0 );
     V( handle != INVALID_HANDLE_VALUE )
         return ~0;
+    N type = GetFileType(handle);
+    V( type != FILE_TYPE_UNKNOWN
+    || GetLastError() != NO_ERROR
+    )
+    {   V( CloseHandle(handle) ){}
+        return ~0;
+    }
+    if( type != FILE_TYPE_UNKNOWN
+    && type != FILE_TYPE_DISK
+    )
+    {   V( CloseHandle(handle) ){}
+        return ~0;
+    }
     I id = E_mem_Q_tab_I_add( E_base_S->E_mem_Q_file_S );
     if( !~id )
     {   V( CloseHandle(handle) ){}
@@ -161,28 +174,10 @@ E_mem_Q_file_M( Pc path
         E_mem_Q_tab_I_remove( E_base_S->E_mem_Q_file_S, id );
         return ~0;
     }
-    file->type = GetFileType(handle);
-    V( file->type != FILE_TYPE_UNKNOWN
-    || GetLastError() == NO_ERROR
-    )
-    {   W( file->unsaved );
-        W( file->blk );
-        V( CloseHandle(handle) ){}
-        E_mem_Q_tab_I_remove( E_base_S->E_mem_Q_file_S, id );
-        return ~0;
-    }
-    if( file->type != FILE_TYPE_UNKNOWN
-    && file->type != FILE_TYPE_DISK
-    )
-    {   W( file->unsaved );
-        W( file->blk );
-        V( CloseHandle(handle) ){}
-        E_mem_Q_tab_I_remove( E_base_S->E_mem_Q_file_S, id );
-        return ~0;
-    }
-    U_R( file->mode, readonly ) = readonly;
     file->pos = 0;
     file->handle = handle;
+    file->type = type;
+    U_R( file->mode, readonly ) = readonly;
     U_L( file->mode, opened_by_handle );
     U_L( file->current_blk, valid );
     U_L( file->current_blk, valid_sob );
@@ -191,7 +186,16 @@ E_mem_Q_file_M( Pc path
 }
 I
 E_mem_Q_file_M_handle( HANDLE handle
-){  I id = E_mem_Q_tab_I_add( E_base_S->E_mem_Q_file_S );
+){  N type = GetFileType(handle);
+    V( type != FILE_TYPE_UNKNOWN
+    || GetLastError() != NO_ERROR
+    )
+        return ~0;
+    if( type != FILE_TYPE_UNKNOWN
+    && type != FILE_TYPE_DISK
+    )
+        return ~0;
+    I id = E_mem_Q_tab_I_add( E_base_S->E_mem_Q_file_S );
     if( !~id )
         return ~0;
     struct E_mem_Q_file_Z *file = E_mem_Q_tab_R( E_base_S->E_mem_Q_file_S, id );
@@ -213,27 +217,86 @@ E_mem_Q_file_M_handle( HANDLE handle
         E_mem_Q_tab_I_remove( E_base_S->E_mem_Q_file_S, id );
         return ~0;
     }
-    file->type = GetFileType(handle);
-    V( file->type != FILE_TYPE_UNKNOWN
-    || GetLastError() == NO_ERROR
-    )
-    {   W( file->unsaved );
-        W( file->blk );
-        E_mem_Q_tab_I_remove( E_base_S->E_mem_Q_file_S, id );
-        return ~0;
-    }
-    if( file->type != FILE_TYPE_UNKNOWN
-    && file->type != FILE_TYPE_DISK
-    )
-    {   W( file->unsaved );
-        W( file->blk );
-        E_mem_Q_tab_I_remove( E_base_S->E_mem_Q_file_S, id );
-        return ~0;
-    }
-    U_R( file->mode, readonly ) = no;
     file->pos = 0;
     file->handle = handle;
+    file->type = type;
+    U_L( file->mode, readonly );
     U_F( file->mode, opened_by_handle );
+    U_L( file->current_blk, valid );
+    U_L( file->current_blk, valid_sob );
+    U_L( file->current_blk, valid_eob );
+    return id;
+}
+I
+E_mem_Q_file_Z_variable_M( void
+){  N l;
+    V( l = GetTempPath( 0, 0 ))
+        return ~0;
+    Pc dir = M( l + 1 );
+    if( !dir )
+        return ~0;
+    N l_;
+    V( l_ = GetTempPath( l + 1, dir ));
+    if( l != l_ )
+    {   W(dir);
+        return ~0;
+    }
+    Pc path = M( MAX_PATH );
+    if( !path )
+    {   W(dir);
+        return ~0;
+    }
+    V( GetTempFileName( dir, "OCQ", 0, path ))
+    {   W(path);
+        W(dir);
+        return ~0;
+    }
+    W(dir);
+    HANDLE handle = CreateFile( path, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, CREATE_NEW, FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE | FILE_FLAG_NO_BUFFERING, 0 );
+    V( handle != INVALID_HANDLE_VALUE )
+    {   W(path);
+        return ~0;
+    }
+    W(path);
+    N type = GetFileType(handle);
+    V( type != FILE_TYPE_UNKNOWN
+    || GetLastError() != NO_ERROR
+    )
+    {   V( CloseHandle(handle) ){}
+        return ~0;
+    }
+    I id = E_mem_Q_tab_I_add( E_base_S->E_mem_Q_file_S );
+    if( !~id )
+    {   V( CloseHandle(handle) ){}
+        return ~0;
+    }
+    struct E_mem_Q_file_Z *file = E_mem_Q_tab_R( E_base_S->E_mem_Q_file_S, id );
+    Mt_( file->blk, file->blk_n = 0 );
+    if( !file->blk )
+    {   V( CloseHandle(handle)){}
+        E_mem_Q_tab_I_remove( E_base_S->E_mem_Q_file_S, id );
+        return ~0;
+    }
+    Mt_( file->unsaved, file->unsaved_n = 0 );
+    if( !file->unsaved )
+    {   W( file->blk );
+        V( CloseHandle(handle) ){}
+        E_mem_Q_tab_I_remove( E_base_S->E_mem_Q_file_S, id );
+        return ~0;
+    }
+    file->l = GetFileSize( handle, 0 );
+    V( file->l != INVALID_FILE_SIZE )
+    {   W( file->unsaved );
+        W( file->blk );
+        V( CloseHandle(handle) ){}
+        E_mem_Q_tab_I_remove( E_base_S->E_mem_Q_file_S, id );
+        return ~0;
+    }
+    file->pos = 0;
+    file->handle = handle;
+    file->type = type;
+    U_L( file->mode, readonly );
+    U_L( file->mode, opened_by_handle );
     U_L( file->current_blk, valid );
     U_L( file->current_blk, valid_sob );
     U_L( file->current_blk, valid_eob );
@@ -399,6 +462,18 @@ E_mem_Q_file_I_save( I id
         }
     }
     return 0;
+}
+N
+E_mem_Q_file_Z_variable_I_save( I id
+){  N ret = E_mem_Q_file_I_save(id);
+    if(ret)
+        return ret;
+    struct E_mem_Q_file_Z *file = E_mem_Q_tab_R( E_base_S->E_mem_Q_file_S, id );
+    for_n( blk_i, file->blk_n )
+        W( file->blk[ blk_i ].data );
+    if( !E_mem_Q_blk_I_remove( &file->blk, 0, file->blk_n ))
+        return ~0;
+    file->blk_n = 0;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 _internal

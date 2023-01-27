@@ -15,6 +15,8 @@ typedef C           *Pc; // WskaŸnik do obliczeñ bajtowych i tekst techniczny jê
 typedef N           *Pn; // WskaŸnik do tablic liczb naturalnych.
 typedef P           *Pp; // WskaŸnik do tablic adresów.
 //==============================================================================
+#define false                               FALSE
+#define true                                TRUE
 #define no                                  FALSE
 #define yes                                 TRUE
 // Wyra¿enie przypisania automatycznie nadaj¹ce podanej wartoœci rozmiar zmiennej. Naprawia koniecznoœæ jawnego deklarowania przyrostków dla typów sta³ych; bo domyœlnie “int”.
@@ -263,6 +265,7 @@ typedef P           *Pp; // WskaŸnik do tablic adresów.
 //==============================================================================
 #define _forced_statement                   __asm__ volatile ( "" )
 #define _internal                           __attribute__ ((__visibility__( "internal" )))
+#define _packed                             __attribute__ ((__packed__))
 #define _unreachable                        __builtin_unreachable()
 #define _unused                             __attribute__ ((__unused__))
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

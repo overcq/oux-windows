@@ -54,4 +54,7 @@ typedef void                *P; // Tylko do deklaracji parametrów i konwersji po
 //==============================================================================
 #define E_mem_Q_file_S_filename_separator   '\\'
 #define E_mem_Q_file_S_filename_separator_s "\\"
+//==============================================================================
+#define GET_X_LPARAM(lp) ((int)(short)LOWORD(lp))
+#define GET_Y_LPARAM(lp) ((int)(short)HIWORD(lp))
 /******************************************************************************/
