@@ -34,7 +34,7 @@ E_window_Q_window_M(
     struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
     window->x = window->y = 0;
     window->width = window->height = 0;
-    window->dc = 0;
+    window->dc = window->dc_object_mask = 0;
     window->drawable = 0;
     window->object = E_mem_Q_tab_M( sizeof( struct E_window_Q_object_Z ), 0 );
     if( !window->object )
@@ -84,7 +84,7 @@ E_window_Q_window_W( I window_id
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 COLORREF
-E_window_R_pixel( struct E_window_Q_window_Z *window
+E_window_Q_image_R_pixel( struct E_window_Q_window_Z *window
 , int x
 , int y
 ){  J_assert( x >= 0 );

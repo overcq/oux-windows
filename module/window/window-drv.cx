@@ -13,6 +13,16 @@ D( window, loop )
             { case WM_QUIT:
                     U_F( E_base_S->E_flow_S_signal, exit );
                     break;
+              case WM_PAINT:
+                    if( msg.hwnd == E_window_S->dnd_window->handle )
+                    {   for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
+                        {   struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
+                            MSG msg_ = msg;
+                            msg_.hwnd = window->handle;
+                            TranslateMessage( &msg_ );
+                            DispatchMessage( &msg_ );
+                        }
+                    }
               default:
                     TranslateMessage( &msg );
                     DispatchMessage( &msg );
@@ -36,7 +46,7 @@ E_window_Q_window_I_proc_dnd( HWND h_window
           case WM_PAINT:
             {   E_window_Q_window_I_draw_P_pen( E_window_S->dnd_window, E_window_Q_theme.window_bg );
                 E_window_Q_window_I_draw_P_brush( E_window_S->dnd_window, E_window_Q_theme.window_bg );
-                E_window_Q_window_I_fill_Z_rectangles( E_window_S->dnd_window, &( RECT ){ 0, 0, E_window_S->dnd_window->width, E_window_S->dnd_window->height }, 1 );
+                E_window_Q_window_I_fill_Z_rectangles( E_window_S->dnd_window, 1, ( RECT[] ){ 0, 0, E_window_S->dnd_window->width, E_window_S->dnd_window->height } );
                 E_window_S->region = CreateRectRgn( 0, 0, 0, 0 );
                 if( !E_window_S->region )
                 {   GV_(NA); _V();
@@ -47,7 +57,7 @@ E_window_Q_window_I_proc_dnd( HWND h_window
                     object->draw( E_window_S->dnd_window, object ); //NDFN Nieprzerysowywanie wszystkich obiektów dla ka¿dej klatki animacji.
                 }
                 U_L( E_window_S->state, draw_object_drag_move );
-                if( !SetWindowRgn( E_window_S->dnd_window->handle, E_window_S->region, true ))
+                if( !SetWindowRgn( E_window_S->dnd_window->handle, E_window_S->region, TRUE ))
                 {   GV_(NA); _V();
                 }
                 PAINTSTRUCT ps;
@@ -108,6 +118,7 @@ E_window_Q_window_I_proc( HWND h_window
                 }
               case WM_LBUTTONDOWN:
                 {   E_window_S->dnd_src_object = E_window_Q_object_mask_R_object_id( window, LOWORD( l_param ), HIWORD( l_param ));
+                    G_(); Gd( E_window_S->dnd_src_object );
                     if( !~E_window_S->dnd_src_object )
                         break;
                     struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, E_window_S->dnd_src_object );
@@ -166,11 +177,9 @@ E_window_Q_window_I_proc( HWND h_window
                     E_window_Q_window_I_draw_P_brush( window, E_window_Q_theme.window_bg );
                     E_window_Q_object_mask_I_draw_P_pen( window, ~0 );
                     E_window_Q_object_mask_I_draw_P_brush( window, ~0 );
-                    E_window_Q_window_I_fill_Z_rectangles( window, &( RECT ){ 0, 0, window->width, window->height }, 1 );
+                    E_window_Q_window_I_fill_Z_rectangles( window, 1, ( RECT[] ){ 0, 0, window->width, window->height } );
                     for_each( object_id, window->object, E_mem_Q_tab ) //NDFN Zak³adana kolejnoœæ od na spodzie do na wierzchu. Nie wiadomo, czy “_q” jest konieczne.
-                    {   E_window_Q_object_mask_I_draw_P_color( object_id );
-                        E_window_Q_object_mask_I_draw_P_pen( window, object_id );
-                        E_window_Q_object_mask_I_draw_P_brush( window, object_id );
+                    {   E_window_S->current_object = object_id;
                         struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
                         if( U_R( object->state, drag_src ))
                             E_window_S->draw_color = E_window_Q_theme.current_brace;

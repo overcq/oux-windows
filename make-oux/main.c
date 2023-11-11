@@ -95,10 +95,12 @@ E_main_Q_s0_I_strstr( char *s
     {   if( *s == *t_ )
         {   if( t_ == t )
                 s_ = s;
+            s++;
             t_++;
         }else
+        {   s -= t_ - t - 1;
             t_ = t;
-        s++;
+        }
     }
     return !*t_ ? s_ : 0;
 }

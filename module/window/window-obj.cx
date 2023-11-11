@@ -43,10 +43,18 @@ struct E_window_Q_object_Z
 };
 struct E_window_Q_object_Z_data_Z_entry
 { I font;
-  Pc text;
+  Pc s;
   N text_start;
   N cursor_pos;
   unsigned U_R( state, cursor_visible_ ) :1;
+};
+struct E_window_Q_object_Z_data_Z_select
+{ Pc *select;
+  N select_n;
+};
+struct E_window_Q_object_Z_data_Z_select_list
+{ N scroll;
+  N selected;
 };
 //==============================================================================
 LONG E_window_Q_object_S_layout_dx = 4, E_window_Q_object_S_layout_dy = 4;
@@ -223,13 +231,14 @@ E_window_Q_object_Z_button_I_draw(
 , struct E_window_Q_object_Z *object
 ){  E_window_Q_window_I_draw_P_pen( window, U_R( object->state, drag_src ) ? E_window_S->draw_color : E_window_Q_theme.line );
     E_window_Q_window_I_draw_P_brush( window, E_window_Q_theme.object_bg );
-    E_window_Q_object_I_fill_Z_rectangles_((
-      ( RECT[] )
+    E_window_Q_object_I_fill_Z_rectangles( window, object
+    , 1
+    , ( RECT[] )
       { { 0, 0
         , object->width, object->height
         }
       }
-    ));
+    );
 }
 void
 E_window_Q_object_Z_button_I_click(
@@ -245,13 +254,13 @@ E_window_Q_object_Z_button_I_click(
 void
 E_window_Q_object_Z_entry_I_clear_data( P data
 ){  struct E_window_Q_object_Z_data_Z_entry *object_data = data;
-    W( object_data->text );
+    W( object_data->s );
 }
 I
 E_window_Q_object_Z_entry_M(
   struct E_window_Q_window_Z *window
 , I font_id
-, Pc text
+, Pc s
 ){  J_assert( E_mem_Q_tab_T( E_window_Q_font_S, font_id ));
     I object_id = E_window_Q_object_M( window
     , 0
@@ -269,13 +278,13 @@ E_window_Q_object_Z_entry_M(
         return ~0;
     }
     object_data->font = font_id;
-    object_data->text = M( E_text_Z_s0_R_l_0(text) );
+    object_data->s = M( E_text_Z_s0_R_l_0(s) );
     object_data->text_start = 0;
-    if( !object_data->text )
+    if( !object_data->s )
     {   E_window_Q_object_W( window, object_id );
         return ~0;
     }
-    E_text_Z_s_P_s0_copy_0( object_data->text, text );
+    E_text_Z_s_P_copy_s0_0( object_data->s, s );
     U_L( object_data->state, cursor_visible_ );
     struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
     object->data = object_data;
@@ -287,17 +296,18 @@ E_window_Q_object_Z_entry_I_draw(
 , struct E_window_Q_object_Z *object
 ){  E_window_Q_window_I_draw_P_pen( window, U_R( object->state, drag_src ) ? E_window_S->draw_color : E_window_Q_theme.window_bg );
     E_window_Q_window_I_draw_P_brush( window, E_window_Q_theme.window_bg );
-    E_window_Q_object_I_fill_Z_rectangles_((
-      ( RECT[] )
+    E_window_Q_object_I_fill_Z_rectangles( window, object
+    , 1
+    , ( RECT[] )
       { { 0, 0
         , object->width, object->height
         }
       }
-    ));
+    );
     struct E_window_Q_object_Z_data_Z_entry *object_data = object->data;
     struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, object_data->font );
     LONG x = 0;
-    Pc s = object_data->text;
+    Pc s = object_data->s;
     for_n( i, object_data->text_start )
     {   U u = ~0;
         s = E_text_Z_su_R_u( s, &u );
@@ -324,12 +334,12 @@ E_window_Q_object_Z_entry_I_draw(
     }
     C c = *s;
     *s = '\0';
-    E_window_Q_object_I_draw_Z_font_Z_s_( 0, 0, E_window_Q_theme.text, object_data->font, s_ );
+    E_window_Q_object_I_draw_Z_font_Z_s( window, object, 0, 0, E_window_Q_theme.text, object_data->font, s_ );
     *s = c;
     if( U_R( object_data->state, cursor_visible_ ))
     {   struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, object_data->font );
         LONG x = 0;
-        Pc s = object_data->text;
+        Pc s = object_data->s;
         for_n( i, object_data->text_start )
         {   U u = ~0;
             s = E_text_Z_su_R_u( s, &u );
@@ -354,11 +364,11 @@ E_window_Q_object_Z_entry_I_draw(
             l--;
         }
         E_window_Q_window_I_draw_P_pen( window, E_window_Q_theme.cursor );
-        POINT lines[2] =
-        { x, 0
-        , x, object->height - 1
+        POINT points[2] =
+        { { x, 0 }
+        , { x, object->height - 1 }
         };
-        E_window_Q_object_I_draw_Z_lines_(lines);
+        E_window_Q_object_I_draw_Z_lines( window, object, points, sizeof(points) / sizeof( points[0] ), 1 );
     }
 }
 //------------------------------------------------------------------------------
@@ -420,7 +430,7 @@ E_window_Q_object_Z_font_M(
     {   E_window_Q_object_W( window, object_id );
         return ~0;
     }
-    E_text_Z_s_P_s0_copy_0( object_data->label, label );
+    E_text_Z_s_P_copy_s0_0( object_data->label, label );
     struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
     object->data = object_data;
     return object_id;
@@ -430,7 +440,7 @@ E_window_Q_object_Z_font_I_draw(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
 ){  struct E_window_Q_object_Z_data_Z_font *object_data = object->data;
-    E_window_Q_object_I_draw_Z_font_Z_s_( 0, 0, E_window_Q_theme.text, object_data->font, object_data->label );
+    E_window_Q_object_I_draw_Z_font_Z_s( window, object, 0, 0, E_window_Q_theme.text, object_data->font, object_data->label );
 }
 //------------------------------------------------------------------------------
 I
@@ -452,13 +462,281 @@ E_window_Q_object_Z_frame_I_draw(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
 ){  E_window_Q_window_I_draw_P_color( U_R( object->state, drag_src ) ? E_window_S->draw_color : E_window_Q_theme.line );
-    E_window_Q_object_I_draw_Z_rectangles_((
-      ( RECT[] )
+    E_window_Q_object_I_draw_Z_rectangles( window, object
+    , 1
+    , ( RECT[] )
       { { 0, 0
         , object->width, object->height
         }
       }
-    ));
+    );
+}
+void
+E_window_Q_object_Z_select_I_clear_data( P data
+){  struct E_window_Q_object_Z_data_Z_select *object_data = data;
+    W( object_data->select );
+}
+I
+E_window_Q_object_Z_select_M(
+  struct E_window_Q_window_Z *window
+){  I object_id = E_window_Q_object_M( window
+    , 0
+    , 0
+    , 0
+    , 8
+    , 8
+    , E_window_Q_object_Z_select_I_clear_data
+    , E_window_Q_object_Z_select_I_draw
+    , 0
+    );
+    if( !~object_id )
+        return ~0;
+    struct E_window_Q_object_Z_data_Z_select *M_( object_data );
+    if( !object_data )
+    {   E_window_Q_object_W( window, object_id );
+        return ~0;
+    }
+    object_data->select_n = 0;
+    Mt_( object_data->select, object_data->select_n );
+    if( !object_data->select )
+    {   W( object_data );
+        E_window_Q_object_W( window, object_id );
+        return ~0;
+    }
+    struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+    object->data = object_data;
+    return object_id;
+}
+void
+E_window_Q_object_Z_select_I_draw(
+  struct E_window_Q_window_Z *window
+, struct E_window_Q_object_Z *object
+){  E_window_Q_object_I_draw_P_color( object, E_window_Q_theme.window_bg );
+    E_window_Q_object_I_fill_Z_rectangles( window, object
+    , 1
+    , ( RECT[] )
+      { { 0
+        , 0
+        , object->width - 1
+        , object->height - 1
+        }
+      }
+    );
+    E_window_Q_object_I_draw_P_color( object, E_window_Q_theme.line );
+    E_window_Q_object_I_draw_Z_lines( window, object
+    , 2
+    , ( POINT[] )
+      { { object->width / 2
+        , 0
+        }
+      , { object->width / 2
+        , object->height - 1
+        }
+      }
+    , 2
+    
+    );
+    E_window_Q_object_I_draw_Z_lines( window, object
+    , 3
+    , ( POINT[] )
+      { { 0
+        , object->height / 2
+        }
+      , { object->width / 2
+        , object->height - 1
+        }
+      , { object->width - 1
+        , object->height / 2
+        }
+      }
+    , 2
+    );
+}
+I
+E_window_Q_object_Z_select_list_M(
+  struct E_window_Q_window_Z *window
+, S16 x
+, S16 y
+, N16 width
+, N16 height
+){  I object_id = E_window_Q_object_M( window
+    , 0
+    , x
+    , y
+    , width
+    , height
+    , 0
+    , E_window_Q_object_Z_select_list_I_draw
+    , 0
+    );
+    if( !~object_id )
+        return ~0;
+    struct E_window_Q_object_Z_data_Z_select_list *M_( object_data );
+    if( !object_data )
+    {   E_window_Q_object_W( window, object_id );
+        return ~0;
+    }
+    object_data->scroll = 0;
+    object_data->selected = ~0;
+    struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+    object->data = object_data;
+    return object_id;
+}
+void
+E_window_Q_object_Z_select_list_I_draw(
+  struct E_window_Q_window_Z *window
+, struct E_window_Q_object_Z *object
+){  E_window_Q_object_I_draw_P_color( object, E_window_Q_theme.window_bg );
+    E_window_Q_object_I_fill_Z_rectangles( window, object
+    , 1
+    , ( RECT[] )
+      { { 1
+        , 1
+        , 1 + object->width - 2
+        , 1 + object->height - 2
+        }
+      }
+    );
+    E_window_Q_object_I_draw_P_color( object, E_window_Q_theme.line );
+    E_window_Q_object_I_draw_Z_rectangles( window, object
+    , 1
+    , ( RECT[] )
+      { { 0
+        , 0
+        , object->width
+        , object->height
+        }
+      }
+    );
+    struct E_window_Q_object_Z *select = E_mem_Q_tab_R( window->object, E_window_S->select_object );
+    struct E_window_Q_object_Z_data_Z_select *select_data = select->data;
+    I parent_id = E_window_Q_object_R_parent( window, E_window_S->select_object );
+    struct E_window_Q_object_Z *object_parent = E_mem_Q_tab_R( window->object, parent_id );
+    struct E_window_Q_object_Z *entry = E_mem_Q_tab_R( window->object, object_parent->child[1] );
+    struct E_window_Q_object_Z_data_Z_entry *entry_data = entry->data;
+    struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, entry_data->font );
+    struct E_window_Q_object_Z_data_Z_select_list *object_data = object->data;
+    N y = 1;
+    for( N i = object_data->scroll; i != select_data->select_n; i++ )
+    {   if( i == object_data->selected )
+        {   E_window_Q_object_I_draw_P_color( object, E_window_Q_theme.line_selection_bg );
+            E_window_Q_object_I_fill_Z_rectangles( window, object
+            , 1
+            , ( RECT[] )
+              { { 1
+                , 1 + ( object_data->selected - object_data->scroll ) * font->height
+                , 1 + object->width - 2
+                , 1 + font->height
+                }
+              }
+            );
+        }
+        if( !~E_window_Q_object_I_draw_Z_font_Z_s( window, object
+        , 1
+        , y
+        , E_window_Q_theme.text
+        , entry_data->font
+        , select_data->select[i]
+        ))
+            return;
+        y += font->height;
+        if( y == object->height - 1 )
+            break;
+    }
+}
+//------------------------------------------------------------------------------
+I
+E_window_Q_object_Z_button_font_M(
+  struct E_window_Q_window_Z *window
+, I font_id
+, Pc s
+){  I button_id = E_window_Q_object_Z_button_M(window);
+    if( !~button_id )
+        return ~0;
+    I font_id_ = E_window_Q_object_Z_font_M( window, font_id, s );
+    if( !~font_id_ )
+        return ~0;
+    E_window_Q_object_I_add( window, button_id, font_id_ );
+    return button_id;
+}
+I
+E_window_Q_object_Z_frame_entry_M(
+  struct E_window_Q_window_Z *window
+, I font_id
+, Pc s
+){  I frame_id = E_window_Q_object_Z_frame_M(window);
+    if( !~frame_id )
+        return ~0;
+    I entry_id = E_window_Q_object_Z_entry_M( window, font_id, s );
+    if( !~entry_id )
+        return ~0;
+    E_window_Q_object_I_add( window, frame_id, entry_id );
+    return frame_id;
+}
+I
+E_window_Q_object_Z_frame_select_M(
+  struct E_window_Q_window_Z *window
+, I font_id
+, Pc s
+){  I frame_id = E_window_Q_object_Z_frame_M(window);
+    if( !~frame_id )
+        return ~0;
+    I select_id = E_window_Q_object_Z_select_M(window);
+    if( !~select_id )
+        return ~0;
+    I entry_id = E_window_Q_object_Z_entry_M( window, font_id, s );
+    if( !~entry_id )
+        return ~0;
+    E_window_Q_object_I_add( window, frame_id, select_id );
+    E_window_Q_object_I_add( window, frame_id, entry_id );
+    return frame_id;
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+N
+E_window_Q_layout_I_store( Pc path
+){  I file_id = E_mem_Q_file_M( path, no, yes );
+    if( !~E_mem_Q_file_I_truncate( file_id ))
+    {   E_mem_Q_file_W( file_id );
+        return ~0;
+    }
+    struct E_mem_Q_file_Z *file = E_mem_Q_tab_R( E_base_S->E_mem_Q_file_S, file_id );
+    for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
+    {   struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
+        for_each( object_id, window->object, E_mem_Q_tab )
+        {   struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+            if( object->draw == E_window_Q_object_Z_entry_I_draw )
+            {   struct E_window_Q_object_Z_data_Z_entry *object_data = object->data;
+                if( E_mem_Q_file_P_insert_s( file_id, object_data->s, E_text_Z_s0_R_l_0( object_data->s )))
+                {   E_mem_Q_file_W( file_id );
+                    return ~0;
+                }
+                E_mem_Q_file_P_pos( file_id, file->l );
+            }
+        }
+    }
+    E_mem_Q_file_W( file_id );
+    return 0;
+}
+N
+E_window_Q_layout_I_restore( Pc path
+){  I file_id = E_mem_Q_file_M( path, no, no );
+    for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
+    {   struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
+        for_each( object_id, window->object, E_mem_Q_tab )
+        {   struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+            if( object->draw == E_window_Q_object_Z_entry_I_draw )
+            {   struct E_window_Q_object_Z_data_Z_entry *object_data = object->data;
+                if( E_mem_Q_file_R_u_upto_0( file_id, &object_data->s ))
+                {   E_mem_Q_file_W( file_id );
+                    return ~0;
+                }
+            }
+        }
+    }
+    C c;
+    N ret = E_mem_Q_file_R_c( file_id, &c );
+    E_mem_Q_file_W( file_id );
+    return ret == E_mem_Q_file_S_eof ? 0 : ~0;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 N

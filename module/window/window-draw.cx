@@ -76,10 +76,6 @@ E_window_Q_window_I_draw_P_brush( struct E_window_Q_window_Z *window
     }
     return brush;
 }
-void
-E_window_Q_object_mask_I_draw_P_color( I object_id
-){  E_window_S->current_object = object_id;
-}
 B
 E_window_Q_object_mask_I_draw_P_pen( struct E_window_Q_window_Z *window
 , I object_id
@@ -112,8 +108,8 @@ E_window_Q_object_mask_I_draw_P_brush( struct E_window_Q_window_Z *window
 B
 E_window_Q_window_I_draw_Z_points(
   struct E_window_Q_window_Z *window
-, POINT *points
 , N n
+, POINT *points
 ){  J_assert(n);
     for_n( i, n )
         if( points[i].x < window->width && points[i].y < window->height )
@@ -143,40 +139,136 @@ E_window_Q_window_I_draw_Z_points(
     return true;
 }
 B
+E_window_Q_window_I_draw_aa_Z_points(
+  struct E_window_Q_window_Z *window
+, N n
+, POINT *points
+, F brightness
+){  J_assert(n);
+    J_assert( brightness >= 0 && brightness <= 1 );
+    COLORREF *Mt_( colors, n );
+    if( !colors )
+        return false;
+    for_n( i, n )
+    {   N p[8];
+        p[0] = points[i].x + 1 < window->width ? E_window_Q_image_R_pixel( window, points[i].x + 1, points[i].y ) : E_window_S->draw_color;
+        p[1] = points[i].x + 1 < window->width && points[i].y + 1 < window->height ? E_window_Q_image_R_pixel( window, points[i].x + 1, points[i].y + 1 ) : E_window_S->draw_color;
+        p[2] = points[i].y + 1 < window->height ? E_window_Q_image_R_pixel( window, points[i].x, points[i].y + 1 ) : E_window_S->draw_color;
+        p[3] = points[i].x > 0 && points[i].y + 1 < window->height ? E_window_Q_image_R_pixel( window, points[i].x - 1, points[i].y + 1 ) : E_window_S->draw_color;
+        p[4] = points[i].x > 0 ? E_window_Q_image_R_pixel( window, points[i].x - 1, points[i].y ) : E_window_S->draw_color;
+        p[5] = points[i].x > 0 && points[i].y > 0 ? E_window_Q_image_R_pixel( window, points[i].x - 1, points[i].y - 1 ) : E_window_S->draw_color;
+        p[6] = points[i].y > 0 ? E_window_Q_image_R_pixel( window, points[i].x, points[i].y - 1 ) : E_window_S->draw_color;
+        p[7] = points[i].x + 1 < window->width && points[i].y > 0 ? E_window_Q_image_R_pixel( window, points[i].x + 1, points[i].y - 1 ) : E_window_S->draw_color;
+        N n_ = 0;
+        N background_red = 0, background_green = 0, background_blue = 0;
+        for_n( j, 8 )
+            if( p[j] != E_window_S->draw_color )
+            {   background_red += GetRValue( p[j] );
+                background_green += GetGValue( p[j] );
+                background_blue += GetBValue( p[j] );
+                n_++;
+            }
+        if( n_ )
+        {   background_red /= n_;
+            background_green /= n_;
+            background_blue /= n_;
+        }else
+        {   background_red = GetRValue( E_window_Q_theme.window_bg );
+            background_green = GetGValue( E_window_Q_theme.window_bg );
+            background_blue = GetBValue( E_window_Q_theme.window_bg );
+        }
+        N red = GetRValue( E_window_S->draw_color );
+        N green = GetGValue( E_window_S->draw_color );
+        N blue = GetBValue( E_window_S->draw_color );
+        if( red > background_red )
+            red = background_red + ( red - background_red ) * brightness;
+        else
+            red = background_red - ( background_red - red ) * brightness;
+        if( green > background_green )
+            green = background_green + ( green - background_green ) * brightness;
+        else
+            green = background_green - ( background_green - green ) * brightness;
+        if( blue > background_blue )
+            blue = background_blue + ( blue - background_blue ) * brightness;
+        else
+            blue = background_blue - ( background_blue - blue ) * brightness;
+        colors[i] = RGB( red, green, blue );
+    }
+    for_n_( i, n )
+    {   E_window_Q_window_I_draw_P_color( colors[i] );
+        E_window_Q_window_I_draw_Z_points( window, 1, &points[i] );
+    }
+    W(colors);
+    return true;
+}
+B
 E_window_Q_window_I_draw_Z_lines(
   struct E_window_Q_window_Z *window
-, POINT *points
 , N n
+, POINT *points
+, DWORD thickness
 ){  J_assert( n > 1 );
-    if( U_R( E_window_S->state, draw_object_drag_move ))
-    {   for_n( i, n - 1 )
-        {   HRGN res = CreateRectRgn( 0, 0, 0, 0 );
-            if( !res )
-                return false;
-            POINT p[2] = { points[i].x, points[i].y, points[ i + 1 ].x, points[ i + 1 ].y };
-            HRGN combine = CreatePolygonRgn( &p[0], 2, WINDING );
-            if( !combine )
-            {   DeleteObject(res);
-                return false;
-            }
-            if( CombineRgn( res, E_window_S->region, combine, RGN_OR ) == ERROR )
-            {   DeleteObject(combine);
-                DeleteObject(res);
-                return false;
-            }
-            DeleteObject( E_window_S->region );
-            DeleteObject(combine);
-            E_window_S->region = res;
+    J_assert( thickness > 0 );
+    HPEN pen = ExtCreatePen( PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_BEVEL
+    , thickness
+    , &( LOGBRUSH )
+      { BS_SOLID
+      , E_window_S->draw_color
+      }
+    , 0, 0
+    );
+    if( !pen )
+        return false;
+    HPEN old_pen = SelectObject( window->dc, pen );
+    if( !old_pen )
+    {   DeleteObject(pen);
+        return false;
+    }
+    HPEN pen_object_mask, old_pen_object_mask;
+    if( !U_R( E_window_S->state, draw_object_drag_move ))
+    {   pen_object_mask = ExtCreatePen( PS_GEOMETRIC | PS_SOLID | PS_ENDCAP_FLAT | PS_JOIN_BEVEL
+        , thickness
+        , &( LOGBRUSH )
+          { BS_SOLID
+          , E_window_S->current_object
+          }
+        , 0, 0
+        );
+        if( !pen_object_mask )
+        {   if( SelectObject( window->dc, old_pen ))
+                DeleteObject(pen);
+            else
+                DeleteObject( old_pen );
+            return false;
+        }
+        old_pen_object_mask = SelectObject( window->dc_object_mask, pen_object_mask );
+        if( !old_pen_object_mask )
+        {   DeleteObject( pen_object_mask );
+            if( SelectObject( window->dc, old_pen ))
+                DeleteObject(pen);
+            else
+                DeleteObject( old_pen );
+            return false;
         }
     }
-    return Polyline( window->dc, points, n )
+    B ret = Polyline( window->dc, points, n )
     && ( U_R( E_window_S->state, draw_object_drag_move ) || Polyline( window->dc_object_mask, points, n ));
+End:if( SelectObject( window->dc, old_pen ))
+        DeleteObject(pen);
+    else
+        DeleteObject( old_pen );
+    if( !U_R( E_window_S->state, draw_object_drag_move ))
+        if( SelectObject( window->dc_object_mask, old_pen_object_mask ))
+            DeleteObject( pen_object_mask );
+        else
+            DeleteObject( old_pen_object_mask );
+    return ret;
 }
 B
 E_window_Q_window_I_draw_Z_rectangles(
   struct E_window_Q_window_Z *window
-, RECT *rectangles
 , N n
+, RECT *rectangles
 ){  J_assert(n);
     if( U_R( E_window_S->state, draw_object_drag_move ))
     {   for_n( i, n )
@@ -260,11 +352,12 @@ E_window_Q_window_I_draw_Z_rectangles(
 B
 E_window_Q_window_I_draw_Z_arcs(
   struct E_window_Q_window_Z *window
-, struct E_window_Z_arc *arcs
 , N n
+, struct E_window_Z_arc *arcs
 ){  J_assert(n);
     if( U_R( E_window_S->state, draw_object_drag_move ))
         ; //NDFN Brak procedury rysowania 'regionu' dla "drag & drop".
+    E_window_Q_object_mask_I_draw_P_pen( window, E_window_S->current_object );
     for_n( i, n )
     {   if( !Arc( window->dc
         , arcs[i].left, arcs[i].top, arcs[i].right, arcs[i].bottom
@@ -283,8 +376,8 @@ E_window_Q_window_I_draw_Z_arcs(
 B
 E_window_Q_window_I_fill_Z_points(
   struct E_window_Q_window_Z *window
-, POINT *points
 , N n
+, POINT *points
 ){  J_assert( n > 2 );
     if( U_R( E_window_S->state, draw_object_drag_move ))
     {   //NDFN Brak procedury rysowania 'regionu' dla "drag & drop".
@@ -305,14 +398,16 @@ E_window_Q_window_I_fill_Z_points(
         DeleteObject(combine);
         E_window_S->region = res;
     }
+    E_window_Q_object_mask_I_draw_P_pen( window, E_window_S->current_object );
+    E_window_Q_object_mask_I_draw_P_brush( window, E_window_S->current_object );
     return Polygon( window->dc, points, n )
     && ( U_R( E_window_S->state, draw_object_drag_move ) || Polygon( window->dc_object_mask, points, n ));
 }
 B
 E_window_Q_window_I_fill_Z_rectangles(
   struct E_window_Q_window_Z *window
-, RECT *rectangles
 , N n
+, RECT *rectangles
 ){  J_assert(n);
     if( U_R( E_window_S->state, draw_object_drag_move ))
     {   for_n( i, n )
@@ -334,6 +429,8 @@ E_window_Q_window_I_fill_Z_rectangles(
             E_window_S->region = res;
         }
     }
+    E_window_Q_object_mask_I_draw_P_pen( window, E_window_S->current_object );
+    E_window_Q_object_mask_I_draw_P_brush( window, E_window_S->current_object );
     for_n( i, n )
     {   if( !Rectangle( window->dc, rectangles[i].left, rectangles[i].top, rectangles[i].right, rectangles[i].bottom )
         || ( !U_R( E_window_S->state, draw_object_drag_move ) && !Rectangle( window->dc_object_mask, rectangles[i].left, rectangles[i].top, rectangles[i].right, rectangles[i].bottom ))
@@ -345,8 +442,8 @@ E_window_Q_window_I_fill_Z_rectangles(
 B
 E_window_Q_window_I_fill_Z_arcs(
   struct E_window_Q_window_Z *window
-, RECT *arcs
 , N n
+, RECT *arcs
 ){  J_assert(n);
     if( U_R( E_window_S->state, draw_object_drag_move ))
     {   for_n( i, n )
@@ -368,6 +465,8 @@ E_window_Q_window_I_fill_Z_arcs(
             E_window_S->region = res;
         }
     }
+    E_window_Q_object_mask_I_draw_P_pen( window, E_window_S->current_object );
+    E_window_Q_object_mask_I_draw_P_brush( window, E_window_S->current_object );
     for_n( i, n )
     {   if( !Ellipse( window->dc, arcs[i].left, arcs[i].top, arcs[i].right, arcs[i].bottom )
         || ( !U_R( E_window_S->state, draw_object_drag_move ) && !Ellipse( window->dc_object_mask, arcs[i].left, arcs[i].top, arcs[i].right, arcs[i].bottom ))
@@ -377,913 +476,152 @@ E_window_Q_window_I_fill_Z_arcs(
     return true;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-struct E_window_Z_points
-{ F x, y;
-};
-F
-E_window_I_pole_wielokata(
-  N n
-, struct E_window_Z_points *points
-){  J_assert( n > 2 );
-    F pole = 0;
-    for_n( i, n - 1 )
-        pole += points[i].x * points[ i + 1 ].y - points[ i + 1 ].x * points[i].y;
-    pole += points[ n - 1 ].x * points[0].y - points[0].x * points[ n - 1 ].y;
-    return 0.5 * fabs(pole);
-}
-void
-E_window_Q_window_I_draw_aa_Z_pixel(
-  struct E_window_Q_window_Z *window
-, LONG x
-, LONG y
-, COLORREF color
-, F brightness
-, N get_pixel
-){  J_assert( brightness >= 0 && brightness <= 1 );
-    N background_red, background_green, background_blue;
-    N n = 0;
-    //if( !U_R( screen->state, draw_object_drag_move ))
-    {   N p[8];
-        p[0] = ( get_pixel & E_window_Z_aa_pixel_S_e ) && x + 1 < window->width ? E_window_R_pixel( window, x + 1, y ) : color;
-        p[1] = ( get_pixel & E_window_Z_aa_pixel_S_se ) && x + 1 < window->width && y + 1 < window->height ? E_window_R_pixel( window, x + 1, y + 1 ) : color;
-        p[2] = ( get_pixel & E_window_Z_aa_pixel_S_s ) && y + 1 < window->height ? E_window_R_pixel( window, x, y + 1 ) : color;
-        p[3] = ( get_pixel & E_window_Z_aa_pixel_S_sw ) && x > 0 && y + 1 < window->height ? E_window_R_pixel( window, x - 1, y + 1 ) : color;
-        p[4] = ( get_pixel & E_window_Z_aa_pixel_S_w ) && x > 0 ? E_window_R_pixel( window, x - 1, y ) : color;
-        p[5] = ( get_pixel & E_window_Z_aa_pixel_S_nw ) && x > 0 && y > 0 ? E_window_R_pixel( window, x - 1, y - 1 ) : color;
-        p[6] = ( get_pixel & E_window_Z_aa_pixel_S_n ) && y > 0 ? E_window_R_pixel( window, x, y - 1 ) : color;
-        p[7] = ( get_pixel & E_window_Z_aa_pixel_S_ne ) && x + 1 < window->width && y > 0 ? E_window_R_pixel( window, x + 1, y - 1 ) : color;
-        background_red = background_green = background_blue = 0;
-        for_n( i, 8 )
-            if( p[i] != color )
-            {   background_red += GetRValue( p[i] );
-                background_green += GetGValue( p[i] );
-                background_blue += GetBValue( p[i] );
-                n++;
-            }
-    }
-    if(n)
-    {   background_red /= n;
-        background_green /= n;
-        background_blue /= n;
-    }else
-    {   background_red = GetRValue( E_window_Q_theme.window_bg );
-        background_green = GetGValue( E_window_Q_theme.window_bg );
-        background_blue = GetBValue( E_window_Q_theme.window_bg );
-    }
-    N red = GetRValue(color);
-    N green = GetGValue(color);
-    N blue = GetBValue(color);
-    if( red > background_red )
-        red = background_red + ( red - background_red ) * brightness;
-    else
-        red = background_red - ( background_red - red ) * brightness;
-    if( green > background_green )
-        green = background_green + ( green - background_green ) * brightness;
-    else
-        green = background_green - ( background_green - green ) * brightness;
-    if( blue > background_blue )
-        blue = background_blue + ( blue - background_blue ) * brightness;
-    else
-        blue = background_blue - ( background_blue - blue ) * brightness;
-    E_window_Q_window_I_draw_P_color_( RGB( red, green, blue ));
-    E_window_Q_window_I_draw_Z_points_(
-      (( POINT[] )
-      { x, y
-      })
-    );
-}
-N
-E_window_Q_window_I_draw_aa_Z_lines(
-  struct E_window_Q_window_Z *window
-, POINT *points
-, N n
-, F thickness
-, COLORREF color
-){  J_assert( n > 1 );
-    E_window_Q_window_I_draw_P_pen( window, color );
-    E_window_Q_window_I_draw_P_brush( window, color );
-    F a = E_window_S->pixel_width;
-    F b = E_window_S->pixel_height;
-    F pole_pixela = a * b;
-    for_n( i, n - 1 )
-    {   F alfa = atan( (F)( points[ i + 1 ].y - points[i].y ) / ( points[ i + 1 ].x - points[i].x ));
-        if( points[ i + 1 ].x > points[i].x )
-        {   if( points[ i + 1 ].y < points[i].y )
-                alfa += M_PI_2;
-            else if( points[i].y == points[ i + 1 ].y )
-            {   RECT rectangle[1];
-                rectangle[0].left = points[i].x;
-                rectangle[0].top = points[i].y - (LONG)( 0.5 * thickness / b );
-                rectangle[0].right = rectangle[0].left + points[ i + 1 ].x - points[i].x + 1;
-                rectangle[0].bottom = rectangle[0].top + (LONG)( thickness / b );
-                F pole = fmod( 0.5 * thickness, b );
-                if(pole)
-                {   pole *= a;
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].left, rectangle[0].top - 1
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_nw | E_window_Z_aa_pixel_S_n
-                    );
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].right - 1, rectangle[0].top - 1
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_n | E_window_Z_aa_pixel_S_ne | E_window_Z_aa_pixel_S_e
-                    );
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].left, rectangle[0].bottom
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_se | E_window_Z_aa_pixel_S_s
-                    );
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].right - 1, rectangle[0].bottom
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_s | E_window_Z_aa_pixel_S_se | E_window_Z_aa_pixel_S_e
-                    );
-                    if( points[i].x + 1 < points[ i + 1 ].x )
-                        for( LONG x = points[i].x + 1; x != points[ i + 1 ].x; x++ )
-                        {   E_window_Q_window_I_draw_aa_Z_pixel_(
-                              x, rectangle[0].top - 1
-                            , color
-                            , pole / pole_pixela
-                            , E_window_Z_aa_pixel_S_n
-                            );
-                            E_window_Q_window_I_draw_aa_Z_pixel_(
-                              x, rectangle[0].bottom
-                            , color
-                            , pole / pole_pixela
-                            , E_window_Z_aa_pixel_S_s
-                            );
-                        }
-                }
-                LONG height = rectangle[0].bottom - rectangle[0].top;
-                if(height)
-                {   E_window_Q_window_I_fill_Z_rectangles_(rectangle);
-                    if(i)
-                    {   struct E_window_Z_arc arcs[2] =
-                        { { points[i].x - height / 2, points[i].y - height / 2
-                          , points[i].x + height / 2, points[i].y + height / 2
-                          }
-                        , { points[ i + 1 ].x - height / 2, points[ i + 1 ].y - height / 2
-                          , points[ i + 1 ].x + height / 2, points[ i + 1 ].y + height / 2
-                          }
-                        };
-                        E_window_Q_window_I_fill_Z_arcs_(arcs);
-                    }
-                }
-                continue;
-            }
-        }else if( points[ i + 1 ].x < points[i].x )
-        {   if( points[ i + 1 ].y > points[i].y )
-                alfa += M_PI_2;
-            else if( points[i].y == points[ i + 1 ].y )
-            {   RECT rectangle[1];
-                rectangle[0].left = points[ i + 1 ].x;
-                rectangle[0].top = points[i].y - (LONG)( 0.5 * thickness / b );
-                rectangle[0].right = rectangle[0].left + points[i].x - points[ i + 1 ].x + 1;
-                rectangle[0].bottom = rectangle[0].top + (LONG)( thickness / b );
-                F pole = fmod( 0.5 * thickness, b );
-                if(pole)
-                {   pole *= a;
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].left, rectangle[0].top - 1
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_nw | E_window_Z_aa_pixel_S_n
-                    );
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].right - 1, rectangle[0].top - 1
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_n | E_window_Z_aa_pixel_S_ne | E_window_Z_aa_pixel_S_e
-                    );
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].left, rectangle[0].bottom
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_sw | E_window_Z_aa_pixel_S_s
-                    );
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].right - 1, rectangle[0].bottom
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_s | E_window_Z_aa_pixel_S_se | E_window_Z_aa_pixel_S_e
-                    );
-                    if( points[ i + 1 ].x + 1 < points[i].x )
-                        for( LONG x = points[ i + 1 ].x + 1; x != points[i].x; x++ )
-                        {   E_window_Q_window_I_draw_aa_Z_pixel_(
-                              x, rectangle[0].top - 1
-                            , color
-                            , pole / pole_pixela
-                            , E_window_Z_aa_pixel_S_n
-                            );
-                            E_window_Q_window_I_draw_aa_Z_pixel_(
-                             x, rectangle[0].bottom
-                            , color
-                            , pole / pole_pixela
-                            , E_window_Z_aa_pixel_S_s
-                            );
-                        }
-                }
-                LONG height = rectangle[0].bottom - rectangle[0].top;
-                if(height)
-                {   E_window_Q_window_I_fill_Z_rectangles_(rectangle);
-                    if(i)
-                    {   struct E_window_Z_arc arcs[2] =
-                        { { points[i].x - height / 2, points[i].y - height / 2
-                          , points[i].x + height / 2, points[i].y + height / 2
-                          }
-                        , { points[ i + 1 ].x - height / 2, points[ i + 1 ].y - height / 2
-                          , points[ i + 1 ].x + height / 2, points[ i + 1 ].y + height / 2
-                          }
-                        };
-                        E_window_Q_window_I_fill_Z_arcs_(arcs);
-                    }
-                }
-                continue;
-            }
-        }else
-        {   if( points[ i + 1 ].y > points[i].y )
-            {   RECT rectangle[1];
-                rectangle[0].left = points[i].x - (LONG)( 0.5 * thickness / a );
-                rectangle[0].top = points[i].y;
-                rectangle[0].right = rectangle[0].left + (LONG)( thickness / a );
-                rectangle[0].bottom = rectangle[0].top + points[ i + 1 ].y - points[i].y + 1;
-                F pole = fmod( 0.5 * thickness, a );
-                if(pole)
-                {   pole *= b;
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].left - 1, rectangle[0].top
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_nw | E_window_Z_aa_pixel_S_n
-                    );
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].right, rectangle[0].top
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_n | E_window_Z_aa_pixel_S_ne | E_window_Z_aa_pixel_S_e
-                    );
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].left - 1, rectangle[0].bottom - 1
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_sw | E_window_Z_aa_pixel_S_s
-                    );
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].right, rectangle[0].bottom - 1
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_s | E_window_Z_aa_pixel_S_se | E_window_Z_aa_pixel_S_e
-                    );
-                    if( points[i].y + 1 < points[ i + 1 ].y )
-                        for( LONG y = points[i].y + 1; y != points[ i + 1 ].y; y++ )
-                        {   E_window_Q_window_I_draw_aa_Z_pixel_(
-                              rectangle[0].left - 1, y
-                            , color
-                            , pole / pole_pixela
-                            , E_window_Z_aa_pixel_S_w
-                            );
-                            E_window_Q_window_I_draw_aa_Z_pixel_(
-                              rectangle[0].right, y
-                            , color
-                            , pole / pole_pixela
-                            , E_window_Z_aa_pixel_S_e
-                            );
-                        }
-                }
-                LONG width = rectangle[0].right - rectangle[0].left;
-                if(width)
-                {   E_window_Q_window_I_fill_Z_rectangles_(rectangle);
-                    if(i)
-                    {   struct E_window_Z_arc arcs[2] =
-                        { { points[i].x - width / 2, points[i].y - width / 2
-                          , points[i].x + width / 2, points[i].y + width / 2
-                          }
-                        , { points[ i + 1 ].x - width / 2, points[ i + 1 ].y - width / 2
-                          , points[ i + 1 ].x + width / 2, points[ i + 1 ].y + width / 2
-                          }
-                        };
-                        E_window_Q_window_I_fill_Z_arcs_(arcs);
-                    }
-                }
-            }else if( points[ i + 1 ].y < points[i].y )
-            {   RECT rectangle[1];
-                rectangle[0].left = points[i].x - (LONG)( 0.5 * thickness / a );
-                rectangle[0].top = points[ i + 1 ].y;
-                rectangle[0].right = rectangle[0].left + (LONG)( thickness / a );
-                rectangle[0].bottom = rectangle[0].top + points[i].y - points[ i + 1 ].y + 1;
-                F pole = fmod( 0.5 * thickness, a );
-                if(pole)
-                {   pole *= b;
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].left - 1, rectangle[0].top
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_nw | E_window_Z_aa_pixel_S_n
-                    );
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].right, rectangle[0].top
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_n | E_window_Z_aa_pixel_S_ne | E_window_Z_aa_pixel_S_e
-                    );
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].left - 1, rectangle[0].bottom - 1
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_w | E_window_Z_aa_pixel_S_sw | E_window_Z_aa_pixel_S_s
-                    );
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      rectangle[0].right, rectangle[0].bottom - 1
-                    , color
-                    , pole / pole_pixela
-                    , E_window_Z_aa_pixel_S_s | E_window_Z_aa_pixel_S_se | E_window_Z_aa_pixel_S_e
-                    );
-                    if( points[ i + 1 ].y + 1 < points[i].y )
-                        for( LONG y = points[ i + 1 ].y + 1; y != points[i].y; y++ )
-                        {   E_window_Q_window_I_draw_aa_Z_pixel_(
-                              rectangle[0].left - 1, y
-                            , color
-                            , pole / pole_pixela
-                            , E_window_Z_aa_pixel_S_w
-                            );
-                            E_window_Q_window_I_draw_aa_Z_pixel_(
-                              rectangle[0].right, y
-                            , color
-                            , pole / pole_pixela
-                            , E_window_Z_aa_pixel_S_e
-                            );
-                        }
-                }
-                LONG width = rectangle[0].right - rectangle[0].left;
-                if(width)
-                {   E_window_Q_window_I_fill_Z_rectangles_(rectangle);
-                    if(i)
-                    {   struct E_window_Z_arc arcs[2] =
-                        { { points[i].x - width / 2, points[i].y - width / 2
-                          , points[i].x + width / 2, points[i].y + width / 2
-                          }
-                        , { points[ i + 1 ].x - width / 2, points[ i + 1 ].y - width / 2
-                          , points[ i + 1 ].x + width / 2, points[ i + 1 ].y + width / 2
-                          }
-                        };
-                        E_window_Q_window_I_fill_Z_arcs_(arcs);
-                    }
-                }
-            }else
-            {   GV( "point instead of line" );
-            }
-            continue;
-        }
-        F sin_alfa, cos_alfa, tan_alfa;
-        LONG dx_direction, dy_direction;
-        F pixel_dx, pixel_dy;
-        B prawoskretny;
-        struct
-        { LONG dx, dy;
-        } *Mt_( dx_dy, 0 );
-        if( !dx_dy )
-            return ~0;
-        N dx_dy_n = 0;
-        for_n( j, 6 )
-        {   F length;
-            LONG x, y;
-            B U_R( first_pixel, overdrawn );
-            switch(j)
-            { case 0:
-                  U_F( first_pixel, overdrawn );
-                  prawoskretny = no;
-                  alfa = M_PI_2 - alfa;
-                  sin_alfa = sin(alfa);
-                  cos_alfa = cos(alfa);
-                  tan_alfa = tan(alfa);
-                  length = 0.5 * thickness;
-                  x = points[i].x;
-                  y = points[i].y;
-                  if( points[ i + 1 ].x > points[i].x )
-                      if( points[ i + 1 ].y > points[i].y )
-                      {   dx_direction = 1;
-                          dy_direction = -1;
-                      }else
-                      {   dx_direction = -1;
-                          dy_direction = -1;
-                      }
-                  else if( points[ i + 1 ].x < points[i].x )
-                      if( points[ i + 1 ].y > points[i].y )
-                      {   dx_direction = 1;
-                          dy_direction = 1;
-                      }else
-                      {   dx_direction = -1;
-                          dy_direction = 1;
-                      }
-                  pixel_dx = 0.5 * a;
-                  pixel_dy = 0.5 * b;
-                  break;
-              case 1:
-                  U_F( first_pixel, overdrawn );
-                  length = hypot(( points[ i + 1 ].x - points[i].x + 1 ) * a, ( points[ i + 1 ].y - points[i].y + 1 ) * b );
-                  if( points[ i + 1 ].x > points[i].x )
-                      if( points[ i + 1 ].y > points[i].y )
-                      {   dx_direction = 1;
-                          dy_direction = 1;
-                      }else
-                      {   dx_direction = 1;
-                          dy_direction = -1;
-                      }
-                  else if( points[ i + 1 ].x < points[i].x )
-                      if( points[ i + 1 ].y > points[i].y )
-                      {   dx_direction = -1;
-                          dy_direction = 1;
-                      }else
-                      {   dx_direction = -1;
-                          dy_direction = -1;
-                      }
-                  break;
-              case 2:
-                  U_F( first_pixel, overdrawn );
-                  prawoskretny = yes;
-                  alfa = M_PI_2 - alfa;
-                  sin_alfa = sin(alfa);
-                  cos_alfa = cos(alfa);
-                  tan_alfa = tan(alfa);
-                  length = 0.5 * thickness;
-                  x = points[ i + 1 ].x;
-                  y = points[ i + 1 ].y;
-                  if( points[ i + 1 ].x > points[i].x )
-                      if( points[ i + 1 ].y > points[i].y )
-                      {   dx_direction = 1;
-                          dy_direction = -1;
-                      }else
-                      {   dx_direction = -1;
-                          dy_direction = -1;
-                      }
-                  else if( points[ i + 1 ].x < points[i].x )
-                      if( points[ i + 1 ].y > points[i].y )
-                      {   dx_direction = 1;
-                          dy_direction = 1;
-                      }else
-                      {   dx_direction = -1;
-                          dy_direction = 1;
-                      }
-                  pixel_dx = 0.5 * a;
-                  pixel_dy = 0.5 * b;
-                  break;
-              case 3:
-                  U_L( first_pixel, overdrawn );
-                  prawoskretny = no;
-                  alfa = M_PI_2 - alfa;
-                  sin_alfa = sin(alfa);
-                  cos_alfa = cos(alfa);
-                  tan_alfa = tan(alfa);
-                  length = 0.5 * thickness;
-                  x = points[ i + 1 ].x;
-                  y = points[ i + 1 ].y;
-                  dx_direction = -dx_direction;
-                  dy_direction = -dy_direction;
-                  pixel_dx = 0.5 * a;
-                  pixel_dy = 0.5 * b;
-                  break;
-              case 4:
-                  U_L( first_pixel, overdrawn );
-                  prawoskretny = yes;
-                  alfa = M_PI_2 - alfa;
-                  sin_alfa = sin(alfa);
-                  cos_alfa = cos(alfa);
-                  tan_alfa = tan(alfa);
-                  length = 0.5 * thickness;
-                  x = points[i].x;
-                  y = points[i].y;
-                  pixel_dx = 0.5 * a;
-                  pixel_dy = 0.5 * b;
-                  break;
-              case 5:
-                  U_F( first_pixel, overdrawn );
-                  length = hypot(( points[ i + 1 ].x - points[i].x + 1 ) * a, ( points[ i + 1 ].y - points[i].y + 1 ) * b );
-                  if( points[ i + 1 ].x > points[i].x )
-                      if( points[ i + 1 ].y > points[i].y )
-                      {   dx_direction = 1;
-                          dy_direction = 1;
-                      }else
-                      {   dx_direction = 1;
-                          dy_direction = -1;
-                      }
-                  else if( points[ i + 1 ].x < points[i].x )
-                      if( points[ i + 1 ].y > points[i].y )
-                      {   dx_direction = -1;
-                          dy_direction = 1;
-                      }else
-                      {   dx_direction = -1;
-                          dy_direction = -1;
-                      }
-                  break;
-            }
-            B wariant_0 = ( prawoskretny && (( dx_direction > 0 && dy_direction > 0 ) || ( dx_direction < 0 && dy_direction < 0 )))
-                || ( !prawoskretny && (( dx_direction > 0 && dy_direction < 0 ) || ( dx_direction < 0 && dy_direction > 0 )));
-            if( !wariant_0 )
-            {   J_swap( F, a, b );
-                J_swap( F, pixel_dx, pixel_dy );
-            }
-            LONG dx, dy;
-            B U_F( first_pixel, computed );
-            while( length > 0 )
-            {   F alfa_przekatnej = atan(( b - pixel_dy ) / ( a - pixel_dx ));
-                LONG prev_dx, prev_dy;
-                if( !U_R( first_pixel, computed ))
-                {   prev_dx = dx;
-                    prev_dy = dy;
-                }else
-                {   prev_dx = 0;
-                    prev_dy = 0;
-                }
-                struct E_window_Z_points *pixel_points;
-                N pixel_points_n;
-                if( alfa <= alfa_przekatnej )
-                {   if( length >= ( a - pixel_dx ) / cos_alfa )
-                    {   Mt_( pixel_points, pixel_points_n = 3 );
-                        if( !pixel_points )
-                        {   W( dx_dy );
-                            return ~0;
-                        }
-                        pixel_points[1].x = a;
-                        pixel_points[1].y = pixel_dy + ( a - pixel_dx ) * tan_alfa;
-                        pixel_points[2].x = a;
-                        pixel_points[2].y = pixel_dy;
-                    }else if( length <= ( a - pixel_dx ) * cos_alfa )
-                    {   Mt_( pixel_points, pixel_points_n = 3 );
-                        if( !pixel_points )
-                        {   W( dx_dy );
-                            return ~0;
-                        }
-                        pixel_points[1].x = pixel_dx + length * cos_alfa;
-                        pixel_points[1].y = pixel_dy + length * sin_alfa;
-                        pixel_points[2].x = pixel_dx + length / cos_alfa;
-                        pixel_points[2].y = pixel_dy;
-                    }else
-                    {   Mt_( pixel_points, pixel_points_n = 4 );
-                        if( !pixel_points )
-                        {   W( dx_dy );
-                            return ~0;
-                        }
-                        pixel_points[1].x = pixel_dx + length * cos_alfa;
-                        pixel_points[1].y = pixel_dy + length * sin_alfa;
-                        pixel_points[2].x = a;
-                        pixel_points[2].y = pixel_dy + ( length / cos_alfa - ( a - pixel_dx )) / tan_alfa;
-                        pixel_points[3].x = a;
-                        pixel_points[3].y = pixel_dy;
-                    }
-                    length -= ( a - pixel_dx ) / cos_alfa;
-                    if( wariant_0 )
-                    {   dx = dx_direction;
-                        dy = alfa == alfa_przekatnej ? dy_direction : 0;
-                    }else
-                    {   dx = alfa == alfa_przekatnej ? dx_direction : 0;
-                        dy = dy_direction;
-                    }
-                }else
-                {   if( length >= ( b - pixel_dy ) / sin_alfa + ( a - pixel_dx - ( b - pixel_dy ) / tan_alfa ) * cos_alfa )
-                    {   Mt_( pixel_points, pixel_points_n = 4 );
-                        if( !pixel_points )
-                        {   W( dx_dy );
-                            return ~0;
-                        }
-                        pixel_points[1].x = pixel_dx + ( b - pixel_dy ) / tan_alfa;
-                        pixel_points[1].y = b;
-                        pixel_points[2].x = a;
-                        pixel_points[2].y = b;
-                        pixel_points[3].x = a;
-                        pixel_points[3].y = pixel_dy;
-                    }else if( length > ( b - pixel_dy ) / sin_alfa )
-                    {   Mt_( pixel_points, pixel_points_n = 5 );
-                        if( !pixel_points )
-                        {   W( dx_dy );
-                            return ~0;
-                        }
-                        pixel_points[1].x = pixel_dx + ( b - pixel_dy ) / tan_alfa;
-                        pixel_points[1].y = b;
-                        pixel_points[2].x = pixel_dx + ( b - pixel_dy ) / tan_alfa + ( length - ( b - pixel_dy ) / sin_alfa ) / cos_alfa;
-                        pixel_points[2].y = b;
-                        pixel_points[3].x = a;
-                        pixel_points[3].y = b - ( a - ( pixel_dx + ( b - pixel_dy ) / tan_alfa + ( length - ( b - pixel_dy ) / sin_alfa ) / cos_alfa )) / tan_alfa;
-                        if( pixel_points[3].y <= pixel_dy )
-                        {   pixel_points[3].x = a;
-                            if( pixel_points[3].y < pixel_dy )
-                                pixel_points[3].x -= ( pixel_dy - pixel_points[3].y ) * tan_alfa;
-                            pixel_points[3].y = pixel_dy;
-                            pixel_points_n--;
-                        }else
-                        {   pixel_points[4].x = a;
-                            pixel_points[4].y = pixel_dy;
-                        }
-                    }else if( length <= ( a - pixel_dx ) * cos_alfa )
-                    {   Mt_( pixel_points, pixel_points_n = 3 );
-                        if( !pixel_points )
-                        {   W( dx_dy );
-                            return ~0;
-                        }
-                        pixel_points[1].x = pixel_dx + length * cos_alfa;
-                        pixel_points[1].y = pixel_dy + length * sin_alfa;
-                        pixel_points[2].x = pixel_dx + length / cos_alfa;
-                        pixel_points[2].y = pixel_dy;
-                    }else
-                    {   Mt_( pixel_points, pixel_points_n = 4 );
-                        if( !pixel_points )
-                        {   W( dx_dy );
-                            return ~0;
-                        }
-                        pixel_points[1].x = pixel_dx + length * cos_alfa;
-                        pixel_points[1].y = pixel_dy + length * sin_alfa;
-                        pixel_points[2].x = a;
-                        pixel_points[2].y = pixel_dy + ( pixel_dx + length / cos_alfa - a ) / tan_alfa;
-                        pixel_points[3].x = a;
-                        pixel_points[3].y = pixel_dy;
-                    }
-                    length -= ( b - pixel_dy ) / sin_alfa;
-                    if( wariant_0 )
-                    {   dx = 0;
-                        dy = dy_direction;
-                    }else
-                    {   dx = dx_direction;
-                        dy = 0;
-                    }
-                }
-                pixel_points[0].x = pixel_dx;
-                pixel_points[0].y = pixel_dy;
-                F pole = 0;
-                if( !pixel_dx && pixel_dy )
-                    pole = pixel_dy * a;
-                if( alfa <= alfa_przekatnej )
-                {   pixel_dy = alfa == alfa_przekatnej ? 0 : pixel_dy + ( a - pixel_dx ) * tan_alfa;
-                    if( pixel_dy >= b )
-                        pixel_dy = 0;
-                    pixel_dx = 0;
-                }else
-                {   pixel_dx += ( b - pixel_dy ) / tan_alfa;
-                    if( pixel_dx >= a )
-                        pixel_dx = 0;
-                    pixel_dy = 0;
-                }
-                if( !wariant_0 )
-                {   for_n( i, pixel_points_n )
-                        J_swap( F, pixel_points[i].x, pixel_points[i].y );
-                }
-                pole += E_window_I_pole_wielokata( pixel_points_n, pixel_points );
-                W( pixel_points );
-                if( U_R( first_pixel, computed )
-                && ( j == 3 || j == 4 )
-                )
-                    pole *= 2;
-                if( j == 0 )
-                {   if( !E_mem_Q_blk_I_append( &dx_dy, 1 ))
-                        return ~0;
-                    dx_dy[ dx_dy_n ].dx = dx;
-                    dx_dy[ dx_dy_n ].dy = dy;
-                    dx_dy_n++;
-                }else if( j == 4 )
-                {   if( !U_R( first_pixel, computed ))
-                    {   if( !E_mem_Q_blk_I_append( &dx_dy, 1 ))
-                            return ~0;
-                        dx_dy[ dx_dy_n ].dx = dx;
-                        dx_dy[ dx_dy_n ].dy = dy;
-                        dx_dy_n++;
-                    }
-                }else if( j == 1 || j == 5 )
-                {   if( !U_R( first_pixel, computed )
-                    && length > 0
-                    ){  E_window_Q_window_I_draw_P_color_(color);
-                        LONG x_ = x, y_ = y;
-                        for_n_rev( i, dx_dy_n )
-                        {   x_ -= dx_dy[i].dx;
-                            y_ -= dx_dy[i].dy;
-                            if( i == dx_dy_n - 1
-                            && (( dx_dy[i].dx && prev_dx  )
-                              || ( dx_dy[i].dy && prev_dy )
-                            ))
-                                continue;
-                            POINT point = { x_, y_ };
-                            E_window_Q_window_I_draw_Z_points( window, &point, 1 );
-                        }
-                    }
-                }else if( j == 2 )
-                    if( dx_dy_n )
-                    {   E_mem_Q_blk_I_remove( &dx_dy, 0, dx_dy_n );
-                        dx_dy_n = 0;
-                    }
-                if( !U_R( first_pixel, overdrawn ))
-                {   N get_pixel;
-                    if( no ) //U_R( screen->mode, animation ))
-                        if( dx_direction > 0 && dy_direction > 0 )
-                        {   get_pixel = prawoskretny ? E_window_Z_aa_pixel_S_sw : E_window_Z_aa_pixel_S_ne;
-                            if( prawoskretny && prev_dy )
-                                get_pixel |= E_window_Z_aa_pixel_S_nw | E_window_Z_aa_pixel_S_w;
-                            if( !prawoskretny && prev_dx )
-                                get_pixel |= E_window_Z_aa_pixel_S_nw | E_window_Z_aa_pixel_S_n;
-                            if( prawoskretny && !dy )
-                                get_pixel |= E_window_Z_aa_pixel_S_s;
-                            if( !prawoskretny && !dx )
-                                get_pixel |= E_window_Z_aa_pixel_S_e;
-                        }else if( dx_direction > 0 && dy_direction < 0 )
-                        {   get_pixel = prawoskretny ? E_window_Z_aa_pixel_S_se : E_window_Z_aa_pixel_S_nw;
-                            if( prawoskretny && prev_dx )
-                                get_pixel |= E_window_Z_aa_pixel_S_sw | E_window_Z_aa_pixel_S_s;
-                            if( !prawoskretny && prev_dy )
-                                get_pixel |= E_window_Z_aa_pixel_S_sw | E_window_Z_aa_pixel_S_w;
-                            if( prawoskretny && !dx )
-                                get_pixel |= E_window_Z_aa_pixel_S_s;
-                            if( !prawoskretny && !dy )
-                                get_pixel |= E_window_Z_aa_pixel_S_w;
-                        }else if( dx_direction < 0 && dy_direction > 0 )
-                        {   get_pixel = prawoskretny ? E_window_Z_aa_pixel_S_nw : E_window_Z_aa_pixel_S_se;
-                            if( prawoskretny && prev_dx )
-                                get_pixel |= E_window_Z_aa_pixel_S_ne | E_window_Z_aa_pixel_S_n;
-                            if( !prawoskretny && prev_dy )
-                                get_pixel |= E_window_Z_aa_pixel_S_ne | E_window_Z_aa_pixel_S_e;
-                            if( prawoskretny && !dx )
-                                get_pixel |= E_window_Z_aa_pixel_S_e;
-                            if( !prawoskretny && !dy )
-                                get_pixel |= E_window_Z_aa_pixel_S_s;
-                        }else // if( dx_direction < 0 && dy_direction < 0 )
-                        {   get_pixel = prawoskretny ? E_window_Z_aa_pixel_S_ne : E_window_Z_aa_pixel_S_sw;
-                            if( prawoskretny && prev_dy )
-                                get_pixel |= E_window_Z_aa_pixel_S_se | E_window_Z_aa_pixel_S_e;
-                            if( !prawoskretny && prev_dx )
-                                get_pixel |= E_window_Z_aa_pixel_S_se | E_window_Z_aa_pixel_S_s;
-                            if( prawoskretny && !dy )
-                                get_pixel |= E_window_Z_aa_pixel_S_n;
-                            if( !prawoskretny && !dx )
-                                get_pixel |= E_window_Z_aa_pixel_S_w;
-                        }
-                    else
-                        get_pixel = 0;
-                    E_window_Q_window_I_draw_aa_Z_pixel_(
-                      x, y
-                    , color
-                    , pole / pole_pixela
-                    , get_pixel
-                    );
-                }
-                U_L( first_pixel, overdrawn );
-                U_L( first_pixel, computed );
-                x += dx;
-                y += dy;
-            }
-            if( j != 5 && !wariant_0 )
-            {   J_swap( F, a, b );
-                J_swap( F, pixel_dx, pixel_dy );
-            }
-        }
-        W( dx_dy );
-        if( i && dx_dy_n )
-        {   RECT arcs[1] =
-            { points[i].x - dx_dy_n, points[i].y - dx_dy_n
-            , points[i].x + dx_dy_n, points[i].x + dx_dy_n
-            };
-            E_window_Q_window_I_draw_P_pen( window, color );
-            E_window_Q_window_I_draw_P_brush( window, color );
-            E_window_Q_window_I_fill_Z_arcs_(arcs);
-        }
-    }
-    return 0;
-}
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 void
 E_window_Q_object_I_draw_P_color(
   struct E_window_Q_object_Z *object
 , COLORREF color
 ){  if( !U_R( object->state, drag_src ))
-        E_window_Q_window_I_draw_P_color_(color);
+        E_window_Q_window_I_draw_P_color(color);
 }
 //------------------------------------------------------------------------------
 B
 E_window_Q_object_I_draw_Z_points(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, POINT *points
 , N n
+, POINT *points
 ){  for_n( i, n )
     {   points[i].x += object->x;
         points[i].y += object->y;
     }
     return E_window_Q_window_I_draw_Z_points( window, n, points );
 }
-void
-E_window_Q_object_I_draw_Z_lines(
+B
+E_window_Q_object_I_draw_aa_Z_points(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, POINT *points
 , N n
+, POINT *points
+, F brightness
 ){  for_n( i, n )
     {   points[i].x += object->x;
         points[i].y += object->y;
     }
-    E_window_Q_window_I_draw_Z_lines( window, points, n );
+    if( !~E_window_Q_window_I_draw_aa_Z_points( window
+    , n
+    , points
+    , brightness
+    ))
+        return false;
+    return true;
+}
+B
+E_window_Q_object_I_draw_Z_lines(
+  struct E_window_Q_window_Z *window
+, struct E_window_Q_object_Z *object
+, N n
+, POINT *points
+, DWORD thickness
+){  for_n( i, n )
+    {   points[i].x += object->x;
+        points[i].y += object->y;
+    }
+    B ret = E_window_Q_window_I_draw_Z_lines( window, n, points, thickness );
+    if( !ret )
+        return false;
+    if( U_R( E_window_S->state, draw_object_drag_move ))
+    {   struct E_window_Q_window_Z *window_ = E_mem_Q_tab_R( E_window_Q_window_S, E_window_S->dnd_src_window );
+        struct E_window_Q_object_Z *object_ = E_mem_Q_tab_R( window_->object, E_window_S->dnd_src_object );
+        for_n( x, object_->width )
+        {   for_n( y, object_->height )
+                if( E_window_Q_object_mask_R_object_id( window_, object_->x + x, object_->y + y ) == E_window_S->dnd_src_object )
+                {   HRGN res = CreateRectRgn( 0, 0, 0, 0 );
+                    if( !res )
+                        return false;
+                    HRGN combine = CreateRectRgn( object->x + x, object->y + y, object->x + x + 1, object->y + y + 1 );
+                    if( !combine )
+                    {   DeleteObject(res);
+                        return false;
+                    }
+                    if( CombineRgn( res, E_window_S->region, combine, RGN_OR ) == ERROR )
+                    {   DeleteObject(combine);
+                        DeleteObject(res);
+                        return false;
+                    }
+                    DeleteObject( E_window_S->region );
+                    DeleteObject(combine);
+                    E_window_S->region = res;
+                }
+        }
+    }
+    return true;
 }
 B
 E_window_Q_object_I_draw_Z_rectangles(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, RECT *rectangles
 , N n
+, RECT *rectangles
 ){  for_n( i, n )
     {   rectangles[i].left += object->x;
         rectangles[i].top += object->y;
         rectangles[i].right += object->x;
         rectangles[i].bottom += object->y;
     }
-    return E_window_Q_window_I_draw_Z_rectangles( window, rectangles, n );
+    return E_window_Q_window_I_draw_Z_rectangles( window, n, rectangles );
 }
 B
 E_window_Q_object_I_draw_Z_arcs(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, RECT *arcs
 , N n
+, RECT *arcs
 ){  for_n( i, n )
     {   arcs[i].left += object->x;
         arcs[i].top += object->y;
         arcs[i].right += object->x;
         arcs[i].bottom += object->y;
     }
-    return E_window_Q_window_I_draw_Z_arcs( window, arcs, n );
+    return E_window_Q_window_I_draw_Z_arcs( window, n, arcs );
 }
 B
 E_window_Q_object_I_fill_Z_points(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, POINT *points
 , N n
+, POINT *points
 ){  for_n( i, n )
     {   points[i].x += object->x;
         points[i].y += object->y;
     }
-    return E_window_Q_window_I_fill_Z_points( window, points, n );
+    return E_window_Q_window_I_fill_Z_points( window, n, points );
 }
 B
 E_window_Q_object_I_fill_Z_rectangles(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, RECT *rectangles
 , N n
+, RECT *rectangles
 ){  for_n( i, n )
     {   rectangles[i].left += object->x;
         rectangles[i].top += object->y;
         rectangles[i].right += object->x;
         rectangles[i].bottom += object->y;
     }
-    return E_window_Q_window_I_fill_Z_rectangles( window, rectangles, n );
+    return E_window_Q_window_I_fill_Z_rectangles( window, n, rectangles );
 }
 B
 E_window_Q_object_I_fill_Z_arcs(
   struct E_window_Q_window_Z *window
 , struct E_window_Q_object_Z *object
-, RECT *arcs
 , N n
+, RECT *arcs
 ){  for_n( i, n )
     {   arcs[i].left += object->x;
         arcs[i].top += object->y;
         arcs[i].right += object->x;
         arcs[i].bottom += object->y;
     }
-    return E_window_Q_window_I_fill_Z_arcs( window, arcs, n );
-}
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-void
-E_window_Q_object_I_draw_aa_Z_pixel(
-  struct E_window_Q_window_Z *window
-, struct E_window_Q_object_Z *object
-, LONG x
-, LONG y
-, COLORREF color
-, F brightness
-, N get_pixel
-){  E_window_Q_window_I_draw_aa_Z_pixel_(
-      object->x + x
-    , object->y + y
-    , !U_R( object->state, drag_src ) ? color : E_window_Q_theme.current_brace
-    , brightness
-    , get_pixel
-    );
-}
-void
-E_window_Q_object_I_draw_aa_Z_lines(
-  struct E_window_Q_window_Z *window
-, struct E_window_Q_object_Z *object
-, POINT *points
-, N n
-, F thickness
-, COLORREF color
-){  for_n( i, n )
-    {   points[i].x += object->x;
-        points[i].y += object->y;
-    }
-    E_window_Q_window_I_draw_aa_Z_lines_(
-      points
-    , n
-    , thickness
-    , !U_R( object->state, drag_src ) ? color : E_window_Q_theme.current_brace
-    );
+    return E_window_Q_window_I_fill_Z_arcs( window, n, arcs );
 }
 //******************************************************************************
