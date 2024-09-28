@@ -1,0 +1,8 @@
+module/*/
+pcre2
+**/Makefile.win
+**/*.a
+**/*.dll
+**/*.exe
+**/*.layout
+**/*.o
