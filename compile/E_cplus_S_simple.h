@@ -1,25 +1,14 @@
-/*******************************************************************************
-*   ___   publicplace
-*  ¦OUX¦  C+
-*  ¦/C+¦  compile
-*   ---   C+
-*         simple common procedures
-* ©overcq                on "Gentoo Linux 17.1” “x86_64”             2020-5-27 T
-*******************************************************************************/
-#define _inline static __attribute__ ((__always_inline__,__unused__))
+/******************************************************************************/
+#define _inline static inline __attribute__ (( __always_inline__, __unused__ ))
 //==============================================================================
 _inline
 N
 E_asm_I_bsf( N n
 ){  N i;
-        #if 0 // defined( __i386__ ) || defined( __x86_64__ )
+        #if 0 //def __x86_64__
     N v;
     __asm__ (
-            #if defined( __i386__ )
-    "\n" "movl  $~0,%0"
-            #else
     "\n" "movq  $~0,%0"
-            #endif
     "\n" "bsf   %2,%1"
     "\n" "cmove %0,%1"
     : "=rm" (v), "=r" (i)
@@ -28,7 +17,7 @@ E_asm_I_bsf( N n
     );
         #else
     if(n)
-        i = __builtin_ctzl(n);
+        i = __builtin_ctzll(n);
     else
         i = ~0;
         #endif
@@ -38,14 +27,10 @@ _inline
 N
 E_asm_I_bsr( N n
 ){  N i;
-        #if 0 //defined( __i386__ ) || defined( __x86_64__ )
+        #if 0 //def __x86_64__
     N v;
     __asm__ (
-            #if defined( __i386__ )
-    "\n" "movl  $~0,%0"
-            #else
     "\n" "movq  $~0,%0"
-            #endif
     "\n" "bsr   %2,%1"
     "\n" "cmove %0,%1"
     : "=rm" (v), "=r" (i)
@@ -54,34 +39,11 @@ E_asm_I_bsr( N n
     );
         #else
     if(n)
-        i = sizeof(N) * 8 - 1 - __builtin_clzl(n);
+        i = sizeof(N) * 8 - 1 - __builtin_clzll(n);
     else
         i = ~0;
         #endif
     return i;
-}
-_inline
-F
-E_asm_I_pow( F x
-, F n
-){
-        #if defined( __i386__ ) || defined( __x86_64__ )
-    __asm__ (
-    "\n" "fyl2x"
-    "\n" "fld1"
-    "\n" "fld        %%st(1)"
-    "\n" "fprem"
-    "\n" "f2xm1"
-    "\n" "faddp"
-    "\n" "fscale"
-    : "+t" (x)
-    : "u" (n)
-//    : "st(2)"
-    );
-        #else
-#error not implemented
-        #endif
-    return x;
 }
 //==============================================================================
 _inline
@@ -97,8 +59,8 @@ E_simple_T_multiply_overflow(
   N a
 , N b
 ){  return a && b
-    && ( E_asm_I_bsr(a) != ~0 ? E_asm_I_bsr(a) : 0 )
-      + ( E_asm_I_bsr(b) != ~0 ? E_asm_I_bsr(b) : 0 )
+    && ( E_asm_I_bsr(a) != ~0ULL ? E_asm_I_bsr(a) : 0 )
+      + ( E_asm_I_bsr(b) != ~0ULL ? E_asm_I_bsr(b) : 0 )
       >= sizeof(N) * 8;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

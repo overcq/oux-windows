@@ -1,0 +1,348 @@
+//-*-C-*-
+//******************************************************************************
+N E_main_Q_timer_S_hour;
+N E_main_Q_timer_S_minute;
+N E_main_Q_timer_S_second;
+N E_main_Q_http_req_ret_count;
+//==============================================================================
+WINAPI int
+WinMain( HINSTANCE h_instance
+, HINSTANCE h_prev_instance
+, LPSTR cmd_line
+, int cmd_show
+){  if( E_base_M( h_instance ))
+        return ~0;
+    if( E_window_M( cmd_show ))
+        return ~0;
+#if 0
+    E_ui_M();
+#ifndef C_line_report
+    I out = E_io_Q_stream_out_M_fd( STDERR_FILENO );
+#else
+    I out = 0;
+#endif
+    E_io_Q_stream_out_P( out
+    , "\n\"OUX 2\" test sample (c)2017-2022 overcq"
+    , 0
+    );
+    I_B();
+#ifndef C_line_report
+    E_io_Q_stream_out_W_(out);
+#endif
+    I_V()
+        goto End;
+
+    SSL_CTX *ssl_ctx = E_net_cli_Q_ssl_M();
+    if( !ssl_ctx )
+        goto End_3;
+    B http2;
+    N connection = E_net_cli_Q_ssl_I_connect( ssl_ctx, "gentoo", &http2 );
+    if( !~connection )
+        goto Skip;
+    if(http2)
+    {   N ret = E_net_http2_I_request( connection, "/", http2_req_ret_func );
+        if(ret)
+            goto Skip;
+        ret = E_net_http2_I_request( connection, "/", http2_req_ret_func );
+        if(ret)
+            goto Skip;
+    }else
+    {   N ret = E_net_http_I_request( connection, "/", http_req_ret_func );
+        if(ret)
+            goto Skip;
+    }
+    X_M( net, ret );
+    E_main_Q_http_req_ret_count = 0;
+    O{  X_B( net, ret, 0 )
+            break;
+        if(( http2
+          && ( !E_net_http2_S_connect_n
+            || E_main_Q_http_req_ret_count == 2
+          ))
+        || ( !http2
+          && ( !E_net_http_S_connect_n
+            || E_main_Q_http_req_ret_count == 1
+        )))
+            break;
+    }
+Skip:
+    E_net_cli_Q_ssl_W( ssl_ctx );
+End_3:;
+    //goto End;
+
+    E_data_Q_layout_I_add( E_data_Q_field_S_text, "Text input ��", 5 );
+    for_n( i, 42 )
+    {   E_data_Q_layout_I_add( E_data_Q_field_S_text, "Second text input ��", 100 );
+        struct E_data_Q_field_Z *input = E_mem_Q_tab_R( E_data_Q_layout_S, 1 + i );
+        input->select_n = 50;
+        Mt_( input->select, input->select_n );
+        for_n( i, input->select_n )
+        {   N l = E_text_Z_n_N_s_G( i, sizeof(i), 10 );
+            input->select[i] = M( l + 8 + 210 + 1 );
+            E_text_Z_n_N_s( input->select[i] + l, i, sizeof(i), 10 );
+            E_text_Z_s_P_s0_copy_0( input->select[i] + l, ". select select select select select select select select select select select select select select select select select select select select select select select select select select select select select select select" );
+        }
+    }
+    E_data_Q_layout_I_add( E_data_Q_field_S_text, "44. text input ��", 100 );
+    E_ncurses_I_lay();
+#endif
+
+    X_M( main, loop );
+    D_M( main, timer_draw, 0 );
+    for_n( i, 2 )
+    {   I window_id = E_window_Q_window_M( 490, 480 );
+        if( window_id < 0 )
+            goto End;
+        struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
+        I object_id = E_window_Q_object_Z_frame_M(window);
+        if( object_id < 0 )
+            goto End;
+        for_n( i, 3 )
+        {   I id = E_window_Q_object_Z_frame_M(window);
+            if( id < 0 )
+                goto End;
+            if( E_window_Q_object_I_add( window, object_id, id ))
+                goto End;
+            for_n( i, 5 )
+            {   I id_2 = E_window_Q_object_Z_frame_M(window);
+                if( id_2 < 0 )
+                    goto End;
+                if( E_window_Q_object_I_add( window, id, id_2 ))
+                    goto End;
+                for_n( i, 2 )
+                {   
+                    I id_3 = E_window_Q_object_Z_frame_M(window);
+                    if( id_3 < 0 )
+                        goto End;
+                    if( E_window_Q_object_I_add( window, id_2, id_3 ))
+                        goto End;
+                    for_n( i, 3 )
+                    {   I id_4 = E_window_Q_object_Z_button_font_M( window, 0, "abc" );
+                        if( id_4 < 0 )
+                            goto End;
+                        if( !~E_window_Q_object_I_add( window, id_3, id_4 ))
+                            goto End;
+                    }
+                }
+                for_n_( i, 2 )
+                {   I id_3 = E_window_Q_object_Z_button_font_M( window, 0, "abcde" );
+                    if( id_3 < 0 )
+                        goto End;
+                    if( E_window_Q_object_I_add( window, id_2, id_3 ))
+                        goto End;
+                }
+            }
+            for_n_( i, 5 )
+            {   I id_2 = E_window_Q_object_Z_frame_select_M( window, 0, "abcdefghijkl" );
+                if( id_2 < 0 )
+                    goto End;
+                if( E_window_Q_object_I_add( window, id, id_2 ))
+                    goto End;
+                struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, id_2 );
+                object = E_mem_Q_tab_R( window->object, object->child[0] );
+                struct E_window_Q_object_Z_data_Z_select *object_data = object->data;
+                object_data->select_n = 5;
+                if( !E_mem_Q_blk_M_replace_tab( &object_data->select, sizeof( Pc ), object_data->select_n ))
+                    goto End;
+                for_n( i, object_data->select_n )
+                {   N l = E_text_Z_n_N_s_G( i, sizeof(i), 10 );
+                    object_data->select[i] = M( l + J_s0_R_l(". select select select select select select select select select select select select select select select select select select select select select select select select select select select select select select select" ) + 1 );
+                    if( !object_data->select[i] )
+                        goto End;
+                    E_text_Z_n_N_s( object_data->select[i] + l, i, sizeof(i), 10 );
+                    E_text_Z_s_P_copy_s0_0( object_data->select[i] + l, ". select select select select select select select select select select select select select select select select select select select select select select select select select select select select select select select" );
+                }
+            }
+        }
+        object_id = E_window_Q_object_M( window
+        , 0
+        , 5, 5
+        , 61, 61
+        , 0
+        , E_main_Q_timer_I_draw
+        , 0
+        );
+        if( object_id < 0 )
+            goto End;
+        struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
+        U_F( object->mode, draggable );
+        object_id = E_window_Q_object_M( window
+        , 0
+        , 55, 53
+        , 171, 191
+        , 0
+        , E_main_Q_timer_I_draw
+        , 0
+        );
+        if( object_id < 0 )
+            goto End;
+        object = E_mem_Q_tab_R( window->object, object_id );
+        U_F( object->mode, draggable );
+        object_id = E_window_Q_object_M( window
+        , 0
+        , 151, 191
+        , 21, 21
+        , 0
+        , E_main_Q_timer_I_draw
+        , 0
+        );
+        if( object_id < 0 )
+            goto End;
+        object = E_mem_Q_tab_R( window->object, object_id );
+        U_F( object->mode, draggable );
+        E_window_Q_object_I_lay(window);
+    }
+    //D_M( main, cursor );
+    X_B( main, loop, 0 ){}
+    //D_W( main, cursor );
+    D_W( main, timer_draw );
+    X_W( main, loop );
+End://E_ui_W();
+    if( E_window_W() )
+        return ~0;
+    if( E_base_W() )
+        return ~0;
+    return 0;
+}
+//D( main, cursor )
+//{   X_A( x_window, flush );
+    //N cursor_no = 0;
+    //I timer = Y_M(1500000);
+    //I_D
+    //{   Y_B( timer, 0 )
+            //break;
+        //if( cursor_no == XC_num_glyphs )
+            //cursor_no = 0;
+        //G(); Gd( cursor_no );
+        //for_each( display_id, E_x_Q_display_S, E_mem_Q_tab )
+        //{   struct E_x_Q_display_Z *display = E_mem_Q_tab_R( E_x_Q_display_S, display_id );
+            //Cursor cursor = XCreateFontCursor( display->x_display, cursor_no );
+            //for_each( window_id, display->window, E_mem_Q_tab )
+            //{   struct E_x_Q_window_Z *window = E_mem_Q_tab_R( display->window, window_id );
+                //if( U_R( window->state, visible ))
+                    //XDefineCursor( display->x_display, window->x_window, cursor );
+            //}
+            //XFreeCursor( display->x_display, cursor );
+            //U_F( display->req, flush );
+        //}
+        //cursor_no += 2;
+        //X_U( x_window, flush );
+    //}
+    //Y_W(timer);
+//}
+D( main, timer_draw )
+{   SYSTEMTIME st;
+    GetLocalTime( &st );
+    E_main_Q_timer_S_hour = st.wHour % 12;
+    E_main_Q_timer_S_minute = st.wMinute;
+    E_main_Q_timer_S_second = st.wSecond;
+    I timer = Y_M(1000);
+    O{  N timer_lost_count;
+        Y_B( timer, &timer_lost_count )
+            break;
+        E_main_Q_timer_S_second += 1 + timer_lost_count;
+        E_main_Q_timer_S_hour += E_main_Q_timer_S_second / 3600;
+        E_main_Q_timer_S_second %= 3600;
+        E_main_Q_timer_S_minute += E_main_Q_timer_S_second / 60;
+        E_main_Q_timer_S_second %= 60;
+        E_main_Q_timer_S_hour += E_main_Q_timer_S_minute / 60;
+        E_main_Q_timer_S_minute %= 60;
+        E_main_Q_timer_S_hour %= 12;
+        E_window_Q_object_I_draw_Z_draw_proc( &E_main_Q_timer_I_draw, !!timer_lost_count );
+    }
+    Y_W(timer);
+}
+#define E_main_I_draw_Z_angle_line_(arc_i,arc_n,line_length_i,line_length_n)    E_main_I_draw_Z_angle_line( window, object, arc_i, arc_n, line_length_i, line_length_n )
+void
+E_main_I_draw_Z_angle_line(
+  struct E_window_Q_window_Z *window
+, struct E_window_Q_object_Z *object
+, N arc_i
+, N arc_n
+, N line_length_i
+, N line_length_n
+){  S32 x = line_length_i * ( object->width / 2 - 1 ) / line_length_n;
+    S32 y = line_length_i * ( object->height / 2 - 1 ) / line_length_n;
+    N l = 2 * ( object->width + object->height );
+    N d = arc_i * l / arc_n;
+    N a = d % ( l / 8 );
+    switch( d / ( l / 8 ))
+    { case 0:
+            x = a;
+            y = -y;
+            break;
+      case 1:
+            y = a - y;
+            break;
+      case 2:
+            y = a;
+            break;
+      case 3:
+            x = x - a;
+            break;
+      case 4:
+            x = -a;
+            break;
+      case 5:
+            x = -x;
+            y -= a;
+            break;
+      case 6:
+            x = -x;
+            y = -a;
+            break;
+      case 7:
+            x = a - x;
+            y = -y;
+            break;
+    }
+    E_window_Q_object_I_draw_Z_lines( window, object
+    , 2
+    , ( POINT[] )
+      { { object->width / 2
+        , object->height / 2
+        }
+      , { object->width / 2 + x
+        , object->height / 2 + y
+        }
+      }
+    , !U_R( E_window_S->mode, draw_simple ) ? object->width * line_length_n / line_length_i * 0.1 : 1
+    );
+}
+void
+E_main_Q_timer_I_draw(
+  struct E_window_Q_window_Z *window
+, struct E_window_Q_object_Z *object
+){  E_window_Q_window_I_draw_P_color( RGB( 0xff, 0xff, 0xff ));
+    E_window_Q_object_I_draw_Z_rectangles( window, object
+    , 1
+    , (( RECT[] )
+      { 0, 0
+      , object->width, object->height
+      })
+    );
+    E_window_Q_object_I_draw_Z_font_Z_s( window, object
+    , 1, 1, 0, 0, "AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ\naąbcćdeęfghijklłmnńoópqrsśtuvwxyzźż\n0123456789\n!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~\n′−¡‽²➪³№ ‒⁄÷°〃⇢×⁑⁂–—≈±⁃―‣•®℠©™µ❛❝❜❞⁅〈⁆〉 ¦‐՚‛‟‚„‘“’”⏎⁋✓·…‹«›» ¿€¢" );
+    E_window_Q_object_I_draw_P_color( object, RGB( 0, 0, 0x9f ));
+    E_main_I_draw_Z_angle_line_(
+      E_main_Q_timer_S_hour
+    , 12
+    , 1
+    , 2
+    );
+    E_window_Q_object_I_draw_P_color( object, RGB( 0, 0xbf, 0 ));
+    E_main_I_draw_Z_angle_line_(
+      E_main_Q_timer_S_minute
+    , 60
+    , 3
+    , 4
+    );
+    E_window_Q_object_I_draw_P_color( object, RGB( 0, 0, 0 ));
+    E_main_I_draw_Z_angle_line_(
+      E_main_Q_timer_S_second
+    , 60
+    , 1
+    , 1
+    );
+}
+//******************************************************************************

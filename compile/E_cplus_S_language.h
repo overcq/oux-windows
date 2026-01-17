@@ -1,37 +1,30 @@
-/*******************************************************************************
-*   ___   publicplace
-*  ¶OUX¶  "C+î into "Cî
-*  ¶/C+¶  compile
-*   ---   C+
-*         base definitions
-* ©overcq                on "Gentoo Linux 13.0î ìx86_64î              2015-1-6 *
-*******************************************************************************/
-// ìStatementî i wyraøenia rozszerzonej sk≥adni, ktÛre muszπ znajdowaÊ siÍ w nawiasach klamrowych bloku nadrzÍdnego: ìfor_î[Ö], ìVî[Ö], linie ìGî[Ö].
-// OgÛlne standardy ëinterfejsÛwí ãprocedurõ:
-// ? dodatkowe wyniki ãprocedurõ sπ przypisywane zmiennym wskaünikowym, jeúli podany adres zmiennej nie jest zerowy.
-// ? ãmenedøerõ mogπcy zmieniÊ adres przechowywany w zmiennej uchwytu obiektu otrzymuje jako pierwszy ëargumentí wskaünik do zmiennej uchwytu, ktÛrπ uaktualnia, jeúli potrzeba. Takimi ãmenedøeramiõ sπ tylko wydajπcy adres struktury danych: ?ìmem_blkî musi tak robiÊ, ale ma zarejestrowane wszystkie wydane adresy, ?ìmem_tabî nie musi tak robiÊ, lecz dla oszczÍdnoúci nie rejestruje wydanych tablic, a zawsze moøna to zmieniÊ w przysz≥oúci. Poza ãmenedøeramiõ pamiÍci raczej nic wiÍcej nie potrzebuje wydawaÊ jako uchwyt obiektuó adresu struktury danych opisu, lecz ãidentyfikatorõ obiektu.
-//==============================================================================
-typedef C           *Pc; // Wskaünik do obliczeÒ bajtowych i tekst techniczny jÍzyka "Cî lub ëUTF-8í. zawsze bÍdzie rÛwnowaøny ìchar *î (przy uzgadnianiu ëinterfejsÛwí procedur systemu operacyjnego).
-typedef N           *Pn; // Wskaünik do tablic liczb naturalnych.
-typedef P           *Pp; // Wskaünik do tablic adresÛw.
+/******************************************************************************/
+typedef C           *Pc; // Wska≈∫nik do oblicze≈Ñ bajtowych i tekst techniczny jƒôzyka ‚ÄüC‚Äù lub ‚ÄòUTF-8‚Äô.‚ÄÉzawsze bƒôdzie r√≥wnowa≈ºny ‚Äúchar *‚Äù (przy uzgadnianiu ‚Äòinterfejs√≥w‚Äô procedur systemu operacyjnego).
+typedef W           *Pw;
+typedef N           *Pn; // Wska≈∫nik do tablic liczb naturalnych.
+typedef P           *Pp; // Wska≈∫nik do tablic adres√≥w.
 //==============================================================================
 #define false                               FALSE
 #define true                                TRUE
 #define no                                  FALSE
 #define yes                                 TRUE
-// Wyraøenie przypisania automatycznie nadajπce podanej wartoúci rozmiar zmiennej. Naprawia koniecznoúÊ jawnego deklarowania przyrostkÛw dla typÛw sta≥ych; bo domyúlnie ìintî.
+// Wyra≈ºenie przypisania automatycznie nadajƒÖce podanej warto≈õci rozmiar zmiennej. Naprawia konieczno≈õƒá jawnego deklarowania przyrostk√≥w dla typ√≥w sta≈Çych; bo domy≈õlnie ‚Äúint‚Äù.
 #define _v(a,v)                             (( (a) ^ (a) ) | (v) )
 //------------------------------------------------------------------------------
 #define _J_s(a)                             #a
 #define J_s(a)                              _J_s(a)
+#define J_w(a)                              J_ab(L,J_s(a))
 #define _J_ab(a,b)                          a##b
 #define J_ab(a,b)                           _J_ab(a,b)
 #define J_a_b(a,b)                          J_ab(J_ab(a,_),b)
+#define J_s0_R_l(s)                         ( sizeof(s) - 1 )
+#define J_a_R_n(a)                          ( sizeof(a) / sizeof( (a)[0] ))
 //------------------------------------------------------------------------------
 #define J_n_10_max_digits(l)                ( l == 8 ? 20 : l == 4 ? 10 : l == 2 ? 5 : 3 )
 #define J_swap(type,a,b)                    { type J_autogen(_) = a; a = b; b = J_autogen(_); }
 #define J_min(a,b)                          ( (a) > (b) ? (b) : (a) )
 #define J_max(a,b)                          ( (a) < (b) ? (b) : (a) )
+#define J_min_max(a,b,c)                    ( J_min( (a), J_max( (b), (c) )))
 #define J_abs(v)                            ( (S)(v) < 0 ? -(v) : (v) )
 //------------------------------------------------------------------------------
 #define J_autogen_S                         _autogen
@@ -67,11 +60,10 @@ typedef P           *Pp; // Wskaünik do tablic adresÛw.
 #define for_each_pop_(id_var,p,q)           for_each_pop_out_(~0,id_var,(p),q)
 #define for_each_pop(id_var,p,q)            I id_var; for_each_pop_(id_var,(p),q)
 //------------------------------------------------------------------------------
-#define for_each_q_out(out,id_var,p,iter,q) \
+#define for_each_q(id_var,p,iter,q) \
   I id_var; \
-  I J_autogen_line(id_var) = (out); \
-  while(( id_var = J_a_b(q,Q_iter_R_next)( (p), (iter), ++J_autogen_line(id_var) )) != (out) )
-#define for_each_q(id_var,p,iter,q)         for_each_q_out(~0,id_var,(p),(iter),q)
+  I J_autogen_line(id_var) = ~0; \
+  while( (S)( id_var = J_a_b(q,Q_iter_R_next)( (p), (iter), ++J_autogen_line(id_var) )) >= 0 )
 //==============================================================================
 #define _F_uid_v(v)                         ( (v) << ( sizeof(int) * 8 / 2 ))
 #define _F_uid(file_identifier)             J_autogen(J_a_b(F,file_identifier))
@@ -91,138 +83,148 @@ typedef P           *Pp; // Wskaünik do tablic adresÛw.
 //------------------------------------------------------------------------------
 #define _0(pointer_variable,l)              E_mem_Q_blk_P_fill_c( (pointer_variable), l, 0 )
 #define _0_(pointer_variable)               _0( (pointer_variable), sizeof( *(pointer_variable) ))
+#define _0t_(pointer_variable,n)            _0( (pointer_variable), (n) * sizeof( *(pointer_variable) ))
 //------------------------------------------------------------------------------
-// Utworzenie i wyrzucenie zmiennej w pamiÍci ëalokowanejí w ìmenedøerze pamiÍciî.
+// Utworzenie i wyrzucenie zmiennej w pamiƒôci ‚Äòalokowanej‚Äô w ‚Äúmened≈ºerze pamiƒôci‚Äù.
 #define M(l)                                E_mem_Q_blk_M(l)
 #define Mt(u,n)                             E_mem_Q_blk_M_tab((u),(n))
 #define W(pointer_variable)                 E_mem_Q_blk_W( pointer_variable )
 #define M_(pointer_variable)                pointer_variable = M( sizeof( *( pointer_variable )))
 #define Mt_(pointer_variable,n)             pointer_variable = Mt( sizeof( *( pointer_variable )), (n) )
-#define W_(pointer_variable)                ( W( pointer_variable ), pointer_variable = 0 )
-#define W_tab_(pointer_variable)            ( E_mem_Q_tab_W( pointer_variable ), pointer_variable = 0 )
 //------------------------------------------------------------------------------
-// Instrukcja blokowa definicji ãzadaniaõ.
+// Instrukcja blokowa definicji ‚Äπzadania‚Ä∫.
 #define D(module,task)                      _internal void _D_proc(module,task)( P thread_proc_arg )
-// Instrukcja blokowa pÍtli g≥Ûwnej ãzadaniaõ.
-#define I_D                                 if( E_flow_Q_task_I_begin() ){} else O
 //------------------------------------------------------------------------------
-// Utworzenie i wyrzucenie ãzadaniaõ lub ãzadaniaõ ìwπtkowanegoî czekajπcego na ãsystemowy raport odblokowujπcyõ.
-//TODO RozdzieliÊ dla ìDhîó na ãzadaniaõ takie jak ìDî (bez ìsubidî) oraz takie jak obecnie ìDhî (ìDhiî).
+// Utworzenie i wyrzucenie ‚Äπzadania‚Ä∫ lub ‚Äπzadania‚Ä∫ ‚ÄúwƒÖtkowanego‚Äù czekajƒÖcego na ‚Äπsystemowy raport odblokowujƒÖcy‚Ä∫.
+//TODO Rozdzieliƒá dla ‚ÄúDh‚Äù ‚Äî na ‚Äπzadania‚Ä∫ takie jak ‚ÄúD‚Äù (bez ‚Äúsubid‚Äù) oraz takie jak obecnie ‚ÄúDh‚Äù (‚ÄúDhi‚Äù).
     #ifdef C_line_report
-#define D_M(module,task)                    if( ~E_flow_Q_task_M( &(D_id(module,task)), &_D_proc(module,task), 0, no, J_s( _D_proc(module,task) ))){} else
-#define Dh_M(module,task,subid,arg)         if( ~E_flow_Q_task_M_thread( &(D_id(module,task)), (subid), &_D_proc(module,task), (arg), J_s( _D_proc(module,task) ))){} else
+#define D_M(module,task,stack_size)         E_flow_Q_task_M( &D_id(module,task), &_D_proc(module,task), 0, no, stack_size, J_s( _D_proc(module,task) ))
+#define Dh_M(module,task,subid,arg)         E_flow_Q_task_M_thread( &D_id(module,task), (subid), &_D_proc(module,task), (arg), J_s( _D_proc(module,task) ))
     #else
-#define D_M(module,task)                    if( ~E_flow_Q_task_M( &(D_id(module,task)), &_D_proc(module,task), 0, no )){} else
-#define Dh_M(module,task,subid,arg)         if( ~E_flow_Q_task_M_thread( &(D_id(module,task)), (subid), &_D_proc(module,task), (arg) )){} else
+#define D_M(module,task,stack_size)         E_flow_Q_task_M( &D_id(module,task), &_D_proc(module,task), 0, no, stack_size )
+#define Dh_M(module,task,subid,arg)         E_flow_Q_task_M_thread( &D_id(module,task), (subid), &_D_proc(module,task), (arg) )
     #endif
 #define Dh_W(module,task,subid)             E_flow_Q_task_W_thread( &(D_id(module,task)), (subid) )
 #define D_W(module,task)                    E_flow_Q_task_W( &(D_id(module,task)) )
+        #ifdef C_line_report
+#define Da_M(module,task,thread_unblock_proc)   E_flow_Q_task_async_M( &D_id(module,task), &_D_proc(module,task), &( thread_unblock_proc ), J_s( _D_proc(module,task) ))
+        #else
+#define Da_M(module,task,thread_unblock_proc)   E_flow_Q_task_async_M( &D_id(module,task), &_D_proc(module,task), &( thread_unblock_proc ))
+        #endif
+#define Da_W(module,task)                   E_flow_Q_task_async_W( &D_id(module,task) )
 //------------------------------------------------------------------------------
-// Znacznik stanu ózwykle stanu pojedynczego obiektu sygnalizujπcego pÛüniej kolekcjÍó umieszczony w strukturze tego ãobiektuõ dostÍpnej przez wyraøenie.
+// Znacznik stanu ‚Äî zwykle stanu pojedynczego obiektu sygnalizujƒÖcego p√≥≈∫niej kolekcjƒô ‚Äî umieszczony w strukturze tego ‚Äπobiektu‚Ä∫ dostƒôpnej przez wyra≈ºenie.
 #define U_R(start_expr,state_name)          J_a_b(start_expr,J_autogen(J_a_b(U,state_name)))
 // Wzbudzenie stanu.
 #define U_F(start_expr,state_name)          U_R(start_expr,state_name) = yes
-// I liniowe obs≥uøenie tego stanu.
+// I liniowe obs≈Çu≈ºenie tego stanu.
 #define U_L(start_expr,state_name)          U_R(start_expr,state_name) = no
 // Albo blokowe.
 #define U_E(start_expr,state_name)          ( U_R(start_expr,state_name) && ( U_L(start_expr,state_name), yes ))
 //------------------------------------------------------------------------------
-// Instrukcja blokowa definicji ãzdarzeniaõ.
+// Instrukcja blokowa definicji ‚Äπzdarzenia‚Ä∫.
 #define K(module,event)                     B _K_proc(module,event)( I object )
-// Deklaracja emisji ãzdarzeniaõ.
+// Deklaracja emisji ‚Äπzdarzenia‚Ä∫.
 #define K_E(module,event,object)            if( !_K_proc(module,event)(object) ){} else
 //------------------------------------------------------------------------------
-// Instrukcje ìX_Mî/ìX_Aî, ìYi_Mî/ìYi_Aî muszπ wystÍpowaÊ w jednym z najwyøszych blokÛw struktury programu ãzadaniaõ, w miejscu zapewniajπcym takπ widocznoúÊ (do uøycia ãraportuõ w tym ãzadaniuõ) jak deklaracja zmiennej lokalnej.
-// Utworzenie i wyrzucenie ãraportuõ.
+// Instrukcje ‚ÄúX_M‚Äù/‚ÄúX_A‚Äù, ‚ÄúYi_M‚Äù/‚ÄúYi_A‚Äù muszƒÖ wystƒôpowaƒá w jednym z najwy≈ºszych blok√≥w struktury programu ‚Äπzadania‚Ä∫, w miejscu zapewniajƒÖcym takƒÖ widoczno≈õƒá (do u≈ºycia ‚Äπraportu‚Ä∫ w tym ‚Äπzadaniu‚Ä∫) jak deklaracja zmiennej lokalnej.
+// Utworzenie i wyrzucenie ‚Äπraportu‚Ä∫.
 #define X_M_(module,report)                 _X_var(module,report) = E_flow_Q_report_M( _X_uid(module,report) )
 #define X_M(module,report)                  I X_M_(module,report)
 #define X_W(module,report)                  E_flow_Q_report_W( _X_var(module,report) )
-// Deklaracja emisji ãraportuõ przez ãzadanieõ.
+// Deklaracja emisji ‚Äπraportu‚Ä∫ przez ‚Äπzadanie‚Ä∫.
 #define X_A(module,report)                  X_M(module,report); _unused B U_L(module,report)
-// Sygnalizacja ãzadaniaõ obs≥ugujπcego ãraportõ kolekcji.
+// Sygnalizacja ‚Äπzadania‚Ä∫ obs≈ÇugujƒÖcego ‚Äπraport‚Ä∫ kolekcji.
 #define X_F(module,report)                  E_flow_Q_report_I_signal( _X_var(module,report) )
-// I warunkowañ gdy jest stan pojedynczego obiektu.
+// I warunkowa‚Äì gdy jest stan pojedynczego obiektu.
 #define X_U(module,report)                  if( !U_E(module,report) ){} else X_F(module,report)
-// Czekanie na ãraportõ kolekcji.
+// Czekanie na ‚Äπraport‚Ä∫ kolekcji.
 #define X_B(module,report,lost_count)       if( !E_flow_Q_report_I_wait( _X_var(module,report), (lost_count) )){} else
-// Czyszczenie licznika raportÛw.
+// Czyszczenie licznika raport√≥w.
 #define X_L(module,report)                  E_flow_Q_report_I_clear( _X_var(module,report) )
 //------------------------------------------------------------------------------
-    #ifdef E_flow_C_thread_system_unblock_reports
-// Deklaracja ãproceduryõ generujπcej ãsystemowy raport odblokowujπcyõ dla ãzadaniaõ; odblokowujπcej to ãzadanieõ.
+// Deklaracja ‚Äπprocedury‚Ä∫ generujƒÖcej ‚Äπsystemowy raport odblokowujƒÖcy‚Ä∫ dla ‚Äπzadania‚Ä∫; odblokowujƒÖcej to ‚Äπzadanie‚Ä∫.
 #define Xh_A( thread_unblock_proc_ ) \
-  HANDLE J_autogen( thread_flow_mutex ); \
-  volatile B *J_autogen( thread_switch_back ); \
-  E_flow_Q_thread_system_unblock_report_M(( thread_unblock_proc_ ), &J_autogen( thread_flow_mutex ), &J_autogen( thread_switch_back ))
-// Tuø przed wywo≥aniem procedury blokujπcej w oczekiwaniu na ãsystemowy raport odblokowujπcyõ.
+  struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current ); \
+  task->thread_unblock_proc = thread_unblock_proc_; \
+  struct E_flow_Q_task_async_Z_proc_args *J_autogen( proc_args ) = thread_proc_arg; \
+  HANDLE J_autogen( thread_switch_in ) = J_autogen( proc_args )->thread_switch_in; \
+  HANDLE J_autogen( thread_switch_out ) = J_autogen( proc_args )->thread_switch_out
+// Tu≈º przed wywo≈Çaniem procedury blokujƒÖcej w oczekiwaniu na ‚Äπsystemowy raport odblokowujƒÖcy‚Ä∫.
 #define Xh_B_() \
-  *J_autogen( thread_switch_back ) = yes; \
-  E_flow_Q_thread_system_unblock_report_I_before_block( J_autogen( thread_flow_mutex ))
-// Czekanie na ãsystemowy raport odblokowujπcyõ; tuø po wywo≥aniu procedury blokujπcej.
+  E_flow_Q_thread_system_unblock_report_I_before_async( J_autogen( thread_switch ), J_autogen( thread_flow_mutex ))
+// Czekanie na ‚Äπsystemowy raport odblokowujƒÖcy‚Ä∫; tu≈º po wywo≈Çaniu procedury blokujƒÖcej.
 #define Xh_B() \
-  *J_autogen( thread_switch_back ) = no; \
-  if( !E_flow_Q_thread_system_unblock_report_I_after_block( J_autogen( thread_flow_mutex ))){} else
-    #else
-#define Xh_A( thread_unblock_proc_ )
-    #endif
+  if( !E_flow_Q_thread_system_unblock_report_I_after_async( J_autogen( thread_switch_in ), J_autogen( thread_switch_out ), J_autogen( thread_switch ), J_autogen( thread_flow_mutex ))){} else
+// Deklaracja ‚Äπprocedury‚Ä∫ tworzƒÖcej dla ‚Äπzadania‚Ä∫ asynchronicznego.
+#define Da_A() \
+  struct E_flow_Q_task_async_Z_proc_args *J_autogen( proc_args ) = thread_proc_arg; \
+  HANDLE J_autogen( thread_switch_in ) = J_autogen( proc_args )->thread_switch_in; \
+  HANDLE J_autogen( thread_switch_out ) = J_autogen( proc_args )->thread_switch_out
+// Tu≈º przed oknem synchronizacji z ‚Äπzadaniami‚Ä∫ nieasynchronicznymi.
+#define Da_B_() \
+  if( !E_flow_Q_thread_async_I_before_sync( J_autogen( thread_switch_in ), J_autogen( thread_switch_out ), J_autogen( thread_switch ), J_autogen( thread_flow_mutex ))){} else
+// Tu≈º po oknie synchronizacji z ‚Äπzadaniami‚Ä∫ nieasynchronicznymi.
+#define Da_B() \
+  E_flow_Q_thread_async_I_after_sync( J_autogen( thread_switch ), J_autogen( thread_flow_mutex ))
 //------------------------------------------------------------------------------
-    #ifdef E_flow_C_itimer_system_unblock_report
-// Utworzenie i wyrzucenie ãsystemowego raportu odblokowujπcegoõ typu ìitimerî, wystÍpujπcego najwyøej jeden raz.
-#define Xh1_M(sigsuspend,setitimer)         E_flow_Q_itimer_system_unblock_report_M( sigsuspend, setitimer )
-#define Xh1_W()                             E_flow_Q_itimer_system_unblock_report_W()
-// Czekanie na ãsystemowy raport odblokowujπcyõ typu ìitimerî.
-#define Xh1_B()                             if( !E_flow_Q_itimer_system_unblock_report_I_wait() ){} else
-    #endif
-//------------------------------------------------------------------------------
-// Utworzenie i wyrzucenie ãcykleraõ.
+// Utworzenie i wyrzucenie ‚Äπcyklera‚Ä∫.
 #define Y_M(period)                         E_flow_Q_timer_M(period)
 #define Y_W(timer)                          E_flow_Q_timer_W(timer)
-// Czekanie na pe≥ny okres ãcykleraõ.
+// Czekanie na pe≈Çny okres ‚Äπcyklera‚Ä∫.
 #define Y_B(timer,lost_count)               if( !E_flow_Q_timer_I_wait( (timer), (lost_count) )){} else
 //------------------------------------------------------------------------------
-// Utworzenie i wyrzucenie ãimpulsatoraõ.
+// Utworzenie i wyrzucenie ‚Äπimpulsatora‚Ä∫.
 #define Yi_M(module,impulser)               I _Yi_var(module,impulser) = E_flow_Q_impulser_M( _Yi_uid(module,impulser) )
 #define Yi_W(module,impulser)               E_flow_Q_timer_W( _Yi_var(module,impulser) )
-// Deklaracja aktywacji ãimpulsatoraõ przez ãzadanieõ.
+// Deklaracja aktywacji ‚Äπimpulsatora‚Ä∫ przez ‚Äπzadanie‚Ä∫.
 #define Yi_A(module,impulser)               I _Yi_var(module,impulser) = E_flow_Q_impulser_M_srv( _Yi_uid(module,impulser) )
-// Aktywacja ãimpulsatoraõ.
+// Aktywacja ‚Äπimpulsatora‚Ä∫.
 #define Yi_F(module,impulser,time)          E_flow_Q_impulser_I_activate( _Yi_var(module,impulser), (time) )
-// Dezaktywacja ãimpulsatoraõ.
+// Dezaktywacja ‚Äπimpulsatora‚Ä∫.
 #define Yi_L(module,impulser)               E_flow_Q_impulser_I_deactivate( _Yi_var(module,impulser) )
-// Czekanie na wzbudzenie przez ãimpulsatorõ.
+// Czekanie na wzbudzenie przez ‚Äπimpulsator‚Ä∫.
 #define Yi_B(module,impulser)               if( !E_flow_Q_impulser_I_wait( _Yi_var(module,impulser) )){} else
 //------------------------------------------------------------------------------
-// Czekanie na wznowienie w nastÍpnym obiegu czasu.
+// Czekanie na wznowienie w nastƒôpnym obiegu czasu.
 #define I_B()                               if( !E_flow_Q_task_I_schedule() ){} else
 //------------------------------------------------------------------------------
-// Wyjúcie z ãzadaniaõ po procedurze zawierajπcej instrukcjÍ prze≥πczenia.
+// Wyj≈õcie z ‚Äπzadania‚Ä∫ po procedurze zawierajƒÖcej instrukcjƒô prze≈ÇƒÖczenia.
 #define I_V()                               if( !E_flow_Q_task_R_exit() ){} else
 //==============================================================================
-#define _G_var      J_autogen_line(G)
+#define _G_var          J_autogen_line(G)
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #ifdef C_line_report
-//TODO W przysz≥oúci zastπpiÊ niegwarantowane wypisywanie synchroniczne na wypisywanie do specjalnego wyjúcia danych, zawsze dostÍpnego, a niekoniecznie o duøej pojemnoúci.
-// ãRaport liniiõ nie wymagajπcy integralnoúci programu. w miejscach, gdzie nie moøna wykonywaÊ funkcji wypisywania integralnej tego programu. poniewaø nie moøna wywo≥ywaÊ øadnej funkcji obiektowoúci zarzπdzanej albo takiej funkcji moøe uøyÊ funkcja øπdania wypisania integralna tego programu.
-#define G_()        _unused B _G_var = yes; E_flow_Z_line_report_Z_line_I_sync( &__FILE__[0], __LINE__, 0 )
-// ãRaport liniiõ.
-#define G()         _unused B _G_var = no; E_flow_Z_line_report_Z_line_I( &__FILE__[0], __LINE__, 0 )
-// ãNiepowodzenie zakaÒczajπceõ (ewentualnπ instrukcjπ ìVî umieszczonπ na koÒcu linii). zaistnia≥e przez wejúcie na tÍ liniÍ tekstu programu.
-#define GV_(s)      _unused B _G_var = yes; E_flow_Z_line_report_Z_line_I_sync( &__FILE__[0], __LINE__, J_s(s) )
-// ãNiepowodzenie ostrzegajπceõ (bez instrukcji ìVî). ?
-#define GV(s)       _unused B _G_var = no; E_flow_Z_line_report_Z_line_I( &__FILE__[0], __LINE__, J_s(s) )
+//TODO W przysz≈Ço≈õci zastƒÖpiƒá niegwarantowane wypisywanie synchroniczne na wypisywanie do specjalnego wyj≈õcia danych, zawsze dostƒôpnego, a niekoniecznie o du≈ºej pojemno≈õci.
+// ‚ÄπRaport linii‚Ä∫ nie wymagajƒÖcy integralno≈õci programu. W miejscach, gdzie nie mo≈ºna wykonywaƒá funkcji wypisywania integralnej tego programu. Poniewa≈º nie mo≈ºna wywo≈Çywaƒá ≈ºadnej funkcji obiektowo≈õci zarzƒÖdzanej albo takiej funkcji mo≈ºe u≈ºyƒá funkcja ≈ºƒÖdania wypisania integralna tego programu.
+#define G_()            _unused B _G_var = yes; E_flow_Z_line_report_Z_line_I_sync( &__FILE__[0], __LINE__, 0 )
+// ‚ÄπRaport linii‚Ä∫.
+#define G()             _unused B _G_var = no; E_flow_Z_line_report_Z_line_I( &__FILE__[0], __LINE__, 0 )
+// ‚ÄπNiepowodzenie zaka≈ÑczajƒÖce‚Ä∫ (ewentualnƒÖ instrukcjƒÖ ‚ÄúV‚Äù umieszczonƒÖ na ko≈Ñcu linii). Zaistnia≈Çe przez wej≈õcie na tƒô liniƒô tekstu programu.
+#define GV_(s)          _unused B _G_var = yes; E_flow_Z_line_report_Z_line_I_sync( &__FILE__[0], __LINE__, J_s(s) )
+// ‚ÄπNiepowodzenie ostrzegajƒÖce‚Ä∫ (bez instrukcji ‚ÄúV‚Äù).‚ÄÉ„ÄÉ
+#define GV(s)           _unused B _G_var = no; E_flow_Z_line_report_Z_line_I( &__FILE__[0], __LINE__, J_s(s) )
 //------------------------------------------------------------------------------
-// Wypisywanie zmiennych programu; po ìGî/ìGVî/ìG_î/ìGV_î w linii.
-#define Gc(c)       if( _G_var ) E_flow_Z_line_report_Z_text_c_I_sync( J_s(c), c ); else E_flow_Z_line_report_Z_text_c_I( J_s(c), c )
-#define Gs(s,s_end) if( (s_end) - (s) ) Gs_l( s, s, (s_end) - (s) ); else Gs_l( s, "", 0 )
-#define Gs_(s,s_end) if( (s_end) - (s) ) Gs_l_( s, (s_end) - (s) ); else Gs_l_( "", 0 )
-#define Gs0(s)      Gs_l( s, s, 0 )
-#define Gs0_(s)     Gs_l_( s, 0 )
-#define Gsl(s,l)    if(l) Gs_l( s, s, (l) ); else Gs_l( s, "", 0 )
-#define Gsl_(s,l)   if(l) Gs_l_( s, (l) ); else Gs_l_( "", 0 )
-#define Gs_l(t,s,l) if( _G_var ) E_flow_Z_line_report_Z_text_s_I_sync( J_s(t), (s), (l) ); else E_flow_Z_line_report_Z_text_s_I( J_s(t), (s), (l) )
-#define Gs_l_(s,l)  if( _G_var ) E_flow_Z_line_report_Z_s_I_sync( (s), (l) ); else E_flow_Z_line_report_Z_s_I( (s), (l) )
-#define Gd(n)       if( _G_var ) E_flow_Z_line_report_Z_text_n_I_sync( J_s(n), (N)(n), sizeof(n), 10 ); else E_flow_Z_line_report_Z_text_n_I( J_s(n), (N)(n), sizeof(n), 10 )
-#define Gh(n)       if( _G_var ) E_flow_Z_line_report_Z_text_n_I_sync( J_s(n), (N)(n), sizeof(n), 16 ); else E_flow_Z_line_report_Z_text_n_I( J_s(n), (N)(n), sizeof(n), 16 )
+// Wypisywanie zmiennych programu; po ‚ÄúG‚Äù/‚ÄúGV‚Äù/‚ÄúG_‚Äù/‚ÄúGV_‚Äù w linii.
+#define Gc(c)           if( _G_var ) E_flow_Z_line_report_Z_text_c_I_sync( J_s(c), c ); else E_flow_Z_line_report_Z_text_c_I( J_s(c), c )
+#define Gs(s,s_end)     if( (s_end) - (s) ) Gs_l( s, s, (s_end) - (s) ); else Gs_l( s, "", 0 )
+#define Gs_(s,s_end)    if( (s_end) - (s) ) Gs_l_( s, (s_end) - (s) ); else Gs_l_( "", 0 )
+#define Gs0(s)          Gs_l( s, s, 0 )
+#define Gs0_(s)         Gs_l_( s, 0 )
+#define Gsl(s,l)        if(l) Gs_l( s, s, (l) ); else Gs_l( s, "", 0 )
+#define Gsl_(s,l)       if(l) Gs_l_( s, (l) ); else Gs_l_( "", 0 )
+#define Gs_l(t,s,l)     if( _G_var ) E_flow_Z_line_report_Z_text_s_I_sync( J_s(t), (s), (l) ); else E_flow_Z_line_report_Z_text_s_I( J_s(t), (s), (l) )
+#define Gs_l_(s,l)      if( _G_var ) E_flow_Z_line_report_Z_s_I_sync( (s), (l) ); else E_flow_Z_line_report_Z_s_I( (s), (l) )
+#define Gw(s,s_end)     if( (s_end) - (s) ) Gw_l( s, s, (s_end) - (s) ); else Gw_l( s, L"", 0 )
+#define Gw_(s,s_end)    if( (s_end) - (s) ) Gw_l_( s, (s_end) - (s) ); else Gw_l_( L"", 0 )
+#define Gw0(s)          Gw_l( s, s, 0 )
+#define Gw0_(s)         Gw_l_( s, 0 )
+#define Gwl(s,l)        if(l) Gw_l( s, s, (l) ); else Gw_l( s, L"", 0 )
+#define Gwl_(s,l)       if(l) Gw_l_( s, (l) ); else Gw_l_( L"", 0 )
+#define Gw_l(t,s,l)     if( _G_var ) E_flow_Z_line_report_Z_text_w_I_sync( J_w(t), (s), (l) ); else E_flow_Z_line_report_Z_text_w_I( J_w(t), (s), (l) )
+#define Gw_l_(s,l)      if( _G_var ) E_flow_Z_line_report_Z_w_I_sync( (s), (l) ); else E_flow_Z_line_report_Z_w_I( (s), (l) )
+#define Gd(n)           if( _G_var ) E_flow_Z_line_report_Z_text_n_I_sync( J_s(n), (N)(n), sizeof(n), 10 ); else E_flow_Z_line_report_Z_text_n_I( J_s(n), (N)(n), sizeof(n), 10 )
+#define Gh(n)           if( _G_var ) E_flow_Z_line_report_Z_text_n_I_sync( J_s(n), (N)(n), sizeof(n), 16 ); else E_flow_Z_line_report_Z_text_n_I( J_s(n), (N)(n), sizeof(n), 16 )
 #define Gq(q)
     #else
 #define G()
@@ -234,6 +236,8 @@ typedef P           *Pp; // Wskaünik do tablic adresÛw.
 #define Gs_(s,s_end)
 #define Gs0(s)
 #define Gs0_(s)
+#define Gsl(s,l)
+#define Gsl_(s,l)
 #define Gs_l(s)
 #define Gs_l_(s)
 #define Gd(n)
@@ -241,39 +245,42 @@ typedef P           *Pp; // Wskaünik do tablic adresÛw.
 #define Gq(q)
     #endif
 //------------------------------------------------------------------------------
-#define _V()        ExitProcess(1)
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//NDFN ZintegrowaÊ koncepcje ìVî razem z ìKî. I wtedy zostanie do≥πczona koncepcja procesÛw ërestartowalnychí ze stanu zachowanego w momencie wystπpienia takiego b≥Ídu (a nie zachowywanego ciπgle).
-//NKN ìVî sπ drogami wyjúcia po nieudanym ìKî wewnÍtrznym funkcji wo≥anej.
-// ãNierealizacje zakaÒczajπceõ (ìV_î) powinny byÊ stosowane dla procedur systemu operacyjnego, ktÛre muszπ siÍ udaÊ dla kontynuacji jakiegokolwiek przep≥ywu wykonania, oraz dla zwalniania oczywistych zasobÛw.
-#define V_(statement)                      V(statement) _V()
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//NKN ãNierealizacje blokoweõ (ìVî), ktÛre wystπpi≥y w ãzadaniuõ innym niø ìmainî, muszπ byÊ obs≥ugiwane przez zablokowanie siÍ ãzadaniaõ na linii wyjúcia z ìI_Dî i sygnalizacjÍ b≥Ídu (pÛ≥-ãzdarzenieõ?), by ãzadanieõ, ktÛre je uruchomi≥o (co najmniej ìmainî usuwajπce poúrednio wszystkie ãzadaniaõ i koÒczπce program), mog≥o normalnie je usunπÊ. Wtedy nie bÍdzie juø nigdy krytycznego (przez zgubienie danych i bytÛw sterowanych) przerywania programu z powodu b≥Ídu procedury systemu operacyjnego oprÛcz sytuacji, gdy lepiej bÍdzie natychmiast przerwaÊ program niø jeszcze coú rozwaliÊ z jego uszkodzonego wewnÍtrznego stanu.
     #ifdef C_line_report
-#define V(statement) \
-  if( (statement) || ( E_flow_Z_line_report_Z_line_I_error( &__FILE__[0], __LINE__ ), no )) \
-  { \
-  }else
+#define _V() \
+  {   E_flow_Z_line_report_I_write_Z_c( '\n' ); \
+      ExitProcess(1); \
+  }
     #else
-#define V(statement) \
-  if(statement) \
-  { \
-  }else
+#define _V()            ExitProcess(1)
     #endif
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#define J_assert(expr)                      if(expr){}else{ GV_(ASSERT); _V(); }
-//==============================================================================
-#define _forced_statement                   __asm__ volatile ( "" )
-#define _internal                           __attribute__ ((__visibility__( "internal" )))
-#define _packed                             __attribute__ ((__packed__))
-#define _unreachable                        __builtin_unreachable()
-#define _unused                             __attribute__ ((__unused__))
+#define _Ve()                               E_flow_Z_line_report_Z_line_I_error( &__FILE__[0], __LINE__ )
+#define Ve(statement,e) \
+  if( (statement) || (( e = GetLastError() ), _Ve(), no )) \
+  { \
+  }else
+#define V(statement) \
+  _unused DWORD J_autogen_line(e); \
+  Ve( (statement), J_autogen_line(e) )
+#define V_(statement)                       V(statement) _V()
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#ifdef BUILDING_DLL
-#define DLLIMPORT                           __declspec(dllexport)
-#else
-#define DLLIMPORT                           __declspec(dllimport)
-#endif
+#define J_assert(expr) \
+  if(expr) \
+  { \
+  }else \
+  { GV( "assertion: " J_s(expr) ); \
+    _V(); \
+  }
 //==============================================================================
-#define E_mem_Q_file_S_eof                  ( ~1L )
+#define alignof(v)                          _Alignof(v)
+#define _export
+#define _forced_statement                   __asm__ volatile ( "" )
+#define _internal
+#define _packed                             __attribute__ (( __packed__ ))
+    #ifndef _unreachable
+#define _unreachable                        __builtin_unreachable()
+    #endif
+#define _unused                             __attribute__ (( __unused__ ))
+//==============================================================================
+#define S_eof                               ( ~4L )
 /******************************************************************************/

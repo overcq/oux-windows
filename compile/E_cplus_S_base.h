@@ -1,16 +1,16 @@
-/*******************************************************************************
-*   ___   publicplace
-*  ¦OUX¦  C+
-*  ¦/C+¦  compile
-*   ---   C+
-*         simple common procedures
-* ©overcq                on "Gentoo Linux 17.1” “x86_64”            2020-11-28 Z
-*******************************************************************************/
-#define _inline static __attribute__ ((__always_inline__,__unused__))
+/******************************************************************************/
+#define _inline static inline __attribute__ (( __always_inline__, __unused__ ))
 //==============================================================================
 _inline
 Pc
 E_text_Z_s0_R_end( Pc s
+){  while( *s )
+        s++;
+    return s;
+}
+_inline
+Pw
+E_text_Z_w0_R_end( Pw s
 ){  while( *s )
         s++;
     return s;
@@ -21,14 +21,29 @@ E_text_Z_s0_R_l( Pc s
 ){  return E_text_Z_s0_R_end(s) - s;
 }
 _inline
+N
+E_text_Z_w0_R_l( Pw s
+){  return E_text_Z_w0_R_end(s) - s;
+}
+_inline
 Pc
 E_text_Z_s0_R_end_0( Pc s
 ){  return E_text_Z_s0_R_end(s) + 1;
 }
 _inline
+Pw
+E_text_Z_w0_R_end_0( Pw s
+){  return E_text_Z_w0_R_end(s) + 1;
+}
+_inline
 N
 E_text_Z_s0_R_l_0( Pc s
 ){  return E_text_Z_s0_R_end_0(s) - s;
+}
+_inline
+N
+E_text_Z_w0_R_l_0( Pw s
+){  return E_text_Z_w0_R_end_0(s) - s;
 }
 //------------------------------------------------------------------------------
 _inline
@@ -38,17 +53,23 @@ E_text_Z_s_P_0( Pc s
     return s;
 }
 _inline
+Pw
+E_text_Z_w_P_0( Pw s
+){  *s++ = '\0';
+    return s;
+}
+_inline
 Pc
 E_text_Z_s0_R_search_last_c( Pc s
 , C c
 ){  return E_text_Z_s_R_search_last_c( s, E_text_Z_s0_R_end_0(s), c );
 }
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-/*_inline
-int
-E_mem_Q_shared_M( N size
-){  return E_mem_Q_shared_M_key( IPC_PRIVATE, size );
-}*/
+_inline
+Pw
+E_text_Z_w0_R_search_last_c( Pw s
+, C c
+){  return E_text_Z_w_R_search_last_c( s, E_text_Z_w0_R_end_0(s), c );
+}
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 _inline
 B
@@ -71,6 +92,12 @@ E_mem_Q_tab_R( struct E_mem_Q_tab_Z *tab_
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 _inline
+void
+E_mem_Q_mask_W( Pc mask
+){  W(mask);
+}
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+_inline
 B
 E_flow_Q_task_R_exit( void
 ){  struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, E_base_S->E_flow_Q_task_S_current );
@@ -79,9 +106,9 @@ E_flow_Q_task_R_exit( void
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 _inline
 HANDLE
-E_mem_Q_file_R_handle( I id
+E_mem_Q_file_R_h( I id
 ){  struct E_mem_Q_file_Z *file = E_mem_Q_tab_R( E_base_S->E_mem_Q_file_S, id );
-    return file->handle;
+    return file->h;
 }
 _inline
 N

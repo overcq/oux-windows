@@ -1,37 +1,48 @@
 //-*-C-*-
 //******************************************************************************
-void
+N
 E_window_W( void
 ){  D_W( window, loop );
     I iter = E_mem_Q_tab_Q_iter_M( E_window_Q_window_S, ~0 );
     if( !~iter )
-    {   GV(NA); _V();
-    }
+        return ~1;
     for_each_q( window_id, E_window_Q_window_S, iter, E_mem_Q_tab )
     {   E_window_Q_window_W( window_id );
     }
-    E_mem_Q_tab_W( E_window_Q_window_S );
-    DestroyWindow( E_window_S->dnd_window->handle );
-    DeleteDC( E_window_S->dnd_window->dc );
-    DeleteObject( E_window_S->dnd_window->drawable );
-    E_mem_Q_tab_W( E_window_S->dnd_window->object );
-    if( !UnregisterClass( "main_window", E_base_S->E_flow_S_h_instance ))
-    {   GV(NA); _V();
-    }
-    if( !UnregisterClass( "dnd_window", E_base_S->E_flow_S_h_instance ))
-    {   GV(NA); _V();
-    }
-    E_window_font_W();
-    W( E_window_S );
+    if( E_mem_Q_tab_W( E_window_Q_window_S ))
+        return ~1;
+    V( DestroyWindow( E_window_S->dnd_window->handle ))
+        return ~1;
+    V( DeleteDC( E_window_S->dnd_window->dc ))
+        return ~1;
+    V( DeleteObject( E_window_S->dnd_window->drawable ))
+        return ~1;
+    N r = E_mem_Q_tab_W( E_window_S->dnd_window->object );
+    if(r)
+        return ~1;
+    V( UnregisterClass( L"main_window", E_base_S->E_flow_S_h_instance ))
+        return ~1;
+    V( UnregisterClass( L"dnd_window", E_base_S->E_flow_S_h_instance ))
+        return ~1;
+    r = E_window_font_W();
+    if(r)
+        return r;
+    return W( E_window_S );
 }
-void
+N
 E_window_font_W( void
 ){  for_each( id, E_window_Q_font_S, E_mem_Q_tab )
     {   struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, id );
+        N r;
         for_n( i, font->bitmap_n )
-            W( font->bitmap[i].bitmap );
-        W( font->bitmap );
+        {   r = W( font->bitmap[i].bitmap );
+            if(r)
+                return ~2;
+        }
+        r = W( font->bitmap );
+        if(r)
+            return ~2;
     }
-    E_mem_Q_tab_W( E_window_Q_font_S );
+    return E_mem_Q_tab_W( E_window_Q_font_S );
 }
 //******************************************************************************

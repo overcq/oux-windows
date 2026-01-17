@@ -1,8 +1,5 @@
 //-*-C-*-
 //******************************************************************************
-// S¹ to obiekty wizualne.
-// Ka¿dy obiekt okna jest jednokrotny w konkretnym oknie.
-//==============================================================================
 typedef
 void
 (*draw_object_proc)(
@@ -18,7 +15,7 @@ void
 , N8 // sequence
 );
 struct E_window_Q_object_Z
-{ void // Ale obiekt zawiera punkty, które narysuje ta funkcja w czasie wywo³ania.
+{ void
   (*draw)(
     struct E_window_Q_window_Z *
   , struct E_window_Q_object_Z *
@@ -35,8 +32,8 @@ struct E_window_Q_object_Z
   N child_n;
   I *child;
   P data;
-  LONG x, y;
-  LONG width, height; // Prostok¹t oczekiwanej widocznoœci obiektu.
+  S32 x, y;
+  S32 width, height;
   unsigned U_R( mode, lay_height )      :1;
   unsigned U_R( mode, draggable )       :1;
   unsigned U_R( state, drag_src )       :1;
@@ -57,16 +54,16 @@ struct E_window_Q_object_Z_data_Z_select_list
   N selected;
 };
 //==============================================================================
-LONG E_window_Q_object_S_layout_dx = 4, E_window_Q_object_S_layout_dy = 4;
+S32 E_window_Q_object_S_layout_dx = 4, E_window_Q_object_S_layout_dy = 4;
 //==============================================================================
 I
 E_window_Q_object_M(
   struct E_window_Q_window_Z *window
 , N child_n
-, LONG x
-, LONG y
-, LONG width
-, LONG height
+, S32 x
+, S32 y
+, S32 width
+, S32 height
 , void
   (*clear_data)(P)
 , void
@@ -82,16 +79,17 @@ E_window_Q_object_M(
   , N8
   )
 ){  I object_id = E_mem_Q_tab_I_add( window->object );
-    if( !~object_id )
+    if( object_id < 0 )
         return ~0;
     struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
     object->draw = draw;
     object->click = click;
     object->clear_data = clear_data;
     object->child_n = child_n;
-    Mt_( object->child, child_n );
+    Mt_( object->child, child_n + 1 );
     if( !object->child )
-    {   E_mem_Q_tab_I_remove( window->object, object_id );
+    {   if( E_mem_Q_tab_I_remove( window->object, object_id ))
+            return ~2;
         return ~0;
     }
     object->data = 0;
@@ -308,7 +306,7 @@ E_window_Q_object_Z_entry_I_draw(
     );
     struct E_window_Q_object_Z_data_Z_entry *object_data = object->data;
     struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, object_data->font );
-    LONG x = 0;
+    S32 x = 0;
     Pc s = object_data->s;
     for_n( i, object_data->text_start )
     {   U u = ~0;
@@ -340,7 +338,7 @@ E_window_Q_object_Z_entry_I_draw(
     *s = c;
     if( U_R( object_data->state, cursor_visible_ ))
     {   struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, object_data->font );
-        LONG x = 0;
+        S32 x = 0;
         Pc s = object_data->s;
         for_n( i, object_data->text_start )
         {   U u = ~0;
@@ -370,7 +368,7 @@ E_window_Q_object_Z_entry_I_draw(
         { { x, 0 }
         , { x, object->height - 1 }
         };
-        E_window_Q_object_I_draw_Z_lines( window, object, points, sizeof(points) / sizeof( points[0] ), 1 );
+        E_window_Q_object_I_draw_Z_lines( window, object, sizeof(points) / sizeof( points[0] ), points, 1 );
     }
 }
 //------------------------------------------------------------------------------
@@ -387,8 +385,8 @@ E_window_Q_object_Z_font_M(
 , I font_id
 , Pc label
 ){  struct E_window_Q_font_Z *font = E_mem_Q_tab_R( E_window_Q_font_S, font_id );
-    LONG width = 2, width_ = 0;
-    LONG height = font->height;
+    S32 width = 2, width_ = 0;
+    S32 height = font->height;
     Pc s = label;
     while( *s )
     {   if( *s == '\n' )
@@ -495,7 +493,7 @@ E_window_Q_object_Z_select_M(
     , E_window_Q_object_Z_select_I_draw
     , 0
     );
-    if( !~object_id )
+    if( object_id < 0 )
         return ~0;
     struct E_window_Q_object_Z_data_Z_select *M_( object_data );
     if( !object_data )
@@ -540,7 +538,6 @@ E_window_Q_object_Z_select_I_draw(
         }
       }
     , 2
-    
     );
     E_window_Q_object_I_draw_Z_lines( window, object
     , 3
@@ -575,7 +572,7 @@ E_window_Q_object_Z_select_list_M(
     , E_window_Q_object_Z_select_list_I_draw
     , 0
     );
-    if( !~object_id )
+    if( object_id < 0 )
         return ~0;
     struct E_window_Q_object_Z_data_Z_select_list *M_( object_data );
     if( !object_data )
@@ -657,7 +654,7 @@ E_window_Q_object_Z_button_font_M(
 , I font_id
 , Pc s
 ){  I button_id = E_window_Q_object_Z_button_M(window);
-    if( !~button_id )
+    if( button_id < 0 )
         return ~0;
     I font_id_ = E_window_Q_object_Z_font_M( window, font_id, s );
     if( !~font_id_ )
@@ -673,10 +670,10 @@ E_window_Q_object_Z_frame_entry_M(
 , I font_id
 , Pc s
 ){  I frame_id = E_window_Q_object_Z_frame_M(window);
-    if( !~frame_id )
+    if( frame_id < 0 )
         return ~0;
     I entry_id = E_window_Q_object_Z_entry_M( window, font_id, s );
-    if( !~entry_id )
+    if( entry_id < 0 )
     {   E_window_Q_object_W( window, frame_id );
         return ~0;
     }
@@ -689,15 +686,15 @@ E_window_Q_object_Z_frame_select_M(
 , I font_id
 , Pc s
 ){  I frame_id = E_window_Q_object_Z_frame_M(window);
-    if( !~frame_id )
+    if( frame_id < 0 )
         return ~0;
     I select_id = E_window_Q_object_Z_select_M(window);
-    if( !~select_id )
+    if( select_id < 0 )
     {   E_window_Q_object_W( window, frame_id );
         return ~0;
     }
     I entry_id = E_window_Q_object_Z_entry_M( window, font_id, s );
-    if( !~entry_id )
+    if( entry_id < 0 )
     {   E_window_Q_object_W( window, select_id );
         E_window_Q_object_W( window, frame_id );
         return ~0;
@@ -708,8 +705,8 @@ E_window_Q_object_Z_frame_select_M(
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 N
-E_window_Q_layout_I_store( Pc path
-){  I file_id = E_mem_Q_file_M( path, no, yes );
+E_window_Q_layout_I_store( Pw path
+){  I file_id = E_mem_Q_file_M( path, no );
     if( !~E_mem_Q_file_I_truncate( file_id ))
     {   E_mem_Q_file_W( file_id );
         return ~0;
@@ -733,8 +730,8 @@ E_window_Q_layout_I_store( Pc path
     return 0;
 }
 N
-E_window_Q_layout_I_restore( Pc path
-){  I file_id = E_mem_Q_file_M( path, no, no );
+E_window_Q_layout_I_restore( Pw path
+){  I file_id = E_mem_Q_file_M( path, no );
     for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
     {   struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
         for_each( object_id, window->object, E_mem_Q_tab )
@@ -751,7 +748,7 @@ E_window_Q_layout_I_restore( Pc path
     C c;
     N ret = E_mem_Q_file_R_c( file_id, &c );
     E_mem_Q_file_W( file_id );
-    return ret == E_mem_Q_file_S_eof ? 0 : ~0;
+    return ret == S_eof ? 0 : ~0;
 }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 N
@@ -774,10 +771,10 @@ Restart:;
         if( !stack )
             return ~0;
         N stack_i = ~0;
-        LONG next_x = E_window_Q_object_S_layout_dx;
-        LONG next_y = E_window_Q_object_S_layout_dy;
-        LONG after_x = E_window_Q_object_S_layout_dx;
-        LONG after_y = E_window_Q_object_S_layout_dy;
+        S32 next_x = E_window_Q_object_S_layout_dx;
+        S32 next_y = E_window_Q_object_S_layout_dy;
+        S32 after_x = E_window_Q_object_S_layout_dx;
+        S32 after_y = E_window_Q_object_S_layout_dy;
         O{  if( object->child_n )
             {   if( ~stack_i )
                     if( U_R( object->mode, lay_height ))
@@ -832,8 +829,8 @@ Restart:;
                     after_y = next_y + object->height + E_window_Q_object_S_layout_dy;
                 struct E_window_Q_object_Z *object_ = object;
                 N stack_i_ = stack_i;
-                LONG after_x_ = after_x;
-                LONG after_y_ = after_y;
+                S32 after_x_ = after_x;
+                S32 after_y_ = after_y;
                 do
                 {   object_ = stack[ stack_i_ ].object;
                     if( object_->width < after_x_ - object_->x )

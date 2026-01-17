@@ -1,87 +1,85 @@
 //-*-C-*-
-//******************************************************************************
-//DFN Globalnie: utworzenie ‹modu³u› ([…]“_M”) mo¿e byæ wykonane w programie tylko raz.
-//==============================================================================
+/******************************************************************************/
+_export
 struct E_base_Z
 { N E_flow_Q_timer_S_last_real_time;
   N E_flow_Q_timer_S_next_real_time;
+  Pw E_flow_S_system_name;
+  Pw E_flow_S_exe_name;
   HINSTANCE E_flow_S_h_instance;
-  Pc E_flow_S_system_name;
-  Pc E_flow_S_hostname;
-  Pc E_flow_S_exe_name;
-  Pc E_flow_S_cmd_line;
-  Pc E_flow_S_cwd;
+  Pw E_flow_S_cmd_line;
+  Pw E_flow_S_cwd;
+  Pc cpu_taken;
+  N cpu_taken_length;
+  HANDLE E_mem_Q_blk_S_threads_sync_mutex;
   N E_mem_S_page_size;
   N E_mem_S_page_granulation;
   struct E_mem_Q_blk_Z_allocated *E_mem_Q_blk_S_allocated;
   N E_mem_Q_blk_S_mapped_id, E_mem_Q_blk_S_decommited_id, E_mem_Q_blk_S_free_id, E_mem_Q_blk_S_allocated_id;
-  N *E_mem_Q_blk_Q_table_M_from_free_or_map_0_S_allocated_id[3];
-  N E_mem_Q_blk_Q_table_M_from_free_or_map_0_S_table_id[3];
-  N E_mem_Q_blk_Q_table_M_from_free_or_map_0_S_allocated_id_n;
-  N E_flow_Z_task_stacks_S_n_pages;
-  struct E_mem_Q_tab_Z *E_flow_Q_task_S; // Ta tablica nie mo¿e mieæ tworzonego “E_mem_Q_tab_Q_iter”.
+  N *E_mem_Q_blk_Q_table_M_from_free_or_map_S_allocated_id[3];
+  N E_mem_Q_blk_Q_table_M_from_free_or_map_S_table_id[3];
+  N E_mem_Q_blk_Q_table_M_from_free_or_map_S_allocated_id_n;
+  struct E_mem_Q_tab_Z *E_flow_Q_task_S; // Ta tablica nie moÅ¼e mieÄ‡ tworzonego â€œE_mem_Q_tab_Q_iterâ€.
   struct E_mem_Q_tab_Z *E_flow_Q_task_S_uid_subid;
   struct E_mem_Q_tab_Z *E_flow_Q_report_S;
-  N E_flow_Q_process_call_S_ping_period;
   struct E_mem_Q_tab_Z *E_flow_Q_timer_S;
-  struct E_mem_Q_tab_Z *E_flow_Q_process_call_srv_S;
-  struct E_mem_Q_tab_Z *E_flow_Q_process_call_cli_S;
   struct E_mem_Q_tab_Z *E_mem_Q_file_S;
   Pc E_mem_Q_file_S_buffer;
   N E_mem_Q_file_S_buffer_l;
   struct E_mem_Q_tab_Z *E_io_Q_stream_out_S;
-  N E_flow_S_exe_pid;
+  N32 E_flow_S_exe_pid;
+  N32 E_flow_S_stderr_cp;
   I E_flow_Q_task_S_current;
-  unsigned U_R( E_flow_S_signal, exit )                 :1;
-  unsigned U_R( E_flow_S_signal, exit_all )             :1;
+  unsigned U_R( E_flow_S_signal, exit ) :1;
     #ifdef C_line_report
-  C E_flow_Z_line_report_N_n_S[ J_n_10_max_digits( sizeof(N) ) + 1 ];
+  W E_flow_Z_line_report_N_n_S[ J_n_10_max_digits( sizeof(N) ) + 1 ];
     #endif
-  HANDLE E_flow_S_resume;
   HANDLE E_flow_S_stderr;
-  LPTOP_LEVEL_EXCEPTION_FILTER E_flow_S_default_exception_filter;
+  HANDLE E_flow_S_resume;
 } *E_base_S;
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+extern char **environ;
 //==============================================================================
 _internal
-void
-E_mem_M_blk( void
-){  SYSTEM_INFO si;
-    GetSystemInfo( &si );
-    N initial_size = E_simple_Z_n_I_align_up_to_v2( sizeof( *E_base_S ) + sizeof( struct E_mem_Q_blk_Z_mapped ) + sizeof( struct E_mem_Q_blk_Z_free ) + 4 * sizeof( struct E_mem_Q_blk_Z_allocated ), si.dwAllocationGranularity );
-    E_base_S = VirtualAlloc( 0, initial_size, MEM_COMMIT, PAGE_READWRITE );
-    if( !E_base_S )
-    {   _V();
-    }
-    E_base_S->E_flow_S_system_name = "oux";
-    E_base_S->E_flow_S_exe_name = E_mem_Q_file_S_filename_separator_s;
-    E_base_S->E_mem_S_page_size = si.dwPageSize;
-    E_base_S->E_mem_S_page_granulation = si.dwAllocationGranularity;
-    E_base_S->E_flow_Q_task_S_current = 0;
-    E_base_S->E_flow_Q_timer_S_next_real_time = GetTickCount() + ( (N)~0 >> 1 );
+N
+E_mem_M_blk( SYSTEM_INFO *si
+){  N initial_size = E_simple_Z_n_I_align_up_to_v2( sizeof( *E_base_S ) + sizeof( struct E_mem_Q_blk_Z_mapped ) + sizeof( struct E_mem_Q_blk_Z_free ) + 4 * sizeof( struct E_mem_Q_blk_Z_allocated ), si->dwAllocationGranularity );
+    if( !( E_base_S = VirtualAlloc( 0
+    , initial_size
+    , MEM_COMMIT
+    , PAGE_READWRITE
+    )))
+        return ~0;
+        #ifdef E_mem_Q_blk_C_debug
+    E_mem_Q_blk_P_fill_c( E_base_S, initial_size, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+        #endif
+    E_base_S->E_flow_S_system_name = L"oux";
+    E_base_S->E_flow_S_exe_name = E_mem_Q_file_S_filename_separator_w;
+    E_base_S->E_mem_S_page_size = si->dwPageSize;
+    E_base_S->E_mem_S_page_granulation = si->dwAllocationGranularity;
+    E_base_S->E_flow_Q_timer_S_next_real_time = ~0ULL;
     U_L( E_base_S->E_flow_S_signal, exit );
-    U_L( E_base_S->E_flow_S_signal, exit_all );
     E_base_S->E_flow_S_exe_pid = GetCurrentProcessId();
-    E_base_S->E_mem_Q_blk_S_mapped_id = 1;
-    E_base_S->E_mem_Q_blk_S_decommited_id = 2;
+    E_base_S->E_mem_Q_blk_S_decommited_id = 0;
+    E_base_S->E_mem_Q_blk_S_mapped_id = 2;
     E_base_S->E_mem_Q_blk_S_free_id = 3;
     E_base_S->E_mem_Q_blk_S_allocated_id = 4;
-    E_base_S->E_mem_Q_blk_Q_table_M_from_free_or_map_0_S_allocated_id_n = 0;
     E_base_S->E_mem_Q_blk_S_allocated = (P)( (Pc)E_base_S + sizeof( *E_base_S ) + sizeof( struct E_mem_Q_blk_Z_mapped ) + sizeof( struct E_mem_Q_blk_Z_free ));
-    E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_mapped_id ].p = (Pc)E_base_S + sizeof( *E_base_S );
-    E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_mapped_id ].u = sizeof( struct E_mem_Q_blk_Z_mapped );
-    E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_mapped_id ].n = 1;
     E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_decommited_id ].p = (P)1;
     E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_decommited_id ].u = sizeof( struct E_mem_Q_blk_Z_decommited );
     E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_decommited_id ].n = 0;
+    E_base_S->E_mem_Q_blk_S_allocated[1].p = (P)E_base_S;
+    E_base_S->E_mem_Q_blk_S_allocated[1].u = 1;
+    E_base_S->E_mem_Q_blk_S_allocated[1].n = sizeof( *E_base_S );
+    E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_mapped_id ].p = (P)( (Pc)E_base_S + sizeof( *E_base_S ));
+    E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_mapped_id ].u = sizeof( struct E_mem_Q_blk_Z_mapped );
+    E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_mapped_id ].n = 1;
     E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_free_id ].p = (P)( (Pc)E_base_S + sizeof( *E_base_S ) + sizeof( struct E_mem_Q_blk_Z_mapped ));
     E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_free_id ].u = sizeof( struct E_mem_Q_blk_Z_free );
     E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_free_id ].n = 1;
     E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_allocated_id ].p = (P)E_base_S->E_mem_Q_blk_S_allocated;
     E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_allocated_id ].u = sizeof( struct E_mem_Q_blk_Z_allocated );
     E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_allocated_id ].n = 5;
-    E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_allocated_id + 1 ].p = (P)E_base_S;
-    E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_allocated_id + 1 ].u = 1;
-    E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_allocated_id + 1 ].n = sizeof( *E_base_S );
     struct E_mem_Q_blk_Z_mapped *mapped_p = (P)E_base_S->E_mem_Q_blk_S_allocated[ E_base_S->E_mem_Q_blk_S_mapped_id ].p;
     mapped_p[0].p = (P)E_base_S;
     mapped_p[0].l = initial_size;
@@ -90,39 +88,63 @@ E_mem_M_blk( void
     free_p[0].l = mapped_p[0].p + mapped_p[0].l - free_p[0].p;
     if( !free_p[0].l )
         free_p[0].p = 0;
+    if( !( E_base_S->E_mem_Q_blk_S_threads_sync_mutex = CreateMutex( 0, no, 0 )))
+        return ~1;
+    return 0;
 }
 _internal
-void
+N
 E_mem_M_file( void
 ){  E_base_S->E_mem_Q_file_S = E_mem_Q_tab_M( sizeof( struct E_mem_Q_file_Z ), 0 );
     if( !E_base_S->E_mem_Q_file_S )
-    {   GV_(NA); _V();
-    }
-    E_base_S->E_mem_Q_file_S_buffer_l = E_base_S->E_mem_S_page_granulation; //CONF Wartoœæ optymalna, ale mo¿e byæ wymagana wiêksza.
-    V_( E_base_S->E_mem_Q_file_S_buffer = VirtualAlloc( 0, E_base_S->E_mem_Q_file_S_buffer_l , MEM_COMMIT , PAGE_READWRITE ));
+        return ~0;
+    E_base_S->E_mem_Q_file_S_buffer_l = E_base_S->E_mem_S_page_size; //CONF WartoÅ›Ä‡ optymalna, ale moÅ¼e byÄ‡ wymagana wiÄ™ksza.
+    V( E_base_S->E_mem_Q_file_S_buffer = VirtualAlloc( 0, E_base_S->E_mem_Q_file_S_buffer_l, MEM_COMMIT, PAGE_READWRITE ))
+        return ~1;
+        #ifdef E_mem_Q_blk_C_debug
+    E_mem_Q_blk_P_fill_c( E_base_S->E_mem_Q_file_S_buffer, E_base_S->E_mem_Q_file_S_buffer_l, 0xa5 ); //TODO Procedura usuwajÄ…ca zerowanie nowej pamiÄ™ci na czas usuwania zmiennych globalnych i testÃ³w.
+        #endif
+    return 0;
 }
-void
+_internal
+N
+E_io_M_stream( void
+){  E_base_S->E_io_Q_stream_out_S = E_mem_Q_tab_M( sizeof( struct E_io_Q_stream_out_Z ), 0 );
+    if( !E_base_S->E_io_Q_stream_out_S )
+        return ~0;
+    if( E_mem_Q_tab_Q_iter_M( E_base_S->E_io_Q_stream_out_S, ~0 ) < 0 )
+        return ~1;
+        #ifdef C_line_report
+    if( E_io_Q_stream_out_M_h( E_base_S->E_flow_S_stderr ) < 0 )
+        return ~1;
+        #endif
+    return 0;
+}
+_export
+N
 E_base_M( HINSTANCE h_instance
-, Pc cmd_line
-){
+){  SYSTEM_INFO si;
+    GetSystemInfo( &si );
+    N r = E_mem_M_blk( &si );
+    if(r)
+        return r;
+    E_base_S->E_flow_S_exe_pid = GetCurrentProcessId();
         #ifdef C_line_report
     AllocConsole();
-        #endif
-    E_mem_M_blk();
-    E_base_S->E_flow_S_h_instance = h_instance;
-    E_base_S->E_flow_S_cmd_line = cmd_line;
-    MEMORYSTATUS ms;
-    GlobalMemoryStatus( &ms );
-    E_base_S->E_flow_Z_task_stacks_S_n_pages = ms.dwAvailPhys / E_base_S->E_mem_S_page_size;
-    E_base_S->E_flow_Q_task_S_uid_subid = E_mem_Q_tab_M( sizeof( struct E_mem_Q_tab_Z * ), 0 );
-        #ifdef C_line_report
+    if(( E_base_S->E_flow_S_stderr = CreateFile( L"CONOUT$", GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0 )) == INVALID_HANDLE_VALUE )
+        #else
     E_base_S->E_flow_S_stderr = GetStdHandle( STD_ERROR_HANDLE );
         #endif
-    // Odblokowanie dostêpu do tablicy ‹zadañ›.
+        return ~0;
+    E_base_S->E_flow_S_stderr_cp = GetConsoleCP();
+    if( !E_base_S->E_flow_S_stderr_cp )
+        return ~0;
+    E_base_S->E_flow_S_h_instance = h_instance;
+    E_base_S->E_flow_S_cmd_line = GetCommandLine();
+    // Odblokowanie dostÄ™pu do tablicy â€¹zadaÅ„â€º.
     E_base_S->E_flow_Q_task_S = E_mem_Q_tab_M( sizeof( struct E_flow_Q_task_Z ), 1 );
     if( !E_base_S->E_flow_Q_task_S )
-    {   GV_(NA); _V();
-    }
+        return ~0;
     struct E_flow_Q_task_Z *task = E_mem_Q_tab_R( E_base_S->E_flow_Q_task_S, 0 );
     *task = ( struct E_flow_Q_task_Z )
     { .run_state = E_flow_Z_run_state_S_ready
@@ -131,63 +153,66 @@ E_base_M( HINSTANCE h_instance
         #endif
     };
     task->thread = GetCurrentThread();
-    // Ustawienie podstawowych zmiennych ‹modu³u›.
-    HANDLE h_module = GetModuleHandle(0);
-    V_( h_module );
+    U_L( task->type, system_unblock_report );
+    U_L( task->type, async );
+    // Ustawienie podstawowych zmiennych â€¹moduÅ‚uâ€º.
+    HANDLE h_module;
+    V( h_module = GetModuleHandle(0) )
+        return ~1;
     N l;
-    Pc s = M(4096);
+    Pw s = Mt( sizeof(W), 4096 );
     if( !s )
-    {   GV_(NA); _V();
-    }
-    V_( l = GetModuleFileName( h_module, s, 4096 - 1 ));
+        return ~1;
+    if( !( l = GetModuleFileName( h_module, s, 4096 - 1 )))
+        return ~1;
     if( !E_mem_Q_blk_I_remove( &s, l + 1, 4096 - ( l + 1 )))
-    {   GV_(NA); _V();
-    }
-    Pc s_ = E_text_Z_s0_R_search_last_c_( E_text_Z_s0_R_end(s), E_mem_Q_file_S_filename_separator );
+        return ~1;
+    Pw s_ = E_text_Z_w0_R_search_last_c_( E_text_Z_w0_R_end(s), E_mem_Q_file_S_filename_separator );
     if( !E_mem_Q_blk_I_remove( &s, 0, s_ + 1 - s ))
-    {   GV_(NA); _V();
-    }
+        return ~1;
     E_base_S->E_flow_S_exe_name = s;
-    V_( l = GetCurrentDirectory( 0, 0 ));
-    s = M(l);
+    V( l = GetCurrentDirectory( 0, 0 ))
+        return ~1;
+    s = Mt( sizeof(W), l );
     if( !s )
-    {   GV_(NA); _V();
-    }
-    V_( GetCurrentDirectory( l, s ) == l - 1 );
-    if( !E_text_Z_s0_T_eq_s0( s, E_mem_Q_file_S_filename_separator_s ))
+        return ~1;
+    V( GetCurrentDirectory( l, s ) == l - 1 )
+        return ~1;
+    if( E_text_Z_w0_T_eq_w0( s, E_mem_Q_file_S_filename_separator_w ))
+    {   r = W(s);
+        if(r)
+            return r;
+        E_base_S->E_flow_S_cwd = E_mem_Q_file_S_filename_separator_w;
+    }else
         E_base_S->E_flow_S_cwd = s;
-    else
-        W(s);
-    // Uruchomienie funkcjonalnoœci ‹modu³u›.
+    // Uruchomienie funkcjonalnoÅ›ci â€¹moduÅ‚uâ€º.
+    E_base_S->E_flow_S_resume = CreateEvent( 0, no, no, 0 );
+    if( !E_base_S->E_flow_S_resume )
+        return ~1;
+    E_base_S->E_flow_Q_task_S_uid_subid = E_mem_Q_tab_M( sizeof( struct E_mem_Q_tab_Z * ), 0 );
     if( !E_base_S->E_flow_Q_task_S_uid_subid )
-    {   GV_(NA); _V();
-    }
+        return ~1;
     E_base_S->E_flow_Q_report_S = E_mem_Q_tab_M( sizeof( struct E_flow_Q_report_Z ), 0 );
     if( !E_base_S->E_flow_Q_report_S )
-    {   GV_(NA); _V();
-    }
+        return ~1;
     E_base_S->E_flow_Q_timer_S = E_mem_Q_tab_M( sizeof( struct E_flow_Q_timer_Z ), 0 );
     if( !E_base_S->E_flow_Q_timer_S )
-    {   GV_(NA); _V();
-    }
-    E_base_S->E_flow_Q_process_call_srv_S = E_mem_Q_tab_M( sizeof( struct E_flow_Q_process_call_srv_Z ), 0 );
-    if( !E_base_S->E_flow_Q_process_call_srv_S )
-    {   GV_(NA); _V();
-    }
-    E_base_S->E_flow_Q_process_call_cli_S = E_mem_Q_tab_M( sizeof( struct E_flow_Q_process_call_cli_Z ), 0 );
-    if( !E_base_S->E_flow_Q_process_call_cli_S )
-    {   GV_(NA); _V();
-    }
-    E_mem_M_file();
-    V_( E_base_S->E_flow_S_resume = CreateEvent( 0, no, no, 0 ));
-    E_base_S->E_flow_S_default_exception_filter = SetUnhandledExceptionFilter( E_flow_I_exception_handler );
-    E_base_S->E_flow_Q_process_call_S_ping_period = 1000;
-    D_M( flow, call_srv )
-    {   GV_(NA); _V();
-    }
-    D_M( mem, file_save )
-    {   GV_(NA); _V();
-    }
+        return ~1;
+    E_base_S->cpu_taken_length = si.dwNumberOfProcessors;
+    E_base_S->cpu_taken = --E_base_S->cpu_taken_length ? E_mem_Q_mask_M( E_base_S->cpu_taken_length ) : 0;
+    r = E_mem_M_file();
+    if(r)
+        return r;
+    r = E_io_M_stream();
+    if(r)
+        return r;
+    r = D_M( io, stream_write, 0 );
+    if( (S)r < 0 )
+        return r;
+    r = D_M( mem, file_save, 0 );
+    if( (S)r < 0 )
+        return r;
     E_flow_Z_stat_I_stat();
+    return 0;
 }
-//******************************************************************************
+/******************************************************************************/

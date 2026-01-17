@@ -1,11 +1,5 @@
 //-*-C-*-
 //******************************************************************************
-// Skróty do dokumentacji:
-// ‘state’– stan obiektu.
-// ‘mode’ wewn¹trzprogramowy– ze wzglêdu na odwewnêtrzn¹ dezintegralnoœæ (nieprzewidywalnoœæ przychodz¹cych sygna³ów) wejœæ/wyjœæ deterministycznych algorytmów przetwarzania danych w sterowniku– wyj¹tkowy (oparty na ·alternatywnych fragmentach· tego samego algorytmu w pe³nym determinizmie) tryb przetwarzania danych podczas przemiany wewnêtrznej.
-// ‘req’– ¿¹danie realizacji funkcji zbiorczej.
-// ‘ex’– uzupe³nienie rodzaju nastêpuj¹cej zmiany (np. ‘mode’).
-//==============================================================================
 struct E_window_Q_window_Z
 { struct E_mem_Q_tab_Z *object;
   HWND handle;
@@ -33,22 +27,12 @@ E_window_Q_window_M(
         return ~0;
     struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
     window->x = window->y = 0;
-    window->width = window->height = 0;
-    window->dc = window->dc_object_mask = 0;
-    window->drawable = 0;
-    window->object = E_mem_Q_tab_M( sizeof( struct E_window_Q_object_Z ), 0 );
-    if( !window->object )
-    {   GV_(NA);
-        if( !~E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
-        {   GV_(NA);
-        }
-        return ~0;
-    }
-    window->object_mask = 0;
+    window->width = width;
+    window->height = height;
     window->handle = CreateWindowEx(
       WS_EX_ACCEPTFILES
-    , "main_window"
-    , "OUX/C+ window"
+    , L"main_window"
+    , L"OUX/C+ window"
     , WS_OVERLAPPEDWINDOW
     , CW_USEDEFAULT
     , CW_USEDEFAULT
@@ -59,26 +43,180 @@ E_window_Q_window_M(
     , E_base_S->E_flow_S_h_instance
     , 0
     );
-    if( !window->handle )
-    {   GV_(NA);
-        E_mem_Q_tab_W( window->object );
-        if( !~E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
-        {   GV_(NA);
-        }
+    V( window->handle )
+    {   if( E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+            return ~2;
+        return ~0;
+    }
+    HDC dc;
+    V( dc = GetDC( window->handle ))
+    {   V( DestroyWindow( window->handle ))
+            return ~2;
+        if( E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+            return ~2;
+        return ~0;
+    }
+    V( window->dc = CreateCompatibleDC(dc) )
+    {   V( ReleaseDC( window->handle, dc ))
+            return ~2;
+        V( DestroyWindow( window->handle ))
+            return ~2;
+        if( E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+            return ~2;
+        return ~0;
+    }
+    V( SetBkMode( window->dc, TRANSPARENT ))
+    {   V( DeleteDC( window->dc ))
+            return ~2;
+        V( ReleaseDC( window->handle, dc ))
+            return ~2;
+        V( DestroyWindow( window->handle ))
+            return ~2;
+        if( E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+            return ~2;
+        return ~0;
+    }
+    V( window->drawable = CreateCompatibleBitmap( dc, window->width, window->height ))
+    {   V( DeleteDC( window->dc ))
+            return ~2;
+        V( ReleaseDC( window->handle, dc ))
+            return ~2;
+        V( DestroyWindow( window->handle ))
+            return ~2;
+        if( E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+            return ~2;
+        return ~0;
+    }
+    V( SelectObject( window->dc, window->drawable ))
+    {   V( DeleteDC( window->dc ))
+            return ~2;
+        V( DeleteObject( window->drawable ))
+            return ~2;
+        V( ReleaseDC( window->handle, dc ))
+            return ~2;
+        V( DestroyWindow( window->handle ))
+            return ~2;
+        if( E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+            return ~2;
+        return ~0;
+    }
+    V( window->dc_object_mask = CreateCompatibleDC(dc) )
+    {   V( DeleteDC( window->dc ))
+            return ~2;
+        V( DeleteObject( window->drawable ))
+            return ~2;
+        V( ReleaseDC( window->handle, dc ))
+            return ~2;
+        V( DestroyWindow( window->handle ))
+            return ~2;
+        if( E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+            return ~2;
+        return ~0;
+    }
+    V( SetBkMode( window->dc_object_mask, TRANSPARENT ))
+    {   V( DeleteDC( window->dc_object_mask ))
+            return ~2;
+        V( DeleteDC( window->dc ))
+            return ~2;
+        V( DeleteObject( window->drawable ))
+            return ~2;
+        V( ReleaseDC( window->handle, dc ))
+            return ~2;
+        V( DestroyWindow( window->handle ))
+            return ~2;
+        if( E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+            return ~2;
+        return ~0;
+    }
+    V( window->object_mask = CreateCompatibleBitmap( dc, window->width, window->height ))
+    {   V( DeleteDC( window->dc_object_mask ))
+            return ~2;
+        V( DeleteDC( window->dc ))
+            return ~2;
+        V( DeleteObject( window->drawable ))
+            return ~2;
+        V( ReleaseDC( window->handle, dc ))
+            return ~2;
+        V( DestroyWindow( window->handle ))
+            return ~2;
+        if( E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+            return ~2;
+        return ~0;
+    }
+    V( ReleaseDC( window->handle, dc ))
+    {   V( DeleteDC( window->dc_object_mask ))
+            return ~2;
+        V( DeleteObject( window->object_mask ))
+            return ~2;
+        V( DeleteDC( window->dc ))
+            return ~2;
+        V( DeleteObject( window->drawable ))
+            return ~2;
+        V( DestroyWindow( window->handle ))
+            return ~2;
+        if( E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+            return ~2;
+        return ~0;
+    }
+    V( SelectObject( window->dc_object_mask, window->object_mask ))
+    {   V( DeleteDC( window->dc_object_mask ))
+            return ~2;
+        V( DeleteObject( window->object_mask ))
+            return ~2;
+        V( DeleteDC( window->dc ))
+            return ~2;
+        V( DeleteObject( window->drawable ))
+            return ~2;
+        V( DestroyWindow( window->handle ))
+            return ~2;
+        if( E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+            return ~2;
+        return ~0;
+    }
+    window->object = E_mem_Q_tab_M( sizeof( struct E_window_Q_object_Z ), 0 );
+    if( !window->object )
+    {   V( DeleteDC( window->dc_object_mask ))
+            return ~2;
+        V( DeleteObject( window->object_mask ))
+            return ~2;
+        V( DeleteDC( window->dc ))
+            return ~2;
+        V( DeleteObject( window->drawable ))
+            return ~2;
+        V( DestroyWindow( window->handle ))
+            return ~2;
+        if( E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+            return ~2;
         return ~0;
     }
     ShowWindow( window->handle, E_window_S->cmd_show );
-    UpdateWindow( window->handle );
+    V( UpdateWindow( window->handle ))
+    {   if( E_mem_Q_tab_W( window->object ))
+            return ~2;
+        V( DeleteDC( window->dc_object_mask ))
+            return ~2;
+        V( DeleteObject( window->object_mask ))
+            return ~2;
+        V( DeleteDC( window->dc ))
+            return ~2;
+        V( DeleteObject( window->drawable ))
+            return ~2;
+        V( DestroyWindow( window->handle ))
+            return ~2;
+        if( E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id ))
+            return ~2;
+        return ~0;
+    }
     return window_id;
 }
 void
 E_window_Q_window_W( I window_id
 ){  struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
-    DestroyWindow( window->handle );
-    DeleteDC( window->dc_object_mask );
-    DeleteDC( window->dc );
-    DeleteObject( window->object_mask );
-    DeleteObject( window->drawable );
+    V_( DestroyWindow( window->handle ));
+    V_( DeleteDC( window->dc_object_mask ));
+    V_( DeleteDC( window->dc ));
+    V_( DeleteObject( window->object_mask ));
+    V_( DeleteObject( window->drawable ));
     E_mem_Q_tab_W( window->object );
     E_mem_Q_tab_I_remove( E_window_Q_window_S, window_id );
 }

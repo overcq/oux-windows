@@ -2,42 +2,30 @@
 //******************************************************************************
 D( window, loop )
 {   X_M( window, loop );
-    I_D
-    {   X_B( window, loop, 0 )
+    O{  X_B( window, loop, 0 )
             break;
         MSG msg;
-        E_flow_Q_task_I_touch_stack();
         while( PeekMessage( &msg, 0, 0, 0, PM_REMOVE ))
-        {   G_(); Gh( msg.message );
-            switch(msg.message)
+            switch( msg.message )
             { case WM_QUIT:
                     U_F( E_base_S->E_flow_S_signal, exit );
-                    break;
-              case WM_PAINT:
-                    if( msg.hwnd == E_window_S->dnd_window->handle )
-                    {   for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
-                        {   struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
-                            MSG msg_ = msg;
-                            msg_.hwnd = window->handle;
-                            TranslateMessage( &msg_ );
-                            DispatchMessage( &msg_ );
-                        }
-                    }
+                    goto End;
               default:
-                    TranslateMessage( &msg );
+                {   TranslateMessage( &msg );
                     DispatchMessage( &msg );
                     break;
+                }
             }
-        }
+End:;
     }
     X_W( window, loop );
 }
 CALLBACK LRESULT
-E_window_Q_window_I_proc_dnd( HWND h_window
+E_window_Q_window_I_proc_dnd( HWND window_h
 , UINT msg
 , WPARAM w_param
 , LPARAM l_param
-){  if( E_window_S->dnd_window->handle == h_window )
+){  if( window_h == E_window_S->dnd_window->handle )
     {   switch(msg)
         { case WM_DESTROY:
             {   PostQuitMessage(0);
@@ -47,25 +35,23 @@ E_window_Q_window_I_proc_dnd( HWND h_window
             {   E_window_Q_window_I_draw_P_pen( E_window_S->dnd_window, E_window_Q_theme.window_bg );
                 E_window_Q_window_I_draw_P_brush( E_window_S->dnd_window, E_window_Q_theme.window_bg );
                 E_window_Q_window_I_fill_Z_rectangles( E_window_S->dnd_window, 1, ( RECT[] ){ 0, 0, E_window_S->dnd_window->width, E_window_S->dnd_window->height } );
-                E_window_S->region = CreateRectRgn( 0, 0, 0, 0 );
-                if( !E_window_S->region )
-                {   GV_(NA); _V();
-                }
+                V_( E_window_S->region = CreateRectRgn( 0, 0, 0, 0 ));
                 U_F( E_window_S->state, draw_object_drag_move );
-                for_each( object_id, E_window_S->dnd_window->object, E_mem_Q_tab ) //NDFN Zak³adana kolejnoœæ od na spodzie do na wierzchu. Nie wiadomo, czy “_q” jest konieczne.
+                for_each( object_id, E_window_S->dnd_window->object, E_mem_Q_tab )
                 {   struct E_window_Q_object_Z *object = E_mem_Q_tab_R( E_window_S->dnd_window->object, object_id );
-                    object->draw( E_window_S->dnd_window, object ); //NDFN Nieprzerysowywanie wszystkich obiektów dla ka¿dej klatki animacji.
+                    object->draw( E_window_S->dnd_window, object );
                 }
                 U_L( E_window_S->state, draw_object_drag_move );
-                if( !SetWindowRgn( E_window_S->dnd_window->handle, E_window_S->region, TRUE ))
-                {   GV_(NA); _V();
-                }
+                V_( SetWindowRgn( E_window_S->dnd_window->handle, E_window_S->region, TRUE ));
                 PAINTSTRUCT ps;
-                HDC dc = BeginPaint( E_window_S->dnd_window->handle, &ps );
-                if( !BitBlt( dc, 0, 0, E_window_S->dnd_window->width, E_window_S->dnd_window->height, E_window_S->dnd_window->dc, 0, 0, SRCCOPY ))
-                {   GV_(NA); _V();
-                }
-                EndPaint( E_window_S->dnd_window->handle, &ps );
+                HDC dc;
+                V_( dc = BeginPaint( E_window_S->dnd_window->handle, &ps ));
+                V_( BitBlt( dc, 0, 0
+                , E_window_S->dnd_window->width, E_window_S->dnd_window->height
+                , E_window_S->dnd_window->dc, 0, 0
+                , SRCCOPY
+                ));
+                V_( EndPaint( E_window_S->dnd_window->handle, &ps ));
                 break;
             }
           case WM_SIZE:
@@ -74,43 +60,36 @@ E_window_Q_window_I_proc_dnd( HWND h_window
                 )
                 {   E_window_S->dnd_window->width = LOWORD( l_param );
                     E_window_S->dnd_window->height = HIWORD( l_param );
-                    DeleteDC( E_window_S->dnd_window->dc );
-                    DeleteObject( E_window_S->dnd_window->drawable );
-                    HDC dc = GetDC( E_window_S->dnd_window->handle );
-                    E_window_S->dnd_window->dc = CreateCompatibleDC(dc);
-                    if( !E_window_S->dnd_window->dc )
-                    {   GV_(NA); _V();
-                    }
-                    if( !SetBkMode( E_window_S->dnd_window->dc, TRANSPARENT ))
-                    {   GV_(NA); _V();
-                    }
-                    E_window_S->dnd_window->drawable = CreateCompatibleBitmap( dc, E_window_S->dnd_window->width, E_window_S->dnd_window->height );
-                    if( !E_window_S->dnd_window->drawable )
-                    {   GV_(NA); _V();
-                    }
-                    ReleaseDC( E_window_S->dnd_window->handle, dc );
-                    DeleteObject( SelectObject( E_window_S->dnd_window->dc, E_window_S->dnd_window->drawable ));
-                    RedrawWindow( E_window_S->dnd_window->handle, 0, 0, RDW_INVALIDATE );
+                    V_( DeleteDC( E_window_S->dnd_window->dc ));
+                    V_( DeleteObject( E_window_S->dnd_window->drawable ));
+                    HDC dc;
+                    V_( dc = GetDC( E_window_S->dnd_window->handle ));
+                    V_( E_window_S->dnd_window->dc = CreateCompatibleDC(dc) );
+                    V_( SetBkMode( E_window_S->dnd_window->dc, TRANSPARENT ));
+                    V_( E_window_S->dnd_window->drawable = CreateCompatibleBitmap( dc, E_window_S->dnd_window->width, E_window_S->dnd_window->height ));
+                    V_( ReleaseDC( E_window_S->dnd_window->handle, dc ));
+                    V_( DeleteObject( SelectObject( E_window_S->dnd_window->dc, E_window_S->dnd_window->drawable )));
+                    //RedrawWindow( E_window_S->dnd_window->handle, 0, 0, RDW_INVALIDATE );
                 }
                 break;
           default:
             {   G_(); Gh(msg);
-                return DefWindowProc( h_window, msg, w_param, l_param );
+                return DefWindowProc( window_h, msg, w_param, l_param );
             }
         }
         return 0;
     }
-    G_(); Gh( h_window ); Gh(msg);
-    return DefWindowProc( h_window, msg, w_param, l_param );
+    G_(); Gh( window_h ); Gh(msg);
+    return DefWindowProc( window_h, msg, w_param, l_param );
 }
 CALLBACK LRESULT
-E_window_Q_window_I_proc( HWND h_window
+E_window_Q_window_I_proc( HWND window_h
 , UINT msg
 , WPARAM w_param
 , LPARAM l_param
 ){  for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
     {   struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
-        if( window->handle == h_window )
+        if( window->handle == window_h )
         {   switch(msg)
             { case WM_DESTROY:
                 {   PostQuitMessage(0);
@@ -136,37 +115,38 @@ E_window_Q_window_I_proc( HWND h_window
                     E_window_S->dnd_src_window = window_id;
                     E_window_S->dnd_diff_x = LOWORD( l_param ) - object->x;
                     E_window_S->dnd_diff_y = HIWORD( l_param ) - object->y;
-                    MoveWindow( E_window_S->dnd_window->handle
+                    V_( MoveWindow( E_window_S->dnd_window->handle
                     , window->x + object->x
                     , window->y + object->y
                     , object->width, object->height, false
-                    );
+                    ));
                     U_F( object->state, drag_src );
                     U_F( E_window_S->mode, drag );
-                    RedrawWindow( window->handle, 0, 0, RDW_INVALIDATE );
+                    V_( RedrawWindow( window->handle, 0, 0, RDW_INVALIDATE ));
                     SetCapture( window->handle );
                     ShowWindow( E_window_S->dnd_window->handle, SW_SHOW );
                     break;
                 }
               case WM_LBUTTONUP:
                     if( U_E( E_window_S->mode, drag ))
-                    {   ShowWindow( E_window_S->dnd_window->handle, SW_HIDE );
-                        ReleaseCapture();
+                    {   V_( ShowWindow( E_window_S->dnd_window->handle, SW_HIDE ));
+                        V_( ReleaseCapture() );
                         E_window_Q_object_W_( E_window_S->dnd_window, 0 );
                         struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, E_window_S->dnd_src_window );
                         struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, E_window_S->dnd_src_object );
                         U_L( object->state, drag_src );
-                        RedrawWindow( window->handle, 0, 0, RDW_INVALIDATE );
+                        V_( RedrawWindow( window->handle, 0, 0, RDW_INVALIDATE ));
                     }
                     break;
               case WM_MOUSEMOVE:
                     if( U_R( E_window_S->mode, drag ))
-                        MoveWindow( E_window_S->dnd_window->handle
+                    {   V_( MoveWindow( E_window_S->dnd_window->handle
                         , window->x + GET_X_LPARAM( l_param ) - E_window_S->dnd_diff_x
                         , window->y + GET_Y_LPARAM( l_param ) - E_window_S->dnd_diff_y
                         , E_window_S->dnd_window->width, E_window_S->dnd_window->height
                         , true
-                        );
+                        ));
+                    }
                     break;
               case WM_MOVE:
                     window->x = LOWORD( l_param );
@@ -178,19 +158,23 @@ E_window_Q_window_I_proc( HWND h_window
                     E_window_Q_object_mask_I_draw_P_pen( window, ~0 );
                     E_window_Q_object_mask_I_draw_P_brush( window, ~0 );
                     E_window_Q_window_I_fill_Z_rectangles( window, 1, ( RECT[] ){ 0, 0, window->width, window->height } );
-                    for_each( object_id, window->object, E_mem_Q_tab ) //NDFN Zak³adana kolejnoœæ od na spodzie do na wierzchu. Nie wiadomo, czy “_q” jest konieczne.
+                    for_each( object_id, window->object, E_mem_Q_tab )
                     {   E_window_S->current_object = object_id;
                         struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, object_id );
                         if( U_R( object->state, drag_src ))
                             E_window_S->draw_color = E_window_Q_theme.current_brace;
-                        object->draw( window, object ); //NDFN Nieprzerysowywanie wszystkich obiektów dla ka¿dej klatki animacji.
+                        object->draw( window, object );
                     }
                     PAINTSTRUCT ps;
-                    HDC dc = BeginPaint( window->handle, &ps );
-                    if( !BitBlt( dc, 0, 0, window->width, window->height, window->dc, 0, 0, SRCCOPY ))
-                    {   GV_(NA); _V();
-                    }
-                    EndPaint( window->handle, &ps );
+                    HDC dc;
+                    V_( dc = BeginPaint( window->handle, &ps ));
+                    V_( BitBlt( dc, 0, 0
+                    , window->width, window->height
+                    , window->dc, 0, 0
+                    , SRCCOPY
+                    ));
+                    V_( EndPaint( window->handle, &ps ));
+                    G_();
                     break;
                 }
               case WM_SIZE:
@@ -200,49 +184,34 @@ E_window_Q_window_I_proc( HWND h_window
                     {   window->width = LOWORD( l_param );
                         window->height = HIWORD( l_param );
                         G_(); Gs0_( "size" ); Gd( window->width); Gd( window->height );
-                        DeleteDC( window->dc_object_mask );
-                        DeleteDC( window->dc );
-                        DeleteObject( window->object_mask );
-                        DeleteObject( window->drawable );
-                        HDC dc = GetDC( window->handle );
-                        window->dc = CreateCompatibleDC(dc);
-                        if( !window->dc )
-                        {   GV_(NA); _V();
-                        }
-                        if( !SetBkMode( window->dc, TRANSPARENT ))
-                        {   GV_(NA); _V();
-                        }
-                        window->drawable = CreateCompatibleBitmap( dc, window->width, window->height );
-                        if( !window->drawable )
-                        {   GV_(NA); _V();
-                        }
-                        DeleteObject( SelectObject( window->dc, window->drawable ));
-                        window->dc_object_mask = CreateCompatibleDC(dc);
-                        if( !window->dc_object_mask )
-                        {   GV_(NA); _V();
-                        }
-                        if( !SetBkMode( window->dc_object_mask, TRANSPARENT ))
-                        {   GV_(NA); _V();
-                        }
-                        window->object_mask = CreateCompatibleBitmap( dc, window->width, window->height );
-                        if( !window->object_mask )
-                        {   GV_(NA); _V();
-                        }
-                        ReleaseDC( window->handle, dc );
-                        DeleteObject( SelectObject( window->dc_object_mask, window->object_mask ));
+                        V_( DeleteDC( window->dc_object_mask ));
+                        V_( DeleteDC( window->dc ));
+                        V_( DeleteObject( window->object_mask ));
+                        V_( DeleteObject( window->drawable ));
+                        HDC dc;
+                        V_( dc = GetDC( window->handle ));
+                        V_( window->dc = CreateCompatibleDC(dc) );
+                        V_( SetBkMode( window->dc, TRANSPARENT ));
+                        V_( window->drawable = CreateCompatibleBitmap( dc, window->width, window->height ));
+                        V_( DeleteObject( SelectObject( window->dc, window->drawable )));
+                        V_( window->dc_object_mask = CreateCompatibleDC(dc) );
+                        V_( SetBkMode( window->dc_object_mask, TRANSPARENT ));
+                        V_( window->object_mask = CreateCompatibleBitmap( dc, window->width, window->height ));
+                        V_( ReleaseDC( window->handle, dc ));
+                        V_( DeleteObject( SelectObject( window->dc_object_mask, window->object_mask )));
                         E_window_Q_object_I_lay(window);
-                        RedrawWindow( window->handle, 0, 0, RDW_INVALIDATE );
+                        V_( RedrawWindow( window->handle, 0, 0, RDW_INVALIDATE ));
                     }
                     break;
               default:
-                {   G_(); Gh(msg);
-                    return DefWindowProc( h_window, msg, w_param, l_param );
+                {   //G_(); Gh(msg);
+                    return DefWindowProc( window_h, msg, w_param, l_param );
                 }
             }
             return 0;
         }
     }
-    G_(); Gh( h_window ); Gh(msg);
-    return DefWindowProc( h_window, msg, w_param, l_param );
+    G_(); Gh( window_h ); Gh(msg);
+    return DefWindowProc( window_h, msg, w_param, l_param );
 }
 //******************************************************************************
