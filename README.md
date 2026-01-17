@@ -53,7 +53,7 @@ Product support continues for the latest git release.
 
 ### Installing
 
-Fetching for first use can be done with a command, for example `git clone `.
+Fetching for first use can be done with a command, for example `git clone https://github.com/overcq/oux-windows.git`.
 
 Then download ‟PCRE2” to a separate directory and build with commands:
 
