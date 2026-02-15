@@ -146,7 +146,7 @@ End_3:;
                     goto End;
                 for_n( i, object_data->select_n )
                 {   N l = E_text_Z_n_N_s_G( i, sizeof(i), 10 );
-                    object_data->select[i] = M( l + J_s0_R_l(". select select select select select select select select select select select select select select select select select select select select select select select select select select select select select select select" ) + 1 );
+                    object_data->select[i] = M( l + J_s0_R_l( ". select select select select select select select select select select select select select select select select select select select select select select select select select select select select select select select" ) + 1 );
                     if( !object_data->select[i] )
                         goto End;
                     E_text_Z_n_N_s( object_data->select[i] + l, i, sizeof(i), 10 );

@@ -96,7 +96,7 @@ E_window_Q_window_I_proc( HWND window_h
                     break;
                 }
               case WM_LBUTTONDOWN:
-                {   E_window_S->dnd_src_object = E_window_Q_object_mask_R_object_id( window, LOWORD( l_param ), HIWORD( l_param ));
+                {   E_window_S->dnd_src_object = E_window_Q_object_mask_R_object_id( window, GET_X_LPARAM( l_param ), GET_Y_LPARAM( l_param ));
                     G_(); Gd( E_window_S->dnd_src_object );
                     if( !~E_window_S->dnd_src_object )
                         break;
@@ -113,8 +113,8 @@ E_window_Q_window_I_proc( HWND window_h
                     struct E_window_Q_object_Z *dnd_object = E_mem_Q_tab_R( window->object, dnd_object_id );
                     dnd_object->data = object->data;
                     E_window_S->dnd_src_window = window_id;
-                    E_window_S->dnd_diff_x = LOWORD( l_param ) - object->x;
-                    E_window_S->dnd_diff_y = HIWORD( l_param ) - object->y;
+                    E_window_S->dnd_diff_x = GET_X_LPARAM( l_param ) - object->x;
+                    E_window_S->dnd_diff_y = GET_Y_LPARAM( l_param ) - object->y;
                     V_( MoveWindow( E_window_S->dnd_window->handle
                     , window->x + object->x
                     , window->y + object->y
@@ -131,11 +131,116 @@ E_window_Q_window_I_proc( HWND window_h
                     if( U_E( E_window_S->mode, drag ))
                     {   V_( ShowWindow( E_window_S->dnd_window->handle, SW_HIDE ));
                         V_( ReleaseCapture() );
+                        struct E_window_Q_window_Z *src_window = E_mem_Q_tab_R( E_window_Q_window_S, E_window_S->dnd_src_window );
+                        struct E_window_Q_object_Z *src_object = E_mem_Q_tab_R( src_window->object, E_window_S->dnd_src_object );
+                        U_L( src_object->state, drag_src );
+                        S32 x_src = GET_X_LPARAM( l_param );
+                        S32 y_src = GET_Y_LPARAM( l_param );
+                        struct E_window_Q_window_Z *drop_window;
+                        S32 x_drop;
+                        S32 y_drop;
+                        if( x_src >= 0
+                        && x_src < src_window->width
+                        && y_src >= 0
+                        && y_src < src_window->height
+                        )
+                        {   drop_window = src_window;
+                            x_drop = x_src;
+                            y_drop = y_src;
+                        }else
+                        {   POINT pt_screen;
+                            pt_screen.x = x_src;
+                            pt_screen.y = y_src;
+                            V_( ClientToScreen( src_window->handle, &pt_screen ));
+                            drop_window = 0;
+                            for_each( window_id, E_window_Q_window_S, E_mem_Q_tab )
+                            {   if( window_id == E_window_S->dnd_src_window )
+                                    continue;
+                                struct E_window_Q_window_Z *check_window = E_mem_Q_tab_R( E_window_Q_window_S, window_id );
+                                POINT pt_client = pt_screen;
+                                V_( ScreenToClient( check_window->handle, &pt_client ));
+                                if( pt_client.x >= 0
+                                && pt_client.x < check_window->width
+                                && pt_client.y >= 0
+                                && pt_client.y < check_window->height
+                                )
+                                {   drop_window = check_window;
+                                    x_drop = pt_client.x;
+                                    y_drop = pt_client.y;
+                                    break;
+                                }
+                            }
+                            if( !drop_window )
+                            {   E_window_Q_object_W_( E_window_S->dnd_window, 0 );
+                                V_( RedrawWindow( src_window->handle, 0, 0, RDW_INVALIDATE ));
+                                break;
+                            }
+                        }
+                        I drop_object_id = E_window_Q_object_mask_R_object_id( drop_window, x_drop, y_drop );
+                        if( drop_window == src_window
+                        && E_window_Q_object_T_descendant_or_self( drop_window, E_window_S->dnd_src_object, drop_object_id )
+                        )
+                            break;
+                        struct E_window_Q_object_Z *drop_object = E_mem_Q_tab_R( drop_window->object, drop_object_id );
+                        if( w_param & MK_CONTROL )
+                        {   //NDFN Nie kopiuje obiektów potomnych.
+                            I new_object_id = E_window_Q_object_M( drop_window
+                            , 0
+                            , x_drop
+                            , y_drop
+                            , src_object->width
+                            , src_object->height
+                            , src_object->clear_data
+                            , src_object->draw
+                            , src_object->click
+                            );
+                            if( !~new_object_id )
+                                _V();
+                            struct E_window_Q_object_Z *new_object = E_mem_Q_tab_R( drop_window->object, new_object_id );
+                            //new_object->data = src_object->data;
+                            U_R( new_object->mode, lay_height ) = U_R( src_object->mode, lay_height );
+                            U_R( new_object->mode, draggable ) = U_R( src_object->mode, draggable );
+                            if( E_window_Q_object_I_add( drop_window, drop_object_id, new_object_id ))
+                                _V();
+                            E_window_Q_object_I_lay( drop_window );
+                            V_( RedrawWindow( drop_window->handle, 0, 0, RDW_INVALIDATE ));
+                        }else
+                        {   I src_parent_id = E_window_Q_object_R_parent( src_window, E_window_S->dnd_src_object );
+                            if( ~src_parent_id )
+                            {   if( drop_window != src_window
+                                || src_parent_id != drop_object_id
+                                )
+                                {   struct E_window_Q_object_Z *src_parent = E_mem_Q_tab_R( src_window->object, src_parent_id );
+                                    for_n( i, src_parent->child_n )
+                                    {   if( src_parent->child[i] == E_window_S->dnd_src_object )
+                                        {   if( E_mem_Q_blk_I_remove( &src_parent->child, i, 1 ))
+                                                _V();
+                                            src_parent->child_n--;
+                                            break;
+                                        }
+                                    }
+                                    if( E_window_Q_object_I_add( drop_window, drop_object_id, E_window_S->dnd_src_object ))
+                                        _V();
+                                    struct E_window_Q_object_Z *object = E_mem_Q_tab_R( drop_window->object, E_window_S->dnd_src_object );
+                                    object->x = x_drop;
+                                    object->y = y_drop;
+                                    E_window_Q_object_I_lay( drop_window );
+                                    V_( RedrawWindow( drop_window->handle, 0, 0, RDW_INVALIDATE ));
+                                }
+                            }else
+                            {   if( E_window_Q_object_I_add( drop_window, drop_object_id, E_window_S->dnd_src_object ))
+                                    _V();
+                                struct E_window_Q_object_Z *object = E_mem_Q_tab_R( drop_window->object, E_window_S->dnd_src_object );
+                                object->x = x_drop;
+                                object->y = y_drop;
+                                E_window_Q_object_I_lay( drop_window );
+                                V_( RedrawWindow( drop_window->handle, 0, 0, RDW_INVALIDATE ));
+                            }
+                        }
                         E_window_Q_object_W_( E_window_S->dnd_window, 0 );
-                        struct E_window_Q_window_Z *window = E_mem_Q_tab_R( E_window_Q_window_S, E_window_S->dnd_src_window );
-                        struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, E_window_S->dnd_src_object );
-                        U_L( object->state, drag_src );
-                        V_( RedrawWindow( window->handle, 0, 0, RDW_INVALIDATE ));
+                        if( drop_window != src_window )
+                        {   V_( RedrawWindow( src_window->handle, 0, 0, RDW_INVALIDATE ));
+                        }
                     }
                     break;
               case WM_MOUSEMOVE:
@@ -149,8 +254,8 @@ E_window_Q_window_I_proc( HWND window_h
                     }
                     break;
               case WM_MOVE:
-                    window->x = LOWORD( l_param );
-                    window->y = HIWORD( l_param );
+                    window->x = GET_X_LPARAM( l_param );
+                    window->y = GET_Y_LPARAM( l_param );
                     break;
               case WM_PAINT:
                 {   E_window_Q_window_I_draw_P_pen( window, E_window_Q_theme.window_bg );
@@ -178,6 +283,10 @@ E_window_Q_window_I_proc( HWND window_h
                     break;
                 }
               case WM_SIZE:
+                    if( w_param != SIZE_MAXIMIZED
+                    &&  w_param != SIZE_RESTORED
+                    )
+                        break;
                     if( window->width != LOWORD( l_param )
                     || window->height != HIWORD( l_param )
                     )

@@ -142,6 +142,30 @@ E_window_Q_object_R_top( struct E_window_Q_window_Z *window
 , I id
 ){  return !~E_window_Q_object_R_parent( window, id );
 }
+B
+E_window_Q_object_T_descendant_or_self( struct E_window_Q_window_Z *window
+, I ancestor_id
+, I id
+){  J_assert( E_mem_Q_tab_T( window->object, id ));
+    J_assert( E_mem_Q_tab_T( window->object, ancestor_id ));
+    I parent_id;
+    do
+    {   if( id == ancestor_id )
+            return yes;
+        for_each_out_( id, parent_id, window->object, E_mem_Q_tab )
+        {   struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, parent_id );
+            for_n( child_i, object->child_n )
+            {   if( object->child[ child_i ] == id )
+                {   id = parent_id;
+                    break;
+                }
+            }
+            if( child_i != object->child_n )
+                break;
+        }
+    }while( ~parent_id );
+    return no;
+}
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 N
 E_window_Q_object_I_add( struct E_window_Q_window_Z *window
@@ -149,7 +173,7 @@ E_window_Q_object_I_add( struct E_window_Q_window_Z *window
 , I child_id
 ){  J_assert( E_mem_Q_tab_T( window->object, child_id ));
     struct E_window_Q_object_Z *object = E_mem_Q_tab_R( window->object, id );
-    if( !E_mem_Q_blk_I_append( &object->child, 1 ))
+    if( !E_mem_Q_blk_I_append( &object->child, 1 )) //NDFN Jak kolejność jest istotna?
         return ~0;
     object->child[ object->child_n ] = child_id;
     object->child_n++;
